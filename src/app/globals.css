@@ -1,0 +1,241 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── FirstNest Design Tokens ── */
+@theme inline {
+  /* Colors */
+  --color-lemon:        #F5E642;
+  --color-lemon-light:  #FBF6A8;
+  --color-lemon-dark:   #D4C400;
+  --color-black:        #111111;
+  --color-charcoal:     #222222;
+  --color-grey-dark:    #444444;
+  --color-grey-mid:     #888888;
+  --color-grey-light:   #F0F0F0;
+  --color-white:        #FFFFFF;
+  --color-green:        #22C55E;
+  --color-green-bg:     #F0FDF4;
+  --color-green-border: #BBF7D0;
+  --color-green-text:   #16A34A;
+  --color-amber:        #F59E0B;
+  --color-amber-bg:     #FFFBEB;
+  --color-red-soft:     #FCA5A5;
+  --color-overlay:      rgba(0,0,0,0.55);
+
+  /* Fonts */
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-body:    "Inter", sans-serif;
+  --font-mono:    "JetBrains Mono", monospace;
+
+  /* Radii */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card:   0 2px 12px rgba(0,0,0,0.08);
+  --shadow-raised: 0 4px 24px rgba(0,0,0,0.12);
+  --shadow-modal:  0 8px 40px rgba(0,0,0,0.18);
+
+  /* AskAI / extended design tokens */
+  --color-fn-yellow:       #F5E642;
+  --color-fn-yellow-light: #FBF6A8;
+  --color-fn-yellow-pale:  #FEFCE8;
+  --color-fn-yellow-dark:  #D4C400;
+  --color-fn-yellow-deep:  #C4A000;
+  --color-fn-navy:         #111111;
+  --color-fn-success:      #22C55E;
+}
+
+:root {
+  --color-lemon:        #F5E642;
+  --color-lemon-light:  #FBF6A8;
+  --color-lemon-dark:   #D4C400;
+  --color-black:        #111111;
+  --color-charcoal:     #222222;
+  --color-grey-dark:    #444444;
+  --color-grey-mid:     #888888;
+  --color-grey-light:   #F0F0F0;
+  --color-white:        #FFFFFF;
+  --color-green:        #22C55E;
+  --color-green-bg:     #F0FDF4;
+  --color-green-border: #BBF7D0;
+  --color-green-text:   #16A34A;
+  --color-amber:        #F59E0B;
+  --color-amber-bg:     #FFFBEB;
+  --color-red-soft:     #FCA5A5;
+
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-full: 9999px;
+
+  --shadow-card:   0 2px 12px rgba(0,0,0,0.08);
+  --shadow-raised: 0 4px 24px rgba(0,0,0,0.12);
+  --shadow-modal:  0 8px 40px rgba(0,0,0,0.18);
+
+  --color-fn-yellow:       #F5E642;
+  --color-fn-yellow-light: #FBF6A8;
+  --color-fn-yellow-pale:  #FEFCE8;
+  --color-fn-yellow-dark:  #D4C400;
+  --color-fn-yellow-deep:  #C4A000;
+  --color-fn-navy:         #111111;
+  --color-fn-success:      #22C55E;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Inter", sans-serif;
+    color: #222222;
+    background: #FFFFFF;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+  }
+
+  /* Focus visible for accessibility */
+  *:focus-visible {
+    outline: 2px solid #D4C400;
+    outline-offset: 2px;
+  }
+
+  /* prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Slider thumb styling */
+@layer utilities {
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: #EEEEEE;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #111111;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #111111;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    border: none;
+    cursor: pointer;
+  }
+}
+
+/* Print styles for PDF download */
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { font-size: 12pt; color: black; }
+  @page { margin: 2cm; }
+}
+
+/* Premium card hover */
+@layer utilities {
+  .card-lift {
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+  /* Lemon card gets a warm glow on hover */
+  .card-lift-lemon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(245,230,66,0.55) !important;
+  }
+
+  /* Lemon gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #D4C400 0%, #F5E642 50%, #FBF6A8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Subtle lemon shimmer on CTA */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-shine::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left 0s;
+  }
+  .btn-shine:hover::after {
+    left: 120%;
+    transition: left 500ms ease;
+  }
+
+  /* Animate-in utility */
+  .fade-up {
+    animation: fadeUp 0.35s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Desktop sidebar layout */
+  @media (min-width: 1024px) {
+    .desktop-two-col {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 32px;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+  }
+}
+
+/* AskAI card border animation */
+@keyframes border-glow-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #DDDDDD; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #AAAAAA; }
