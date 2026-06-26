@@ -80,7 +80,8 @@ export function FinalCTAStrip() {
             display: 'block',
           }}
         >
-          ✓ No sign-up &nbsp;·&nbsp; ✓ No credit check &nbsp;·&nbsp; ✓ Free forever
+          {/* ✓ No sign-up &nbsp;·&nbsp; */}
+           ✓ No credit check &nbsp;·&nbsp; ✓ 100% Free
         </p>
       </div>
     </section>

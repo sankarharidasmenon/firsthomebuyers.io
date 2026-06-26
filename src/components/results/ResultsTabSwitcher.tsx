@@ -37,7 +37,7 @@ export function ResultsTabSwitcher() {
                 }
           }
         >
-          Govt Schemes {isGrants ? '✓' : ''}
+           Grants & Schemes {isGrants ? '✓' : ''}
         </Link>
         <Link
           href="/results/borrowing"

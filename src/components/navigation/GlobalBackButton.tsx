@@ -15,11 +15,11 @@ export function GlobalBackButton() {
     <>
       <style>{`
         main {
-          padding-top: 112px !important;
+          padding-top: 82px !important;
         }
         @media (min-width: 1024px) {
           main {
-            padding-top: 128px !important;
+            padding-top: 90px !important;
           }
         }
       `}</style>

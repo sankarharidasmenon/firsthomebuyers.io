@@ -7,9 +7,11 @@ import { Home, Menu, X } from 'lucide-react'
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/my-results', label: 'My Results' },
-  { href: '/next-steps', label: 'Your Plan' },
+  { href: '/my-results', label: 'Outcomes' },
+  { href: '/next-steps', label: 'Strategy' },
   { href: '/#ai-guidance', label: 'AI Guidance' },
+  { href: '/ads', label: 'Rent Space' },
+  { href: '/articles', label: 'Articles' },
 ]
 
 export function Navbar() {
@@ -48,6 +50,9 @@ export function Navbar() {
     }
   }
 
+  // Hide on onboarding — it has its own step-progress header
+  if (pathname.startsWith('/onboarding')) return null
+
   return (
     <>
       <nav
@@ -76,7 +81,7 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-8">
             {NAV_LINKS.map(link => {
               const isAI = link.href === '/#ai-guidance'
-              
+
               let active = false
               if (isAI) {
                 active = pathname === '/' && activeHash === '#ai-guidance'
@@ -90,10 +95,10 @@ export function Navbar() {
                   setActiveHash('')
                   return
                 }
-                
+
                 e.preventDefault()
                 setActiveHash('#ai-guidance')
-                
+
                 if (pathname === '/') {
                   window.history.pushState(null, '', '#ai-guidance')
                   document.getElementById('ai-guidance')?.scrollIntoView({ behavior: 'smooth' })

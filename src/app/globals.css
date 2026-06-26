@@ -48,6 +48,13 @@
   --color-fn-yellow-deep:  #C4A000;
   --color-fn-navy:         #111111;
   --color-fn-success:      #22C55E;
+
+  /* Ads / Billboard page dark theme */
+  --color-ads-bg:     #0A0F1C;
+  --color-ads-header: #1B2A4A;
+  --color-ads-nav:    #0F1A2E;
+  --color-ads-vacant: #0D1B2A;
+  --color-ads-muted:  #8899AA;
 }
 
 :root {
@@ -84,6 +91,13 @@
   --color-fn-yellow-deep:  #C4A000;
   --color-fn-navy:         #111111;
   --color-fn-success:      #22C55E;
+
+  /* Ads / Billboard page dark theme */
+  --color-ads-bg:     #0A0F1C;
+  --color-ads-header: #1B2A4A;
+  --color-ads-nav:    #0F1A2E;
+  --color-ads-vacant: #0D1B2A;
+  --color-ads-muted:  #8899AA;
 }
 
 @layer base {

@@ -1,10 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Navbar } from '@/components/home/Navbar'
 import { SessionResumeBanner } from '@/components/home/SessionResumeBanner'
 import { HeroSection } from '@/components/home/HeroSection'
-import { HeroVideo } from '@/components/home/HeroVideo'
 import { HowItWorks } from '@/components/home/HowItWorks'
 import { SocialProof } from '@/components/home/SocialProof'
 import AskAISection from '@/components/home/AskAISection'
@@ -32,9 +30,6 @@ export default function HomePage() {
       >
         Skip to main content
       </a>
-
-      {/* ── Fixed navbar ── */}
-      <Navbar />
 
       {/* ── Session resume banner — fixed below navbar ── */}
       {showBanner && progress && (
@@ -75,26 +70,6 @@ export default function HomePage() {
 
         {/* SECTION 3 — How It Works (white) */}
         <HowItWorks />
-
-           <section style={{ background: '#FAFAFA', padding: '32px 20px' }} className="lg:py-12">
-          <div className="max-w-[1100px] mx-auto lg:px-12">
-            <p
-              style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 600,
-                fontSize: '0.6875rem',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: '#888888',
-                textAlign: 'center',
-                marginBottom: 20,
-              }}
-            >
-              SEE HOW IT WORKS
-            </p>
-            <HeroVideo />
-          </div>
-        </section>
 
         {/* SECTION 4 — Social Proof (off-white) */}
         <SocialProof />

@@ -167,7 +167,8 @@ export default function MyResultsPage() {
               Get Started <ArrowRight size={16} className="ml-2 inline" />
             </Button>
             <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#AAAAAA', marginTop: 12 }}>
-              Takes about 3 minutes · No sign-up needed
+              Takes about 3 minutes 
+              {/* No sign-up needed */}
             </p>
           </div>
         )}
@@ -226,7 +227,7 @@ export default function MyResultsPage() {
                       style={{ borderLeft: i > 0 ? '1px solid rgba(0,0,0,0.06)' : undefined }}
                     >
                       <p style={microLabel}>{label}</p>
-                      <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: i === 2 ? '0.875rem' : '1.25rem', color, lineHeight: 1.1 }}>
+                      <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700,fontSize: i === 2 ? '0.875rem' : '1.25rem', color, lineHeight: 1.1 }}>
                         {value}
                       </p>
                     </div>

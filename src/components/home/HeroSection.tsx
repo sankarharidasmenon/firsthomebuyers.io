@@ -169,37 +169,37 @@ export function HeroSection() {
                   style={{
                     fontFamily: '"Plus Jakarta Sans", sans-serif',
                     fontWeight: 800,
-                    lineHeight: 1.05,
-                    marginBottom: 16,
-                    letterSpacing: '-0.02em',
+                    lineHeight: 1.06,
+                    marginBottom: 28,
+                    letterSpacing: '-0.035em',
                   }}
                 >
                   <span
                     style={{
                       display: 'block',
-                      fontSize: 'clamp(2rem, 5vw, 3rem)',
+                      fontSize: 'clamp(2.25rem, 5.5vw, 3.5rem)',
                       color: '#111111',
                     }}
                   >
-                    Know your grants.
+                    Your home buying
                   </span>
                   <span
                     style={{
                       display: 'block',
-                      fontSize: 'clamp(2rem, 5vw, 3rem)',
+                      fontSize: 'clamp(2.25rem, 5.5vw, 3.5rem)',
                       color: '#111111',
                     }}
                   >
-                    Know your budget.
+                    journey starts
                   </span>
                   <span
                     style={{
                       display: 'block',
-                      fontSize: 'clamp(2rem, 5vw, 3rem)',
-                      color: '#D4C400',
+                      fontSize: 'clamp(2.25rem, 5.5vw, 3.5rem)',
+                      color: '#C8AA00',
                     }}
                   >
-                    Buy with confidence.
+                    here.
                   </span>
                 </h1>
 
@@ -216,14 +216,16 @@ export function HeroSection() {
                   }}
                 >
                   FirstNest shows Australian first home buyers exactly what government
-                  grants they qualify for, how much they can borrow, and what to do next
-                  — in about 3 minutes.
+                  grants they qualify for, how much they can borrow, and what to do next.
+                  {/* — in about 3 minutes. */}
                 </p>
 
-                {/* Stat chips */}
+                {/* Reorder wrapper: CTAs first on mobile, stats first on desktop */}
+                <div className="flex flex-col">
+
+                {/* Stat chips — order-2 on mobile, order-1 on desktop */}
                 <div
-                  className="grid grid-cols-2 lg:flex lg:flex-nowrap gap-2.5 lg:gap-3 w-full"
-                  style={{ marginBottom: 28 }}
+                  className="order-2 lg:order-1 grid grid-cols-2 lg:flex lg:flex-nowrap gap-2.5 lg:gap-3 w-full mb-0 lg:mb-7"
                 >
                   {MOBILE_STATS.map((s, i) => (
                     <div
@@ -246,8 +248,8 @@ export function HeroSection() {
                   ))}
                 </div>
 
-                {/* CTA pair */}
-                <div className="flex flex-col lg:flex-row lg:items-start gap-3">
+                {/* CTA pair — order-1 on mobile, order-2 on desktop */}
+                <div className="order-1 lg:order-2 flex flex-col lg:flex-row lg:items-start gap-3 mb-7 lg:mb-0">
                   <button
                     type="button"
                     onClick={() => router.push('/onboarding?flow=grants')}
@@ -273,7 +275,8 @@ export function HeroSection() {
                     }}
                     className="hover:-translate-y-px hover:shadow-[0_6px_24px_rgba(245,230,66,0.50)]"
                   >
-                    Show My Eligible Schemes
+                    {/* Show My Eligible Schemes */}
+                    Grants & Schemes 
                   </button>
 
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -300,7 +303,7 @@ export function HeroSection() {
                       }}
                       className="hover:border-[#111111] hover:bg-[#FAFAFA]"
                     >
-                      Show My Borrowing Capacity
+                     Borrowing Capacity
                     </button>
                     <p
                       style={{
@@ -315,6 +318,7 @@ export function HeroSection() {
                     </p>
                   </div>
                 </div>
+                </div>{/* end reorder wrapper */}
               </div>
             )}
           </div>
