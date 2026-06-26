@@ -5,7 +5,32 @@
 
 /* ── FirstNest Design Tokens ── */
 @theme inline {
-  /* Colors */
+  /* AskAI / extended design tokens */
+  --color-fn-yellow:       #F5E642;
+  --color-fn-yellow-light: #FBF6A8;
+  --color-fn-yellow-pale:  #FEFCE8;
+  --color-fn-yellow-dark:  #D4C400;
+  --color-fn-yellow-deep:  #C4A000;
+  --color-fn-navy:         #111111;
+  --color-fn-success:      #22C55E;
+
+  /* Explicit Brand Tokens (Static across themes) */
+  --color-brand-yellow:         #F5E642;
+  --color-brand-yellow-light:   #FBF6A8;
+  --color-brand-gold:           #D4C400;
+  --color-brand-gradient-start: #F5E642;
+  --color-brand-gradient-end:   #EDD900;
+  --color-brand-dark-surface:   #111111;
+  --color-brand-glow:           rgba(245,230,66,0.45);
+
+  /* Ads / Billboard page dark theme */
+  --color-ads-bg:     #0A0F1C;
+  --color-ads-header: #1B2A4A;
+  --color-ads-nav:    #0F1A2E;
+  --color-ads-vacant: #0D1B2A;
+  --color-ads-muted:  #8899AA;
+
+  /* Existing Colors */
   --color-lemon:        #F5E642;
   --color-lemon-light:  #FBF6A8;
   --color-lemon-dark:   #D4C400;
@@ -49,15 +74,78 @@
   --color-fn-navy:         #111111;
   --color-fn-success:      #22C55E;
 
+  /* Explicit Brand Tokens (Static across themes) */
+  --color-brand-yellow:         #F5E642;
+  --color-brand-yellow-light:   #FBF6A8;
+  --color-brand-gold:           #D4C400;
+  --color-brand-gradient-start: #F5E642;
+  --color-brand-gradient-end:   #EDD900;
+  --color-brand-dark-surface:   #111111;
+  --color-brand-glow:           rgba(245,230,66,0.45);
+
   /* Ads / Billboard page dark theme */
   --color-ads-bg:     #0A0F1C;
   --color-ads-header: #1B2A4A;
   --color-ads-nav:    #0F1A2E;
   --color-ads-vacant: #0D1B2A;
   --color-ads-muted:  #8899AA;
+
+  /* ── Semantic Tokens (Light Theme) ── */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
 }
 
-:root {
+@layer base {
+  :root {
+  /* ── Semantic Variables for inline style fallbacks ── */
+  --background: #FFFFFF;
+  --foreground: #111111;
+  --card: #FFFFFF;
+  --card-foreground: #111111;
+  --primary: #F5E642;
+  --primary-hover: #D4C400;
+  --primary-foreground: #111111;
+  --secondary: #F5F5F5;
+  --secondary-foreground: #444444;
+  --muted: #FAFAFA;
+  --muted-foreground: #888888;
+  --accent: #F9F9F9;
+  --accent-foreground: #111111;
+  --border: #EEEEEE;
+  --input: #DDDDDD;
+  --ring: #D4C400;
+  --success: #22C55E;
+  --success-foreground: #16A34A;
+  --warning: #F59E0B;
+  --warning-foreground: #B45309;
+  --destructive: #E53E3E;
+  --destructive-foreground: #FFFFFF;
+  --surface: #F0F0F0;
+  --surface-2: #E8E8E8;
+
+  /* ── Existing Variables ── */
   --color-lemon:        #F5E642;
   --color-lemon-light:  #FBF6A8;
   --color-lemon-dark:   #D4C400;
@@ -74,6 +162,15 @@
   --color-amber:        #F59E0B;
   --color-amber-bg:     #FFFBEB;
   --color-red-soft:     #FCA5A5;
+
+  /* ── Brand Tokens ── */
+  --brand-yellow:         #F5E642;
+  --brand-yellow-light:   #FBF6A8;
+  --brand-gold:           #D4C400;
+  --brand-gradient-start: #F5E642;
+  --brand-gradient-end:   #EDD900;
+  --brand-dark-surface:   #111111;
+  --brand-glow:           rgba(245,230,66,0.45);
 
   --radius-sm:   8px;
   --radius-md:   12px;
@@ -98,6 +195,7 @@
   --color-ads-nav:    #0F1A2E;
   --color-ads-vacant: #0D1B2A;
   --color-ads-muted:  #8899AA;
+  }
 }
 
 @layer base {
@@ -253,3 +351,81 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #DDDDDD; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #AAAAAA; }
+
+@layer base {
+  .dark {
+    /* ── Semantic Tokens (Dark Theme) ── */
+    --color-background: #0B0B0C;
+    --background: #0B0B0C;
+    
+    --color-foreground: #FAFAFA;
+    --foreground: #FAFAFA;
+    
+    --color-card: #18181B;
+    --card: #18181B;
+    
+    --color-card-foreground: #FAFAFA;
+    --card-foreground: #FAFAFA;
+    
+    --color-primary: #F5E642;
+    --primary: #F5E642;
+    
+    --color-primary-hover: #D4C400;
+    --primary-hover: #D4C400;
+    
+    --color-primary-foreground: #111111;
+    --primary-foreground: #111111;
+    
+    --color-secondary: #222222;
+    --secondary: #222222;
+    
+    --color-secondary-foreground: #E0E0E0;
+    --secondary-foreground: #E0E0E0;
+    
+    --color-muted: #1A1A1A;
+    --muted: #1A1A1A;
+    
+    --color-muted-foreground: #A1A1AA;
+    --muted-foreground: #A1A1AA;
+    
+    --color-accent: #2A2A2A;
+    --accent: #2A2A2A;
+    
+    --color-accent-foreground: #FAFAFA;
+    --accent-foreground: #FAFAFA;
+    
+    --color-border: #2A2A2E;
+    --border: #2A2A2E;
+    
+    --color-input: #2F2F33;
+    --input: #2F2F33;
+    
+    --color-ring: #F5E642;
+    --ring: #F5E642;
+    
+    --color-success: #22C55E;
+    --success: #22C55E;
+    
+    --color-success-foreground: #4ADE80;
+    --success-foreground: #4ADE80;
+    
+    --color-warning: #F59E0B;
+    --warning: #F59E0B;
+    
+    --color-warning-foreground: #FBBF24;
+    --warning-foreground: #FBBF24;
+    
+    --color-destructive: #EF4444;
+    --destructive: #EF4444;
+    
+    --color-destructive-foreground: #FAFAFA;
+    --destructive-foreground: #FAFAFA;
+    
+    --color-surface: #1F1F23;
+    --surface: #1F1F23;
+    
+    --color-surface-2: #222222;
+    --surface-2: #222222;
+  }
+}
+

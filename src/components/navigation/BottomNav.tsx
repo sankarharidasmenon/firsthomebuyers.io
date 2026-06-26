@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, BookmarkCheck, Megaphone, Sparkles } from 'lucide-react'
+import { Home, BookmarkCheck, Megaphone, Sparkles, BookOpen, UserCircle } from 'lucide-react'
 
 /* ─── Tab definitions ────────────────────────────────────────────────────── */
 const TABS = [
   { href: '/',             label: 'Home',       Icon: Home },
   { href: '/my-results',   label: 'My Results', Icon: BookmarkCheck },
-  { href: '/ads',          label: 'Rent Space',  Icon: Megaphone },
+  { href: '/articles',     label: 'Articles',   Icon: BookOpen },
+  { href: '/profile',   label: 'My Profile', Icon: UserCircle },
+  { href: '/ads',          label: 'Rent Space', Icon: Megaphone },
   { href: '/#ai-guidance', label: 'AI',         Icon: Sparkles },
 ] as const
 
@@ -57,14 +59,13 @@ export function BottomNav() {
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-50"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95"
       aria-label="Main navigation"
       style={{
-        background: 'rgba(255,255,255,0.97)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderRadius: '14px 14px 0 0',
-        borderTop: '1px solid rgba(0,0,0,0.07)',
+        borderTop: '1px solid var(--border)',
         boxShadow: '0 -6px 28px rgba(0,0,0,0.09)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
@@ -74,7 +75,7 @@ export function BottomNav() {
         style={{
           height: 68,
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(6, 1fr)',
           maxWidth: 480,
           margin: '0 auto',
         }}
@@ -119,7 +120,7 @@ export function BottomNav() {
                   transform: 'translateX(-50%)',
                   width: active ? 22 : 0,
                   height: 3,
-                  background: '#F5E642',
+                  background: 'var(--primary)',
                   borderRadius: '0 0 3px 3px',
                   transition: 'width 240ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                 }}
@@ -135,7 +136,7 @@ export function BottomNav() {
                   width: 44,
                   height: 28,
                   borderRadius: 14,
-                  background: active ? '#F5E642' : 'transparent',
+                  background: active ? 'var(--primary)' : 'transparent',
                   transform: isPressed ? 'scale(0.88)' : 'scale(1)',
                   transition: 'background 180ms ease, transform 80ms ease',
                 }}
@@ -144,7 +145,7 @@ export function BottomNav() {
                   size={20}
                   strokeWidth={active ? 2.5 : 1.8}
                   style={{
-                    color: active ? '#111111' : '#AAAAAA',
+                    color: active ? 'var(--foreground)' : 'var(--muted-foreground)',
                     transition: 'color 160ms',
                   }}
                 />
@@ -158,7 +159,7 @@ export function BottomNav() {
                   fontSize: '0.625rem',
                   letterSpacing: '0.01em',
                   lineHeight: 1,
-                  color: active ? '#111111' : '#AAAAAA',
+                  color: active ? 'var(--foreground)' : 'var(--muted-foreground)',
                   transition: 'color 160ms',
                 }}
               >

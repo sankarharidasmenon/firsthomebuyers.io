@@ -167,9 +167,11 @@ const GRID_CLASS: Record<Zone['size'], string> = {
 function SerialBadge({ id, dark = false }: { id: string; dark?: boolean }) {
   return (
     <div className="absolute top-3 left-3 z-20">
-      <span style={{
-        background: dark ? 'rgba(255,255,255,0.92)' : '#F0F0F0',
-        color: '#111111',
+      <span 
+        className={dark ? '' : 'bg-[#F0F0F0] dark:bg-surface text-[#111111] dark:text-foreground'}
+        style={{
+        background: dark ? 'rgba(255,255,255,0.92)' : undefined,
+        color: dark ? '#111111' : undefined,
         fontFamily: 'monospace',
         fontSize: '0.6rem',
         letterSpacing: '0.06em',
@@ -209,7 +211,7 @@ export default function AdsPage() {
       <Navbar />
 
       {/* GlobalBackButton injects `main { padding-top: 82px / 90px }` automatically */}
-      <main className="min-h-screen" style={{ background: '#FAFAFA' }}>
+      <main className="min-h-screen bg-[#FAFAFA] dark:bg-background">
         <style>{`
           /* Occupied card hover: lift + deeper shadow */
           .ads-card { transition: transform 200ms ease, box-shadow 200ms ease; }
@@ -225,8 +227,11 @@ export default function AdsPage() {
           /* Filter pills */
           .ads-pill-active { background: #FFFFFF !important; color: var(--color-black) !important;
             box-shadow: 0 1px 4px rgba(0,0,0,0.12) !important; }
+          .dark .ads-pill-active { background: var(--foreground) !important; color: var(--background) !important; box-shadow: none !important; }
           .ads-pill-inactive { color: var(--color-grey-dark); }
           .ads-pill-inactive:hover { color: var(--color-black) !important; }
+          .dark .ads-pill-inactive { color: var(--muted-foreground); }
+          .dark .ads-pill-inactive:hover { color: var(--foreground) !important; }
 
           /* CTA buttons */
           .ads-btn-primary { transition: background 150ms, transform 80ms; }
@@ -234,6 +239,7 @@ export default function AdsPage() {
           .ads-btn-primary:active { transform: scale(0.97); }
           .ads-btn-outline { transition: border-color 150ms, background 150ms; }
           .ads-btn-outline:hover { border-color: var(--color-black) !important; background: #FAFAFA !important; }
+          .dark .ads-btn-outline:hover { border-color: var(--foreground) !important; background: var(--surface) !important; }
 
           /* Occupied zone CTA chip */
           .ads-zone-cta { transition: background 150ms; }
@@ -244,10 +250,12 @@ export default function AdsPage() {
 
           /* Copy button */
           .ads-copy:hover { border-color: var(--color-grey-dark) !important; color: var(--color-black) !important; }
+          .dark .ads-copy:hover { border-color: var(--foreground) !important; color: var(--foreground) !important; }
 
           /* Enquiry links */
           .ads-email:hover { text-decoration: underline; }
           .ads-phone:hover { color: var(--color-black) !important; }
+          .dark .ads-phone:hover { color: var(--foreground) !important; }
 
           /* Smooth image scale on card hover */
           .ads-card:hover .ads-media { transform: scale(1.04); }
@@ -274,8 +282,7 @@ export default function AdsPage() {
 
         {/* ── HERO ─────────────────────────────────────────────────────────── */}
         <header
-          className="relative overflow-hidden px-4 md:px-8 lg:px-12 pt-2 pb-3 lg:pt-10 lg:pb-16"
-          style={{ background: '#FFFFFF', borderBottom: '1px solid #EEEEEE' }}
+          className="relative overflow-hidden px-4 md:px-8 lg:px-12 pt-2 pb-3 lg:pt-10 lg:pb-16 bg-white dark:bg-card border-b border-[#EEEEEE] dark:border-border"
         >
           {/* Decorative yellow glow — top-right */}
           <div aria-hidden="true" style={{
@@ -297,7 +304,7 @@ export default function AdsPage() {
           <div className="relative max-w-3xl">
             {/* Brand label */}
             <div className="flex items-center gap-3 mb-2 lg:mb-7">
-              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.8125rem', color: 'var(--color-black)' }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.8125rem', color: 'var(--foreground)' }}>
                 FirstNest
               </span>
               <span style={{
@@ -312,19 +319,18 @@ export default function AdsPage() {
               }}>
                 ADS
               </span>
-              <span style={{ width: 1, height: 14, background: '#DDDDDD', display: 'inline-block' }} />
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--color-grey-dark)' }}>
+              <span className="bg-[#DDDDDD] dark:bg-border" style={{ width: 1, height: 14, display: 'inline-block' }} />
+              <span className="text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>
                 Premium Digital Billboard Network
               </span>
             </div>
 
             {/* Headline */}
-            <h1 className="ads-h-title" style={{
+            <h1 className="ads-h-title text-[var(--color-black)] dark:text-foreground" style={{
               fontFamily: '"Plus Jakarta Sans", sans-serif',
               fontWeight: 800,
               fontSize: 'clamp(1.75rem, 5vw, 3.25rem)',
               lineHeight: 1.1,
-              color: 'var(--color-black)',
               letterSpacing: '-0.03em',
               marginBottom: 20,
             }}>
@@ -333,11 +339,10 @@ export default function AdsPage() {
             </h1>
 
             {/* Subtext */}
-            <p className="ads-h-desc" style={{
+            <p className="ads-h-desc text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{
               fontFamily: 'Inter, sans-serif',
               fontWeight: 400,
               fontSize: '1.0625rem',
-              color: 'var(--color-grey-dark)',
               lineHeight: 1.6,
               marginBottom: 28,
               maxWidth: 500,
@@ -352,14 +357,11 @@ export default function AdsPage() {
                 { label: '3 Size Formats' },
                 { label: 'From $99/mo' },
               ].map(({ label }) => (
-                <span key={label} className="ads-stat-chip" style={{
-                  background: '#FAFAFA',
-                  border: '1px solid #EEEEEE',
+                <span key={label} className="ads-stat-chip bg-[#FAFAFA] dark:bg-surface border border-[#EEEEEE] dark:border-border text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{
                   borderRadius: 9999,
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 500,
                   fontSize: '0.8125rem',
-                  color: 'var(--color-grey-dark)',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                   whiteSpace: 'nowrap' as const,
                 }}>
@@ -391,16 +393,14 @@ export default function AdsPage() {
               </button>
               <a
                 href="mailto:ads@firstnest.com.au?subject=Media Kit Request — FirstNest ADS"
-                className="ads-btn-outline ads-h-btn"
+                className="ads-btn-outline ads-h-btn border-[1.5px] border-[#DDDDDD] dark:border-border text-[var(--color-black)] dark:text-foreground"
                 style={{
                   background: 'transparent',
-                  color: 'var(--color-black)',
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   fontSize: '0.9375rem',
                   padding: '15px 28px',
                   borderRadius: 'var(--radius-lg)',
-                  border: '1.5px solid #DDDDDD',
                   cursor: 'pointer',
                   minHeight: 52,
                   display: 'inline-flex',
@@ -418,27 +418,21 @@ export default function AdsPage() {
         {/* ── FILTER BAR — sticky below Navbar ───────────────────────────── */}
         <div
           id="billboard-grid"
-          className="sticky top-14 lg:top-16 z-30 px-4 md:px-8 lg:px-12"
-          style={{
-            background: '#FFFFFF',
-            borderBottom: '1px solid #EEEEEE',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          }}
+          className="sticky top-14 lg:top-16 z-30 px-4 md:px-8 lg:px-12 bg-white dark:bg-card border-b border-[#EEEEEE] dark:border-border"
+          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
         >
           <div className="flex items-center justify-center sm:justify-between gap-4 py-3">
-            <span className="hidden sm:inline" style={{
+            <span className="hidden sm:inline text-[var(--color-grey-mid)] dark:text-muted-foreground" style={{
               fontFamily: 'Inter, sans-serif',
               fontSize: '0.8125rem',
-              color: 'var(--color-grey-mid)',
               whiteSpace: 'nowrap' as const,
             }}>
               {vacantCount} available · {occupiedCount} occupied
             </span>
 
             {/* Segmented control */}
-            <div style={{
+            <div className="bg-[#F3F3F1] dark:bg-surface" style={{
               display: 'flex',
-              background: '#F3F3F1',
               borderRadius: 10,
               padding: 3,
               gap: 2,
@@ -496,10 +490,10 @@ export default function AdsPage() {
               return (
                 <div
                   key={zone.id}
-                  className={`${spanClass} ${visibilityClass} relative rounded-2xl overflow-hidden ${zone.status === 'occupied' ? 'ads-card' : 'ads-vacant'}`}
+                  className={`${spanClass} ${visibilityClass} relative rounded-2xl overflow-hidden ${zone.status === 'occupied' ? 'ads-card' : 'ads-vacant border-2 border-dashed border-[#DDDDDD] dark:border-border bg-white dark:bg-card'}`}
                   style={zone.status === 'occupied'
                     ? { background: '#E8E8E8', boxShadow: 'var(--shadow-card)', cursor: 'default' }
-                    : { background: '#FFFFFF', border: '2px dashed #DDDDDD', cursor: 'pointer' }
+                    : { cursor: 'pointer' }
                   }
                 >
                   {zone.status === 'occupied' ? (
@@ -597,16 +591,15 @@ export default function AdsPage() {
                       <SerialBadge id={zone.id} dark={false} />
 
                       {/* Billboard icon */}
-                      <div style={{ color: '#CCCCCC', marginBottom: 2 }}>
+                      <div className="text-[#CCCCCC] dark:text-muted-foreground/40" style={{ marginBottom: 2 }}>
                         <BillboardIcon />
                       </div>
 
                       {/* Zone number */}
-                      <p style={{
+                      <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{
                         fontFamily: 'monospace',
                         fontWeight: 700,
                         fontSize: zone.size === 'small' ? '1rem' : '1.375rem',
-                        color: '#BBBBBB',
                         letterSpacing: '0.08em',
                         lineHeight: 1,
                       }}>
@@ -614,11 +607,10 @@ export default function AdsPage() {
                       </p>
 
                       {/* Price */}
-                      <p style={{
+                      <p className="text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 600,
                         fontSize: '0.75rem',
-                        color: 'var(--color-grey-dark)',
                       }}>
                         from {zone.price}
                       </p>
@@ -654,31 +646,31 @@ export default function AdsPage() {
 
         {/* ── ENQUIRY STRIP ──────────────────────────────────────────────── */}
         <div
-          className="px-4 md:px-8 lg:px-12 py-8 text-center"
-          style={{ borderTop: '3px solid var(--color-lemon)', background: '#FFFFFF' }}
+          className="px-4 md:px-8 lg:px-12 py-8 text-center bg-white dark:bg-card"
+          style={{ borderTop: '3px solid var(--color-lemon)' }}
         >
-          <p style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.0625rem', color: 'var(--color-black)', marginBottom: 6 }}>
+          <p className="text-[var(--color-black)] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.0625rem', marginBottom: 6 }}>
             Ready to reach Australia&apos;s first home buyers?
           </p>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: 'var(--color-grey-dark)', lineHeight: 1.7 }}>
+          <p className="text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', lineHeight: 1.7 }}>
             Email{' '}
             <a
               href="mailto:ads@firstnest.com.au"
-              className="ads-email"
-              style={{ color: 'var(--color-black)', fontWeight: 600, textDecoration: 'none' }}
+              className="ads-email text-[var(--color-black)] dark:text-foreground"
+              style={{ fontWeight: 600, textDecoration: 'none' }}
             >
               ads@firstnest.com.au
             </a>
             {' '}or call{' '}
             <a
               href="tel:1800347786"
-              className="ads-phone"
-              style={{ color: 'var(--color-grey-mid)', textDecoration: 'none', fontWeight: 500 }}
+              className="ads-phone text-[var(--color-grey-mid)] dark:text-muted-foreground"
+              style={{ textDecoration: 'none', fontWeight: 500 }}
             >
               1800 FIRST HOME
             </a>
           </p>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--color-grey-mid)', marginTop: 8 }}>
+          <p className="text-[var(--color-grey-mid)] dark:text-muted-foreground/70" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', marginTop: 8 }}>
             All bookings confirmed within 1 business day. No automated checkout.
           </p>
         </div>
@@ -694,19 +686,17 @@ export default function AdsPage() {
             aria-label={`Reserve ${modal.id}`}
           >
             <div
-              className="max-w-sm w-full rounded-2xl p-8 relative"
+              className="max-w-sm w-full rounded-2xl p-8 relative bg-white dark:bg-card"
               style={{
-                background: '#FFFFFF',
                 boxShadow: 'var(--shadow-modal)',
                 borderTop: '4px solid var(--color-lemon)',
               }}
               onClick={e => e.stopPropagation()}
             >
               {/* Zone number */}
-              <p style={{
+              <p className="text-[#D4D4D4] dark:text-border" style={{
                 fontFamily: 'monospace',
                 fontWeight: 800,
-                color: '#D4D4D4',
                 fontSize: '5rem',
                 lineHeight: 1,
                 textAlign: 'center',
@@ -716,18 +706,18 @@ export default function AdsPage() {
                 {modal.id}
               </p>
 
-              <p style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--color-black)', textAlign: 'center', marginBottom: 4 }}>
+              <p className="text-[var(--color-black)] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.125rem', textAlign: 'center', marginBottom: 4 }}>
                 Space Selected
               </p>
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--color-grey-mid)', textAlign: 'center', marginBottom: 20 }}>
+              <p className="text-[var(--color-grey-mid)] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', textAlign: 'center', marginBottom: 20 }}>
                 {modal.price} · {modal.size.charAt(0).toUpperCase() + modal.size.slice(1)} Billboard
               </p>
 
               {/* Info box */}
-              <div className="rounded-xl p-4 mb-5" style={{ background: '#FAFAFA', border: '1px solid #EEEEEE' }}>
-                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--color-grey-dark)', lineHeight: 1.65, textAlign: 'center' }}>
+              <div className="rounded-xl p-4 mb-5 bg-[#FAFAFA] dark:bg-surface border border-[#EEEEEE] dark:border-border">
+                <p className="text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', lineHeight: 1.65, textAlign: 'center' }}>
                   Email{' '}
-                  <a href="mailto:ads@firstnest.com.au" style={{ color: 'var(--color-black)', fontWeight: 600, textDecoration: 'none' }}>
+                  <a href="mailto:ads@firstnest.com.au" className="text-[var(--color-black)] dark:text-foreground" style={{ fontWeight: 600, textDecoration: 'none' }}>
                     ads@firstnest.com.au
                   </a>{' '}
                   with reference <strong>{modal.id}</strong> and we&apos;ll confirm within 1 business day.
@@ -737,12 +727,9 @@ export default function AdsPage() {
               {/* Copy reference */}
               <button
                 onClick={() => handleCopy(modal.id)}
-                className="ads-copy"
+                className={`ads-copy border-[1.5px] border-[#DDDDDD] dark:border-border ${copied ? 'bg-[var(--color-lemon-light)] text-[var(--color-black)]' : 'bg-transparent text-[var(--color-grey-dark)] dark:text-muted-foreground'}`}
                 style={{
                   width: '100%',
-                  background: copied ? 'var(--color-lemon-light)' : 'transparent',
-                  border: '1.5px solid #DDDDDD',
-                  color: copied ? 'var(--color-black)' : 'var(--color-grey-dark)',
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   fontSize: '0.8125rem',

@@ -15,12 +15,12 @@ const CATEGORY_COLORS: Record<ArticleCategory, string> = {
 
 // Soft Australian editorial card backgrounds — cycles by article id
 const CARD_BG = [
-  'bg-[#FDFAF4] border-[#E8E0CC]',  // warm ivory
-  'bg-[#F3F7F2] border-[#DAE6D6]',  // muted sage
-  'bg-[#F2F5F8] border-[#D6E1EC]',  // coastal blue-grey
-  'bg-[#FBF8F0] border-[#EDE4CE]',  // warm cream
-  'bg-[#F0F5F2] border-[#D2E6DA]',  // pale eucalyptus
-  'bg-[#FAF6EE] border-[#E4DAC4]',  // soft sandstone
+  'bg-[#FDFAF4] border-[#E8E0CC] dark:bg-card dark:border-border',  // warm ivory
+  'bg-[#F3F7F2] border-[#DAE6D6] dark:bg-card dark:border-border',  // muted sage
+  'bg-[#F2F5F8] border-[#D6E1EC] dark:bg-card dark:border-border',  // coastal blue-grey
+  'bg-[#FBF8F0] border-[#EDE4CE] dark:bg-card dark:border-border',  // warm cream
+  'bg-[#F0F5F2] border-[#D2E6DA] dark:bg-card dark:border-border',  // pale eucalyptus
+  'bg-[#FAF6EE] border-[#E4DAC4] dark:bg-card dark:border-border',  // soft sandstone
 ]
 
 export default function ArticlesPageContent() {
@@ -46,10 +46,10 @@ export default function ArticlesPageContent() {
   const hasActiveFilter = activeCategory !== 'All' || searchQuery.trim() !== ''
 
   return (
-    <div className="min-h-screen bg-[#FFFEF0]">
+    <div className="min-h-screen bg-[#FFFEF0] dark:bg-background">
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#FFFEF0] via-[#FFF9D6] to-[#FFFEF0] border-b border-fn-yellow-deep/10">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#FFFEF0] via-[#FFF9D6] to-[#FFFEF0] dark:from-background dark:via-background dark:to-background border-b border-fn-yellow-deep/10 dark:border-border">
         {/* Background depth — three layered glows */}
         <div className="absolute -right-32 -top-32 w-[420px] h-[420px] rounded-full bg-fn-yellow opacity-[0.07] blur-3xl pointer-events-none" />
         <div className="absolute -left-16 bottom-0 w-56 h-56 rounded-full bg-fn-yellow opacity-[0.05] blur-2xl pointer-events-none" />
@@ -60,27 +60,27 @@ export default function ArticlesPageContent() {
 
             {/* ── Left: text ── */}
             <div className="max-w-xl">
-              <span className="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white border border-fn-yellow-deep/30 text-fn-navy-mid shadow-sm mb-3 sm:mb-5 whitespace-nowrap">
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white dark:bg-surface border border-fn-yellow-deep/30 dark:border-fn-yellow-deep/20 text-fn-navy-mid dark:text-foreground shadow-sm mb-3 sm:mb-5 whitespace-nowrap">
                 <Sparkles className="w-3 h-3 text-fn-yellow-deep shrink-0" />
                 AI-assisted education · Australia-focused · Plain English
               </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-fn-navy leading-[1.05] sm:leading-[1.1] tracking-tight mb-2 sm:mb-3">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-fn-navy dark:text-foreground leading-[1.05] sm:leading-[1.1] tracking-tight mb-2 sm:mb-3">
                 First-home buyer insights,{' '}
                 <span className="text-fn-yellow-deep">simplified.</span>
               </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-500 leading-relaxed">
+              <p className="text-sm sm:text-base lg:text-lg text-gray-500 dark:text-muted-foreground leading-relaxed">
                 Practical guides on grants, borrowing power, property risks, and smarter buying
                 decisions — written for Australians making the biggest financial decision of their lives.
               </p>
             </div>
 
             {/* ── Right: editorial card stack — desktop only ── */}
-            <div className="hidden lg:flex flex-col gap-3">
+            <div className="hidden lg:flex flex-col gap-3 lg:mt-8">
 
               {/* Main featured article preview card */}
               <Link
                 href={`/articles/${featuredArticle.slug}`}
-                className="group block rounded-3xl bg-white shadow-md border border-gray-100 overflow-hidden hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300"
+                className="group block rounded-3xl bg-white dark:bg-card shadow-md border border-gray-100 dark:border-border overflow-hidden hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative h-40 overflow-hidden">
                   <img
@@ -97,10 +97,10 @@ export default function ArticlesPageContent() {
                 </div>
                 <div className="p-4 flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-fn-navy font-bold text-sm leading-snug line-clamp-2 group-hover:text-fn-yellow-deep transition-colors duration-200">
+                    <p className="text-fn-navy dark:text-foreground font-bold text-sm leading-snug line-clamp-2 group-hover:text-fn-yellow-deep transition-colors duration-200">
                       {featuredArticle.title}
                     </p>
-                    <span className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
+                    <span className="flex items-center gap-1 text-xs text-gray-400 dark:text-muted-foreground mt-1.5">
                       <Clock className="w-3 h-3" />
                       {featuredArticle.readTime} min read · Featured guide
                     </span>
@@ -144,7 +144,7 @@ export default function ArticlesPageContent() {
                 </Link>
 
                 {/* Stats card */}
-                <div className="rounded-2xl bg-fn-navy p-4 flex flex-col justify-between">
+                <div className="rounded-2xl bg-fn-navy dark:bg-surface dark:border dark:border-border p-4 flex flex-col justify-between">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-fn-yellow">
                     Content Hub
                   </p>
@@ -173,7 +173,7 @@ export default function ArticlesPageContent() {
         <section>
           <Link
             href={`/articles/${featuredArticle.slug}`}
-            className="group relative overflow-hidden rounded-2xl bg-fn-navy text-white block hover:-translate-y-1 hover:shadow-2xl transition-all duration-300"
+            className="group relative overflow-hidden rounded-2xl bg-fn-navy dark:bg-card dark:border dark:border-border text-white dark:text-foreground block hover:-translate-y-1 hover:shadow-2xl transition-all duration-300"
           >
             {/* Featured Guide label */}
             <div className="absolute top-4 left-4 z-10">
@@ -205,15 +205,15 @@ export default function ArticlesPageContent() {
                     <span className="w-1.5 h-1.5 rounded-full bg-fn-yellow inline-block" />
                     In-Depth Guide
                   </p>
-                  <h3 className="text-2xl font-extrabold text-white leading-tight mb-4">
+                  <h3 className="text-2xl font-extrabold text-white dark:text-foreground leading-tight mb-4">
                     {featuredArticle.title}
                   </h3>
-                  <p className="text-gray-300 text-sm leading-relaxed">
+                  <p className="text-gray-300 dark:text-muted-foreground text-sm leading-relaxed">
                     {featuredArticle.excerpt}
                   </p>
                 </div>
-                <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/10">
-                  <div className="flex items-center gap-2 text-gray-400 text-xs">
+                <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/10 dark:border-border">
+                  <div className="flex items-center gap-2 text-gray-400 dark:text-muted-foreground text-xs">
                     <Clock className="w-3.5 h-3.5" />
                     {featuredArticle.readTime} min read
                   </div>
@@ -232,18 +232,18 @@ export default function ArticlesPageContent() {
 
           {/* Search bar */}
           <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search grants, suburbs, deposits, or property risks…"
-              className="w-full pl-11 pr-10 py-3 rounded-2xl border border-gray-200 bg-white text-sm text-fn-grey-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-fn-yellow/40 focus:border-fn-yellow-deep transition-all shadow-sm"
+              className="w-full pl-11 pr-10 py-3 rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-input text-sm text-fn-grey-900 dark:text-foreground placeholder:text-gray-400 dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-fn-yellow/40 focus:border-fn-yellow-deep transition-all shadow-sm"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-400 hover:text-fn-navy hover:bg-gray-100 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-400 dark:text-muted-foreground hover:text-fn-navy dark:hover:text-foreground hover:bg-gray-100 dark:hover:bg-surface transition-colors"
                 aria-label="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
@@ -258,7 +258,7 @@ export default function ArticlesPageContent() {
               className={`text-sm font-semibold px-4 py-1.5 rounded-full border transition-all duration-200 ${
                 activeCategory === 'All'
                   ? 'bg-fn-navy text-white border-fn-navy shadow-sm'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-fn-navy hover:text-fn-navy'
+                  : 'bg-white dark:bg-card text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:border-fn-navy hover:text-fn-navy dark:hover:text-foreground dark:hover:border-foreground'
               }`}
             >
               All
@@ -270,7 +270,7 @@ export default function ArticlesPageContent() {
                 className={`text-sm font-semibold px-4 py-1.5 rounded-full border transition-all duration-200 ${
                   activeCategory === cat
                     ? 'bg-fn-navy text-white border-fn-navy shadow-sm'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-fn-navy hover:text-fn-navy'
+                    : 'bg-white dark:bg-card text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:border-fn-navy hover:text-fn-navy dark:hover:text-foreground dark:hover:border-foreground'
                 }`}
               >
                 {cat}
@@ -281,15 +281,15 @@ export default function ArticlesPageContent() {
           {/* Results count / empty state */}
           {filteredGrid.length === 0 ? (
             <div className="py-14 flex flex-col items-center gap-3 text-center">
-              <div className="w-12 h-12 rounded-2xl bg-fn-grey-50 flex items-center justify-center">
-                <Search className="w-5 h-5 text-gray-300" />
+              <div className="w-12 h-12 rounded-2xl bg-fn-grey-50 dark:bg-surface flex items-center justify-center">
+                <Search className="w-5 h-5 text-gray-300 dark:text-muted-foreground/50" />
               </div>
-              <p className="text-fn-grey-700 font-medium text-sm">No articles found</p>
-              <p className="text-gray-400 text-xs max-w-xs">
+              <p className="text-fn-grey-700 dark:text-foreground font-medium text-sm">No articles found</p>
+              <p className="text-gray-400 dark:text-muted-foreground text-xs max-w-xs">
                 Try a different keyword or{' '}
                 <button
                   onClick={() => { setSearchQuery(''); setActiveCategory('All') }}
-                  className="text-fn-navy-light underline underline-offset-2 font-medium"
+                  className="text-fn-navy-light dark:text-foreground underline underline-offset-2 font-medium"
                 >
                   clear all filters
                 </button>
@@ -298,7 +298,7 @@ export default function ArticlesPageContent() {
           ) : (
             <>
               {hasActiveFilter && (
-                <p className="text-xs text-gray-400 font-medium -mb-1">
+                <p className="text-xs text-gray-400 dark:text-muted-foreground font-medium -mb-1">
                   {filteredGrid.length} article{filteredGrid.length !== 1 ? 's' : ''} found
                 </p>
               )}
@@ -329,19 +329,19 @@ export default function ArticlesPageContent() {
                     {/* Card content */}
                     <div className="flex flex-col flex-1 p-5 justify-between gap-0">
                       <div className="flex flex-col gap-2 mb-4">
-                        <h3 className="font-bold text-fn-navy text-[15px] leading-snug group-hover:text-fn-yellow-deep transition-colors duration-200">
+                        <h3 className="font-bold text-fn-navy dark:text-foreground text-[15px] leading-snug group-hover:text-fn-yellow-deep dark:group-hover:text-fn-yellow transition-colors duration-200">
                           {article.title}
                         </h3>
-                        <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">
+                        <p className="text-gray-500 dark:text-muted-foreground text-sm leading-relaxed line-clamp-2">
                           {article.excerpt}
                         </p>
                       </div>
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                        <span className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-border">
+                        <span className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-muted-foreground font-medium">
                           <Clock className="w-3 h-3" />
                           {article.readTime} min read
                         </span>
-                        <span className="text-xs font-bold text-fn-navy-light group-hover:text-fn-yellow-deep transition-colors duration-200 flex items-center gap-1">
+                        <span className="text-xs font-bold text-fn-navy-light dark:text-foreground group-hover:text-fn-yellow-deep dark:group-hover:text-fn-yellow transition-colors duration-200 flex items-center gap-1">
                           Read more
                           <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-200" />
                         </span>
@@ -383,7 +383,7 @@ export default function ArticlesPageContent() {
 
       {/* Compliance disclaimer */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-10">
-        <p className="text-xs text-gray-300 text-center">
+        <p className="text-xs text-gray-300 dark:text-muted-foreground/60 text-center">
           FirstNest AI provides general information only. This is not financial, legal, or taxation advice.
           Always consult a licensed financial adviser, mortgage broker, and conveyancer before making purchasing decisions.
         </p>

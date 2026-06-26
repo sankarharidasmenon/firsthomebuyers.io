@@ -76,7 +76,7 @@ export function FinalCTAStrip() {
             fontFamily: 'Inter, sans-serif',
             fontWeight: 400,
             fontSize: '0.8125rem',
-            color: '#888888',
+            color: 'var(--muted-foreground)',
             display: 'block',
           }}
         >

@@ -51,7 +51,7 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div>
-        <h2 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#111111' }}>
+        <h2 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}>
           {greetingText}
         </h2>
       </div>
@@ -74,7 +74,7 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
               fontFamily: 'Inter, sans-serif',
               fontWeight: 500,
               fontSize: '0.875rem',
-              color: '#444444',
+              color: 'var(--secondary-foreground)',
               opacity: 1,
               transition: 'opacity 300ms ease',
             }}
@@ -86,8 +86,8 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
 
       {/* Field 2 — State */}
       <div className="flex flex-col gap-2">
-        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: '#222222' }}>
-          Which state or territory are you buying in?<span className="text-[#888888] ml-0.5">*</span>
+        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
+          Which state or territory are you buying in?<span className="text-muted-foreground ml-0.5">*</span>
         </label>
         <BadgeChipGroup
           options={STATE_OPTIONS}
@@ -95,7 +95,7 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
           onChange={v => onChange({ ...data, state: v })}
         />
         {errors.state && (
-          <p role="alert" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#E53E3E' }}>
+          <p role="alert" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--destructive)' }}>
             {errors.state}
           </p>
         )}
@@ -103,8 +103,8 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
 
       {/* Field 3 — Buying situation */}
       <div className="flex flex-col gap-2">
-        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: '#222222' }}>
-          Are you buying alone or with someone?<span className="text-[#888888] ml-0.5">*</span>
+        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
+          Are you buying alone or with someone?<span className="text-muted-foreground ml-0.5">*</span>
         </label>
         <TapCardGroup
           options={BUYING_OPTIONS}
@@ -112,7 +112,7 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
           onChange={v => onChange({ ...data, buyingWith: v as Step1Data['buyingWith'] })}
         />
         {errors.buyingWith && (
-          <p role="alert" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#E53E3E' }}>
+          <p role="alert" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--destructive)' }}>
             {errors.buyingWith}
           </p>
         )}

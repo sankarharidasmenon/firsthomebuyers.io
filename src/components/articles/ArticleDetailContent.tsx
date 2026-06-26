@@ -43,7 +43,7 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
   switch (block.type) {
     case 'paragraph':
       return (
-        <p key={index} className="text-fn-grey-700 leading-[1.85] text-[17px]">
+        <p key={index} className="text-fn-grey-700 dark:text-foreground/90 leading-[1.85] text-[17px]">
           {block.text}
         </p>
       )
@@ -56,7 +56,7 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
             key={index}
             id={id}
             data-heading
-            className="text-2xl font-bold text-fn-navy mt-2 mb-0 scroll-mt-24"
+            className="text-2xl font-bold text-fn-navy dark:text-foreground mt-2 mb-0 scroll-mt-24"
           >
             {block.text}
           </h2>
@@ -65,7 +65,7 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
       return (
         <h3
           key={index}
-          className="text-lg font-semibold text-fn-navy-mid mt-1 mb-0"
+          className="text-lg font-semibold text-fn-navy-mid dark:text-foreground mt-1 mb-0"
         >
           {block.text}
         </h3>
@@ -76,7 +76,7 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
         return (
           <ol key={index} className="list-decimal list-outside pl-5 flex flex-col gap-2">
             {block.items.map((item, i) => (
-              <li key={i} className="text-fn-grey-700 leading-relaxed text-[17px] pl-1">
+              <li key={i} className="text-fn-grey-700 dark:text-foreground/90 leading-relaxed text-[17px] pl-1">
                 {item}
               </li>
             ))}
@@ -86,7 +86,7 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
       return (
         <ul key={index} className="flex flex-col gap-2">
           {block.items.map((item, i) => (
-            <li key={i} className="flex items-start gap-3 text-fn-grey-700 leading-relaxed text-[17px]">
+            <li key={i} className="flex items-start gap-3 text-fn-grey-700 dark:text-foreground/90 leading-relaxed text-[17px]">
               <CheckCircle2 className="w-4 h-4 text-fn-yellow-deep shrink-0 mt-[3px]" strokeWidth={2.5} />
               <span>{item}</span>
             </li>
@@ -100,11 +100,11 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
           key={index}
           className="border-l-4 border-fn-yellow pl-6 py-1 flex flex-col gap-2"
         >
-          <p className="text-fn-navy-mid text-lg font-medium leading-relaxed italic">
+          <p className="text-fn-navy-mid dark:text-foreground text-lg font-medium leading-relaxed italic">
             &ldquo;{block.text}&rdquo;
           </p>
           {block.attribution && (
-            <cite className="text-sm text-fn-grey-500 not-italic font-medium">
+            <cite className="text-sm text-fn-grey-500 dark:text-muted-foreground not-italic font-medium">
               — {block.attribution}
             </cite>
           )}
@@ -142,7 +142,7 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
           <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${cfg.iconColor}`} strokeWidth={2} />
           <div>
             <p className={`font-bold text-sm mb-1 ${cfg.titleColor}`}>{block.title}</p>
-            <p className="text-fn-grey-700 text-sm leading-relaxed">{block.body}</p>
+            <p className="text-fn-grey-700 dark:text-fn-grey-900 text-sm leading-relaxed">{block.body}</p>
           </div>
         </div>
       )
@@ -152,7 +152,7 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
       return (
         <div
           key={index}
-          className="rounded-2xl bg-fn-navy border border-fn-navy-mid p-6 flex flex-col gap-3"
+          className="rounded-2xl bg-fn-navy dark:bg-card border border-fn-navy-mid dark:border-border p-6 flex flex-col gap-3"
         >
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-fn-yellow shrink-0" strokeWidth={2} />
@@ -212,7 +212,7 @@ function TableOfContents({
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="text-xs font-bold uppercase tracking-widest text-fn-grey-500 mb-3 px-2">
+      <p className="text-xs font-bold uppercase tracking-widest text-fn-grey-500 dark:text-muted-foreground mb-3 px-2">
         Contents
       </p>
       {headings.map(({ text }) => {
@@ -225,7 +225,7 @@ function TableOfContents({
             className={`text-left text-sm px-3 py-2 rounded-lg transition-all duration-200 leading-snug ${
               active
                 ? 'bg-fn-yellow-light text-fn-navy font-semibold border-l-2 border-fn-yellow'
-                : 'text-fn-grey-500 hover:text-fn-navy hover:bg-fn-grey-50'
+                : 'text-fn-grey-500 dark:text-muted-foreground hover:text-fn-navy dark:hover:text-foreground hover:bg-fn-grey-50 dark:hover:bg-surface'
             }`}
           >
             {text}
@@ -336,7 +336,7 @@ export default function ArticleDetailContent({
   }, [article.slug])
 
   return (
-    <div className="min-h-screen bg-[#FFFEF0]">
+    <div className="min-h-screen bg-[#FFFEF0] dark:bg-background">
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden">
@@ -348,7 +348,7 @@ export default function ArticleDetailContent({
             className="w-full h-full object-cover"
           />
           {/* Dark gradient scrim so text below reads cleanly */}
-          <div className="absolute inset-0 bg-gradient-to-b from-fn-navy/20 via-fn-navy/10 to-[#FFFEF0]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-fn-navy/20 via-fn-navy/10 to-[#FFFEF0] dark:to-background" />
         </div>
 
         {/* Text block sitting below the image, on the page background */}
@@ -356,7 +356,7 @@ export default function ArticleDetailContent({
           {/* Breadcrumb */}
           <Link
             href="/articles"
-            className="inline-flex items-center gap-2 text-sm font-medium text-fn-grey-500 hover:text-fn-navy transition-colors mb-4 group"
+            className="inline-flex items-center gap-2 text-sm font-medium text-fn-grey-500 dark:text-muted-foreground hover:text-fn-navy dark:hover:text-foreground transition-colors mb-4 group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to Articles
@@ -373,16 +373,16 @@ export default function ArticleDetailContent({
                 <span className={`text-xs font-semibold px-3 py-1 rounded-full ${CATEGORY_PILL[article.category]}`}>
                   {article.category}
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-fn-grey-500 font-medium">
+                <span className="flex items-center gap-1.5 text-xs text-fn-grey-500 dark:text-muted-foreground font-medium">
                   <Clock className="w-3.5 h-3.5" />
                   {article.readTime} min read
                 </span>
               </div>
 
-              <h1 className="text-3xl lg:text-4xl font-extrabold text-fn-navy leading-[1.15] tracking-tight">
+              <h1 className="text-3xl lg:text-4xl font-extrabold text-fn-navy dark:text-foreground leading-[1.15] tracking-tight">
                 {article.title}
               </h1>
-              <p className="text-fn-grey-500 text-base lg:text-lg leading-relaxed">
+              <p className="text-fn-grey-500 dark:text-muted-foreground text-base lg:text-lg leading-relaxed">
                 {article.excerpt}
               </p>
             </div>
@@ -439,16 +439,16 @@ export default function ArticleDetailContent({
 
       {/* ── Related Articles ── */}
       {relatedArticles.length > 0 && (
-        <section className="bg-fn-yellow-pale/50 py-10 sm:py-16 border-t border-fn-yellow/20">
+        <section className="bg-fn-yellow-pale/50 dark:bg-surface/10 border-t border-fn-yellow/20 dark:border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-6 sm:mb-8">
               <div>
                 <p className="text-fn-yellow text-[10px] sm:text-xs font-bold tracking-wider sm:tracking-widest uppercase mb-1">Keep Reading</p>
-                <h2 className="text-lg sm:text-2xl font-extrabold text-fn-navy">Related Articles</h2>
+                <h2 className="text-lg sm:text-2xl font-extrabold text-fn-navy dark:text-foreground">Related Articles</h2>
               </div>
               <Link
                 href="/articles"
-                className="text-fn-navy font-semibold text-xs sm:text-sm flex items-center gap-1 border-b-2 border-fn-yellow pb-0.5 hover:text-fn-yellow transition-colors self-start sm:self-auto shrink-0"
+                className="text-fn-navy dark:text-foreground font-semibold text-xs sm:text-sm flex items-center gap-1 border-b-2 border-fn-yellow pb-0.5 hover:text-fn-yellow transition-colors self-start sm:self-auto shrink-0"
               >
                 View all articles <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Link>
@@ -464,7 +464,7 @@ export default function ArticleDetailContent({
 
       {/* Compliance disclaimer */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-        <p className="text-xs text-gray-300 text-center">
+        <p className="text-xs text-gray-300 dark:text-muted-foreground/60 text-center">
           FirstNest AI provides general information only. This is not financial, legal, or taxation advice.
           Always consult a licensed financial adviser, mortgage broker, and conveyancer before making purchasing decisions.
         </p>

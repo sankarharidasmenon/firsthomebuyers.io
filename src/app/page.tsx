@@ -16,13 +16,13 @@ export default function HomePage() {
   const showBanner = isLoaded && hasSession && !isExpired && !sessionDismissed
 
   /* Navbar height: 56px mobile / 64px (3.5rem lg) desktop.
-     Banner height: ~54px on desktop, ~88px on mobile (wraps). */
+     Banner height: ~40px mobile (single row compact) / ~40px desktop. */
   const heroOffset = showBanner
-    ? 'pt-[calc(56px+90px)] lg:pt-[calc(64px+54px)]'
+    ? 'pt-[calc(56px+40px)] lg:pt-[calc(64px+40px)]'
     : 'pt-14 lg:pt-16'
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Skip to main */}
       <a
         href="#main"

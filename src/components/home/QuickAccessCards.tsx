@@ -14,9 +14,9 @@ export function QuickAccessCards() {
         onClick={() => router.push('/onboarding?flow=grants')}
         className="card-lift flex flex-col gap-2.5 p-5 rounded-[14px] cursor-pointer text-left"
         style={{
-          background: '#FFFFFF',
-          border: '1.5px solid #E8E8E8',
-          borderTop: '3px solid #F5E642',
+          background: 'var(--background)',
+          border: '1.5px solid var(--border)',
+          borderTop: '3px solid var(--brand-yellow)',
           boxShadow: '0 2px 16px rgba(0,0,0,0.07)',
           minHeight: 140,
           position: 'relative',
@@ -28,7 +28,7 @@ export function QuickAccessCards() {
             fontFamily: '"Plus Jakarta Sans", sans-serif',
             fontWeight: 700,
             fontSize: '0.9375rem',
-            color: '#111111',
+            color: 'var(--foreground)',
             lineHeight: 1.3,
           }}>
             Government Schemes
@@ -37,7 +37,7 @@ export function QuickAccessCards() {
             fontFamily: 'Inter, sans-serif',
             fontWeight: 400,
             fontSize: '0.8125rem',
-            color: '#666666',
+            color: 'var(--muted-foreground)',
             marginTop: 3,
             lineHeight: 1.4,
           }}>
@@ -46,8 +46,8 @@ export function QuickAccessCards() {
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
           <span style={{
-            background: '#111111',
-            color: '#F5E642',
+            background: 'var(--brand-dark-surface)',
+            color: 'var(--brand-yellow)',
             fontSize: '0.625rem',
             fontFamily: 'Inter, sans-serif',
             fontWeight: 700,
@@ -68,9 +68,9 @@ export function QuickAccessCards() {
         onClick={() => router.push('/onboarding?flow=borrowing')}
         className="card-lift flex flex-col gap-2.5 p-5 rounded-[14px] cursor-pointer text-left"
         style={{
-          background: '#FFFFFF',
-          border: '1.5px solid #E8E8E8',
-          borderTop: '3px solid #DDDDDD',
+          background: 'var(--background)',
+          border: '1.5px solid var(--border)',
+          borderTop: '3px solid var(--muted-foreground)',
           boxShadow: '0 2px 16px rgba(0,0,0,0.07)',
           minHeight: 140,
         }}
@@ -81,7 +81,7 @@ export function QuickAccessCards() {
             fontFamily: '"Plus Jakarta Sans", sans-serif',
             fontWeight: 700,
             fontSize: '0.9375rem',
-            color: '#111111',
+            color: 'var(--foreground)',
             lineHeight: 1.3,
           }}>
             Borrowing Capacity
@@ -90,7 +90,7 @@ export function QuickAccessCards() {
             fontFamily: 'Inter, sans-serif',
             fontWeight: 400,
             fontSize: '0.8125rem',
-            color: '#666666',
+            color: 'var(--muted-foreground)',
             marginTop: 3,
             lineHeight: 1.4,
           }}>

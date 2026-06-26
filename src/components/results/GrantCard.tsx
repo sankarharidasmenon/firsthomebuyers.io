@@ -49,7 +49,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
 
   return (
     <div
-      className={`relative bg-white transition-all duration-200 ${hidden ? 'hidden' : ''}`}
+      className={`relative bg-white dark:bg-card dark:border dark:border-border transition-all duration-200 ${hidden ? 'hidden' : ''}`}
       style={{
         borderLeft: `3px solid ${STATUS_COLOURS[status]}`,
         borderRadius: 14,
@@ -82,7 +82,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
         {/* Name + optional benefit line for schemes */}
         <div className="flex-1 pr-4">
           <span
-            className="block text-[1rem] sm:text-[0.9375rem] font-semibold text-[#111111] leading-snug"
+            className="block text-[1rem] sm:text-[0.9375rem] font-semibold text-[#111111] dark:text-foreground leading-snug"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             {grant.name}
@@ -96,6 +96,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
                 color: status === 'eligible' ? '#16A34A' : '#888888',
                 lineHeight: 1.4,
               }}
+              // In dark mode: eligible stays green, ineligible gets lighter
             >
               {status === 'eligible' ? '✓ ' : ''}{schemeBenefit}
             </span>
@@ -127,7 +128,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
       {/* Expanded content */}
       {open && (
         <div className="px-5 pb-5 border-t border-grey-light" style={{ borderTopColor: 'rgba(0,0,0,0.05)' }}>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#444444', marginTop: 12, marginBottom: 12 }}>
+          <p className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', marginTop: 12, marginBottom: 12 }}>
             {grant.description}
           </p>
 
@@ -139,7 +140,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
                   ? <Check size={14} className="text-[#22C55E] mt-0.5 shrink-0" />
                   : <X size={14} className="text-[#9CA3AF] mt-0.5 shrink-0" />
                 }
-                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#444444' }}>
+                <span className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>
                   {c.text}
                 </span>
               </li>
@@ -169,7 +170,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
             href={grant.officialUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[0.8125rem] text-grey-dark underline hover:text-[#111111]"
+            className="inline-flex items-center gap-1 text-[0.8125rem] text-grey-dark dark:text-muted-foreground underline hover:text-[#111111] dark:hover:text-foreground"
             style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}
           >
             Verify on the official government website

@@ -36,7 +36,7 @@ export function ExpandableCard({
   return (
     <div
       className={[
-        'bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)]',
+        'bg-card rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)]',
         className,
       ].join(' ')}
     >
@@ -49,7 +49,7 @@ export function ExpandableCard({
         <div className="flex-1">{header}</div>
         <ChevronDown
           size={18}
-          className="text-[#888888] transition-transform duration-200 shrink-0 ml-2"
+          className="text-muted-foreground transition-transform duration-200 shrink-0 ml-2"
           style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
         />
       </button>
@@ -62,7 +62,7 @@ export function ExpandableCard({
           transition: 'max-height 200ms ease-in-out',
         }}
       >
-        <div className="px-4 pb-4 border-t border-[#F0F0F0]">
+        <div className="px-4 pb-4 border-t border-border">
           <div className="pt-3">{children}</div>
         </div>
       </div>

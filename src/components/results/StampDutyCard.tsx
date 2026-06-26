@@ -45,7 +45,7 @@ export function StampDutyCard({ result, state, hidden = false }: StampDutyCardPr
 
   return (
     <div
-      className={`relative bg-white transition-all duration-200 ${hidden ? 'hidden' : ''}`}
+      className={`relative bg-white dark:bg-card dark:border dark:border-border transition-all duration-200 ${hidden ? 'hidden' : ''}`}
       style={{
         borderRadius: 14,
         boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05)',
@@ -74,7 +74,7 @@ export function StampDutyCard({ result, state, hidden = false }: StampDutyCardPr
         className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 pt-6 sm:p-5 text-left cursor-pointer bg-none border-none"
       >
         <span
-          className="flex-1 text-[1rem] sm:text-[0.9375rem] font-semibold text-[#111111] leading-snug pr-4"
+          className="flex-1 text-[1rem] sm:text-[0.9375rem] font-semibold text-[#111111] dark:text-foreground leading-snug pr-4"
           style={{ fontFamily: 'Inter, sans-serif' }}
         >
           Stamp Duty — First Home Buyer Concession
@@ -105,14 +105,14 @@ export function StampDutyCard({ result, state, hidden = false }: StampDutyCardPr
             {/* Two-column comparison */}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-0.5">
-                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#888888' }}>Standard Stamp Duty</p>
+                <p className="text-[#888888] dark:text-muted-foreground/70" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem' }}>Standard Stamp Duty</p>
                 <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.0625rem', color: '#9CA3AF', textDecoration: 'line-through' }}>
                   ${result.standardDuty.toLocaleString('en-AU')}
                 </p>
               </div>
               <div className="flex flex-col gap-0.5">
-                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#888888' }}>With FHB Concession</p>
-                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.0625rem', color: '#111111' }}>
+                <p className="text-[#888888] dark:text-muted-foreground/70" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem' }}>With FHB Concession</p>
+                <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.0625rem' }}>
                   ${result.concessionDuty.toLocaleString('en-AU')}
                 </p>
               </div>
@@ -125,7 +125,7 @@ export function StampDutyCard({ result, state, hidden = false }: StampDutyCardPr
                 style={{ background: '#F0FDF4' }}
               >
                 <div className="flex items-center justify-between">
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#444444' }}>You save:</span>
+                  <span className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>You save:</span>
                   <span style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.25rem', color: '#16A34A' }}>
                     ${result.saving.toLocaleString('en-AU')}
                   </span>
@@ -150,7 +150,7 @@ export function StampDutyCard({ result, state, hidden = false }: StampDutyCardPr
               href={STATE_REVENUE_URLS[state] ?? '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[0.8125rem] text-grey-dark underline hover:text-[#111111]"
+              className="inline-flex items-center gap-1 text-[0.8125rem] text-grey-dark dark:text-muted-foreground underline hover:text-[#111111] dark:hover:text-foreground"
               style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}
             >
               Verify at {state} Revenue Office

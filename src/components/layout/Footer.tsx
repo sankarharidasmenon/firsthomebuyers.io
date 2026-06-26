@@ -65,10 +65,10 @@ export function Footer() {
         .fn-social-btn {
           display: flex; align-items: center; justify-content: center;
           width: 34px; height: 34px; border-radius: 8px;
-          background: #F5E642; color: #111111;
+          background: var(--primary); color: var(--primary-foreground);
           transition: background 130ms, transform 130ms;
         }
-        .fn-social-btn:hover { background: #EDD900; transform: translateY(-2px); }
+        .fn-social-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
       `}</style>
 
       {/* ── Main columns: Brand | Product | Official Sources ── */}
@@ -79,10 +79,10 @@ export function Footer() {
           <div className="flex flex-col items-center lg:items-start gap-5">
             <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
               <div style={{
-                width: 32, height: 32, background: '#F5E642', borderRadius: 6,
+                width: 32, height: 32, background: 'var(--primary)', borderRadius: 6,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <Home size={17} style={{ color: '#111111' }} strokeWidth={2.5} />
+                <Home size={17} style={{ color: 'var(--primary-foreground)' }} strokeWidth={2.5} />
               </div>
               <span style={{
                 fontFamily: '"Plus Jakarta Sans", sans-serif',
@@ -96,7 +96,7 @@ export function Footer() {
               fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)',
               lineHeight: 1.65, maxWidth: 220,
             }}>
-              Australia's free first home buyer tool — grants, borrowing power and your next step.
+              Australia&apos;s free first home buyer tool — grants, borrowing power and your next step.
             </p>
 
             <div style={{ display: 'flex', gap: 6 }}>

@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/navigation/BottomNav'
 import { Footer } from '@/components/layout/Footer'
 import { GlobalBackButton } from '@/components/navigation/GlobalBackButton'
 import { Navbar } from '@/components/home/Navbar'
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -43,19 +44,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="text-[#222222] antialiased flex flex-col min-h-screen" style={{ background: '#111111' }}>
-        <div className="flex-1 flex flex-col bg-white">
-          <Navbar />
-          <GlobalBackButton />
-          {children}
-        </div>
-        <Footer />
-        <BottomNav />
+      <body className="text-foreground antialiased flex flex-col min-h-screen" style={{ background: 'var(--color-brand-dark-surface)' }}>
+        <ThemeProvider>
+          <div className="flex-1 flex flex-col bg-background">
+            <Navbar />
+            <GlobalBackButton />
+            {children}
+          </div>
+          <Footer />
+          <BottomNav />
+        </ThemeProvider>
       </body>
     </html>
   )

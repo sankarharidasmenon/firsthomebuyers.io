@@ -45,7 +45,7 @@ export function HeroSection() {
 
   return (
     <section
-      className="w-full bg-white"
+      className="w-full bg-background"
       style={{ paddingBottom: '32px' }}
     >
       <div
@@ -64,7 +64,7 @@ export function HeroSection() {
                     fontFamily: '"Plus Jakarta Sans", sans-serif',
                     fontWeight: 700,
                     fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-                    color: '#111111',
+                    color: 'var(--foreground)',
                     lineHeight: 1.15,
                     marginBottom: 16,
                   }}
@@ -76,7 +76,7 @@ export function HeroSection() {
                     fontFamily: 'Inter, sans-serif',
                     fontWeight: 400,
                     fontSize: '1rem',
-                    color: '#555555',
+                    color: 'var(--muted-foreground)',
                     marginBottom: 20,
                   }}
                 >
@@ -93,14 +93,14 @@ export function HeroSection() {
                     <span
                       key={chip}
                       style={{
-                        background: 'white',
-                        border: '1px solid #EEEEEE',
+                        background: 'var(--card)',
+                        border: '1px solid var(--border)',
                         borderRadius: 9999,
                         padding: '7px 16px',
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 500,
                         fontSize: '0.8125rem',
-                        color: '#444444',
+                        color: 'var(--secondary-foreground)',
                         boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                         whiteSpace: 'nowrap',
                       }}
@@ -144,18 +144,18 @@ export function HeroSection() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      background: '#FFFFFF',
-                      color: '#444444',
+                      background: 'var(--card)',
+                      color: 'var(--secondary-foreground)',
                       fontFamily: 'Inter, sans-serif',
                       fontWeight: 500,
                       fontSize: '0.875rem',
-                      border: '1.5px solid #DDDDDD',
+                      border: '1.5px solid var(--input)',
                       borderRadius: 9999,
                       padding: '16px 18px',
                       cursor: 'pointer',
                       whiteSpace: 'nowrap',
                     }}
-                    className="hover:border-[#111111] transition-colors duration-150"
+                    className="hover:border-foreground transition-colors duration-150"
                   >
                     Start fresh
                   </button>
@@ -178,7 +178,7 @@ export function HeroSection() {
                     style={{
                       display: 'block',
                       fontSize: 'clamp(2.25rem, 5.5vw, 3.5rem)',
-                      color: '#111111',
+                      color: 'var(--foreground)',
                     }}
                   >
                     Your home buying
@@ -187,7 +187,7 @@ export function HeroSection() {
                     style={{
                       display: 'block',
                       fontSize: 'clamp(2.25rem, 5.5vw, 3.5rem)',
-                      color: '#111111',
+                      color: 'var(--foreground)',
                     }}
                   >
                     journey starts
@@ -209,7 +209,7 @@ export function HeroSection() {
                     fontFamily: 'Inter, sans-serif',
                     fontWeight: 400,
                     fontSize: '1.0625rem',
-                    color: '#555555',
+                    color: 'var(--muted-foreground)',
                     maxWidth: 460,
                     lineHeight: 1.6,
                     marginBottom: 24,
@@ -230,17 +230,17 @@ export function HeroSection() {
                   {MOBILE_STATS.map((s, i) => (
                     <div
                       key={s.label}
-                      className={`flex flex-col lg:flex-row items-center justify-center bg-[#FAFAFA] border border-[#EEEEEE] rounded-[16px] lg:rounded-full py-2.5 px-1 lg:px-3 lg:py-1.5 ${
+                      className={`flex flex-col lg:flex-row items-center justify-center bg-muted border border-border rounded-[16px] lg:rounded-full py-2.5 px-1 lg:px-3 lg:py-1.5 ${
                         i === 2 ? 'col-span-2 justify-self-center px-8 lg:px-3' : 'w-full lg:w-auto'
                       }`}
                     >
                       <span
-                        className="font-mono font-bold text-[0.8125rem] text-[#111111] whitespace-nowrap text-center"
+                        className="font-mono font-bold text-[0.8125rem] text-foreground whitespace-nowrap text-center"
                       >
                         {s.value}
                       </span>
                       <span
-                        className="font-sans text-[0.6875rem] text-[#666666] mt-0.5 lg:mt-0 lg:ml-1.5 text-center lg:text-left lg:whitespace-nowrap leading-tight"
+                        className="font-sans text-[0.6875rem] text-muted-foreground mt-0.5 lg:mt-0 lg:ml-1.5 text-center lg:text-left lg:whitespace-nowrap leading-tight"
                       >
                         {s.label}
                       </span>
@@ -289,19 +289,19 @@ export function HeroSection() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: 8,
-                        background: 'transparent',
-                        color: '#111111',
+                        background: 'linear-gradient(var(--background), var(--background)) padding-box, linear-gradient(135deg, #F5E642 0%, #C8AA00 40%, #F5E642 70%, #D4C400 100%) border-box',
+                        color: 'var(--foreground)',
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 600,
                         fontSize: '0.9375rem',
-                        border: '1px solid #DDDDDD',
+                        border: '1.5px solid transparent',
                         borderRadius: 9999,
                         padding: '16px 24px',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         whiteSpace: 'nowrap',
                       }}
-                      className="hover:border-[#111111] hover:bg-[#FAFAFA]"
+                      className="hover:brightness-110"
                     >
                      Borrowing Capacity
                     </button>
@@ -309,7 +309,7 @@ export function HeroSection() {
                       style={{
                         fontFamily: 'Inter, sans-serif',
                         fontSize: '0.75rem',
-                        color: '#888888',
+                        color: 'var(--muted-foreground)',
                         textAlign: 'center',
                         marginTop: 10,
                       }}

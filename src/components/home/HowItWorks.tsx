@@ -29,7 +29,7 @@ export function HowItWorks() {
   const router = useRouter()
 
   return (
-    <section style={{ background: 'white', padding: '40px 20px' }} className="lg:py-16">
+    <section style={{ background: 'var(--background)', padding: '40px 20px' }} className="lg:py-16">
       <style>{`
         /*
          * Three-child grid layout.
@@ -98,7 +98,7 @@ export function HowItWorks() {
               fontFamily: '"Plus Jakarta Sans", sans-serif',
               fontWeight: 700,
               fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
-              color: '#111111',
+              color: 'var(--foreground)',
               textAlign: 'center',
               margin: 0,
             }}
@@ -116,7 +116,7 @@ export function HowItWorks() {
                 fontSize: '0.6875rem',
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                color: '#888888',
+                color: 'var(--muted-foreground)',
                 textAlign: 'center',
                 marginBottom: 16,
               }}
@@ -138,8 +138,8 @@ export function HowItWorks() {
                   key={step.num}
                   className="card-lift"
                   style={{
-                    background: 'white',
-                    border: '1px solid rgba(0,0,0,0.04)',
+                    background: 'var(--card)',
+                    border: '1px solid var(--border)',
                     borderRadius: 16,
                     padding: 20,
                     display: 'flex',
@@ -154,7 +154,7 @@ export function HowItWorks() {
                         fontFamily: '"JetBrains Mono", monospace',
                         fontWeight: 700,
                         fontSize: '1.5rem',
-                        color: '#D4C400',
+                        color: 'var(--brand-gold)',
                         lineHeight: 1,
                       }}
                     >
@@ -168,7 +168,7 @@ export function HowItWorks() {
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 700,
                         fontSize: '0.9375rem',
-                        color: '#111111',
+                        color: 'var(--foreground)',
                         marginBottom: 4,
                       }}
                     >
@@ -179,7 +179,7 @@ export function HowItWorks() {
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 400,
                         fontSize: '0.875rem',
-                        color: '#666666',
+                        color: 'var(--muted-foreground)',
                         lineHeight: 1.5,
                       }}
                     >
@@ -198,8 +198,8 @@ export function HowItWorks() {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  background: 'linear-gradient(135deg, #F5E642 0%, #EDD900 100%)',
-                  color: '#111111',
+                  background: 'linear-gradient(135deg, var(--brand-gradient-start) 0%, var(--brand-gradient-end) 100%)',
+                  color: 'var(--brand-dark-surface)',
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 700,
                   fontSize: '0.875rem',

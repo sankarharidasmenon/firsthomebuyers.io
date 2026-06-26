@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { Home, Menu, X } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -12,6 +13,7 @@ const NAV_LINKS = [
   { href: '/#ai-guidance', label: 'AI Guidance' },
   { href: '/ads', label: 'Rent Space' },
   { href: '/articles', label: 'Articles' },
+  { href: '/profile', label: 'My Profile' },
 ]
 
 export function Navbar() {
@@ -50,14 +52,13 @@ export function Navbar() {
     }
   }
 
-  // Hide on onboarding — it has its own step-progress header
-  if (pathname.startsWith('/onboarding')) return null
+
 
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 bg-white h-14 lg:h-16"
-        style={{ borderBottom: '1px solid #EEEEEE' }}
+        className="fixed top-0 left-0 right-0 z-50 bg-background h-14 lg:h-16"
+        style={{ borderBottom: '1px solid var(--border)' }}
       >
         <style>{`
           @media (min-width: 1024px) { .fn-nav { height: 64px !important; } }
@@ -68,11 +69,11 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2 no-underline" aria-label="FirstNest home">
             <div
               className="flex items-center justify-center rounded-sm shrink-0"
-              style={{ width: 32, height: 32, background: '#F5E642' }}
+              style={{ width: 32, height: 32, background: 'var(--primary)' }}
             >
-              <Home size={17} style={{ color: '#111111' }} strokeWidth={2.5} />
+              <Home size={17} style={{ color: 'var(--primary-foreground)' }} strokeWidth={2.5} />
             </div>
-            <span style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: '1.0625rem', color: '#111111', letterSpacing: '-0.01em' }}>
+            <span style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: '1.0625rem', color: 'var(--foreground)', letterSpacing: '-0.01em' }}>
               FirstNest
             </span>
           </Link>
@@ -119,10 +120,10 @@ export function Navbar() {
                     fontFamily: 'Inter, sans-serif',
                     fontWeight: active ? 700 : 500,
                     fontSize: '0.9375rem',
-                    color: active ? '#111111' : '#444444',
+                    color: active ? 'var(--foreground)' : 'var(--secondary-foreground)',
                     textDecoration: 'none',
                     paddingBottom: 2,
-                    borderBottom: active ? '2px solid #F5E642' : '2px solid transparent',
+                    borderBottom: active ? '2px solid var(--primary)' : '2px solid transparent',
                     transition: 'color 150ms, border-color 150ms',
                   }}
                 >
@@ -133,7 +134,9 @@ export function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
+            <ThemeToggle />
+
             {/* Mobile: hamburger toggle */}
             <button
               type="button"
@@ -144,10 +147,10 @@ export function Navbar() {
               style={{
                 width: 40,
                 height: 40,
-                background: menuOpen ? '#F5F5F5' : 'transparent',
+                background: menuOpen ? 'var(--secondary)' : 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#111111',
+                color: 'var(--foreground)',
               }}
             >
               {menuOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
@@ -162,8 +165,8 @@ export function Navbar() {
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 600,
                 fontSize: '0.875rem',
-                background: 'linear-gradient(135deg, #F5E642 0%, #EDD900 100%)',
-                color: '#111111',
+                background: 'linear-gradient(135deg, var(--brand-gradient-start) 0%, var(--brand-gradient-end) 100%)',
+                color: 'var(--brand-dark-surface)',
                 border: 'none',
                 borderRadius: 9999,
                 padding: '10px 24px',
@@ -193,7 +196,7 @@ export function Navbar() {
 
       {/* Mobile menu panel — slides down from navbar */}
       <div
-        className="lg:hidden fixed left-0 right-0 z-50 bg-white"
+        className="lg:hidden fixed left-0 right-0 z-50 bg-background"
         style={{
           top: 56,
           boxShadow: menuOpen ? '0 8px 32px rgba(0,0,0,0.14)' : 'none',
@@ -201,7 +204,7 @@ export function Navbar() {
           transform: menuOpen ? 'translateY(0)' : 'translateY(-6px)',
           pointerEvents: menuOpen ? 'all' : 'none',
           transition: 'opacity 220ms ease, transform 220ms ease',
-          borderBottom: '1px solid #EEEEEE',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <div className="flex flex-col px-5 py-3">
@@ -220,11 +223,11 @@ export function Navbar() {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: active ? 600 : 500,
                   fontSize: '1rem',
-                  color: active ? '#111111' : '#444444',
+                  color: active ? 'var(--foreground)' : 'var(--secondary-foreground)',
                   textDecoration: 'none',
                   padding: '14px 0',
-                  borderBottom: '1px solid #F5F5F5',
-                  borderLeft: active ? '3px solid #F5E642' : '3px solid transparent',
+                  borderBottom: '1px solid var(--secondary)',
+                  borderLeft: active ? '3px solid var(--primary)' : '3px solid transparent',
                   paddingLeft: 12,
                   transition: 'color 120ms',
                 }}
@@ -233,6 +236,13 @@ export function Navbar() {
               </Link>
             )
           })}
+
+          <div className="flex items-center justify-between mt-2 mb-2 px-3">
+            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: 'var(--secondary-foreground)' }}>
+              Theme
+            </span>
+            <ThemeToggle />
+          </div>
 
           {/* Get Started CTA inside mobile menu */}
           <button
@@ -243,8 +253,8 @@ export function Navbar() {
               marginBottom: 6,
               width: '100%',
               padding: '15px',
-              background: '#F5E642',
-              color: '#111111',
+              background: 'var(--primary)',
+              color: 'var(--primary-foreground)',
               fontFamily: 'Inter, sans-serif',
               fontWeight: 700,
               fontSize: '0.9375rem',

@@ -10,7 +10,7 @@ const STATS = [
 
 export function SocialProof() {
   return (
-    <section style={{ background: '#FAFAFA', padding: '56px 20px' }} className="lg:py-20">
+    <section style={{ background: 'var(--secondary)', padding: '56px 20px' }} className="lg:py-20">
       <div className="max-w-[1100px] mx-auto lg:px-12">
 
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-center">
@@ -24,7 +24,7 @@ export function SocialProof() {
                     fontFamily: '"JetBrains Mono", monospace',
                     fontWeight: 700,
                     fontSize: 'clamp(2rem, 5vw, 2.5rem)',
-                    color: '#D4C400',
+                    color: 'var(--brand-gold)',
                     lineHeight: 1,
                     marginBottom: 6,
                   }}
@@ -36,7 +36,7 @@ export function SocialProof() {
                     fontFamily: 'Inter, sans-serif',
                     fontWeight: 400,
                     fontSize: '0.875rem',
-                    color: '#666666',
+                    color: 'var(--muted-foreground)',
                     lineHeight: 1.5,
                   }}
                 >
@@ -49,10 +49,10 @@ export function SocialProof() {
           {/* RIGHT — testimonial card */}
           <div
             style={{
-              background: '#F9F9F9',
+              background: 'var(--secondary)',
               borderRadius: 16,
               padding: '24px 28px',
-              border: '1px solid #EEEEEE',
+              border: '1px solid var(--border)',
             }}
           >
             {/* Stars */}
@@ -63,7 +63,7 @@ export function SocialProof() {
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 400,
                 fontSize: '1rem',
-                color: '#333333',
+                color: 'var(--foreground)',
                 lineHeight: 1.7,
                 fontStyle: 'italic',
                 marginBottom: 16,
@@ -78,7 +78,7 @@ export function SocialProof() {
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 500,
                 fontSize: '0.8125rem',
-                color: '#888888',
+                color: 'var(--muted-foreground)',
               }}
             >
               — Priya M., first home buyer, Melbourne 2024

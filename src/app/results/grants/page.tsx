@@ -22,10 +22,10 @@ function SectionHeader({ icon, title, description }: { icon: string; title: stri
     <div className="flex items-center gap-2.5 px-1">
       <span style={{ fontSize: '0.9375rem', opacity: 0.75 }}>{icon}</span>
       <div>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem', color: '#444444' }}>
+        <span className="text-[#444444] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem' }}>
           {title}
         </span>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#BBBBBB', marginLeft: 8 }}>
+        <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', marginLeft: 8 }}>
           {description}
         </span>
       </div>
@@ -47,8 +47,15 @@ export default function GrantsResultsPage() {
     const report = evaluateEligibility(s1, s2, s3, s4)
 
     // Partition grants into cash vs scheme — no logic change, just display grouping
-    const cashGrants = report.grants.filter(eg => CASH_GRANT_IDS.includes(eg.grant.id))
-    const schemes = report.grants.filter(eg => !CASH_GRANT_IDS.includes(eg.grant.id))
+    const statusPriority: Record<string, number> = { eligible: 1, check: 2, ineligible: 3 }
+
+    const cashGrants = report.grants
+      .filter(eg => CASH_GRANT_IDS.includes(eg.grant.id))
+      .sort((a, b) => statusPriority[a.status] - statusPriority[b.status])
+      
+    const schemes = report.grants
+      .filter(eg => !CASH_GRANT_IDS.includes(eg.grant.id))
+      .sort((a, b) => statusPriority[a.status] - statusPriority[b.status])
 
     const cashGrantsTotal = cashGrants
       .filter(eg => eg.status === 'eligible' && typeof eg.value === 'number')
@@ -73,79 +80,85 @@ export default function GrantsResultsPage() {
     setTimeout(() => setSaved(false), 2000)
   }
 
-  // Section visibility: hide a section only when all its cards are ineligible AND toggle is OFF
-  const showCashSection = showIneligible || cashGrants.some(eg => eg.status !== 'ineligible')
-  const showSchemesSection = showIneligible || schemes.some(eg => eg.status !== 'ineligible')
-  const showTaxSection = showIneligible || (report.stampDuty?.isEligible ?? false)
+  // Global status priority for flat sort
+  const STATUS_PRI: Record<string, number> = { eligible: 1, check: 2, ineligible: 3 }
 
-  const CardList = () => (
-    <div className="px-5 flex flex-col pt-5 pb-6" style={{ gap: 28 }}>
+  // Category display metadata
+  const CATEGORY_META = {
+    cash:    { icon: '💰', title: 'Cash Grants',        description: 'One-time payments that do not need to be repaid' },
+    schemes: { icon: '🏠', title: 'Government Schemes', description: 'Programs that help you buy without providing direct cash' },
+    tax:     { icon: '🧾', title: 'Tax & Duty Savings', description: 'Reductions in government taxes on your purchase' },
+  } as const
 
-      {/* ── Section 1: Cash Grants ── */}
-      {showCashSection && cashGrants.length > 0 && (
-        <div className="flex flex-col" style={{ gap: 20 }}>
-          <SectionHeader
-            icon="💰"
-            title="Cash Grants"
-            description="One-time payments that do not need to be repaid"
-          />
-          {cashGrants.map(eg => (
-            <GrantCard
-              key={eg.grant.id}
-              evaluatedGrant={eg}
-              hidden={!showIneligible && eg.status === 'ineligible'}
-              variant="grant"
-            />
-          ))}
-        </div>
-      )}
+  const CardList = () => {
+    type Category = 'cash' | 'schemes' | 'tax'
+    type FlatItem =
+      | { type: 'grant';     category: 'cash' | 'schemes'; status: string; eg: typeof cashGrants[0]; variant: 'grant' | 'scheme' }
+      | { type: 'stampDuty'; category: 'tax';              status: string }
 
-      {/* ── Section 2: Government Schemes ── */}
-      {showSchemesSection && schemes.length > 0 && (
-        <div className="flex flex-col" style={{ gap: 20 }}>
-          <SectionHeader
-            icon="🏠"
-            title="Government Schemes"
-            description="Programs that help you buy without providing direct cash"
-          />
-          {schemes.map(eg => (
-            <GrantCard
-              key={eg.grant.id}
-              evaluatedGrant={eg}
-              hidden={!showIneligible && eg.status === 'ineligible'}
-              variant="scheme"
-            />
-          ))}
-        </div>
-      )}
+    // Flatten all items across all categories and sort globally by status
+    const flatItems: FlatItem[] = ([
+      ...cashGrants.map(eg  => ({ type: 'grant'     as const, category: 'cash'    as const, status: eg.status, eg, variant: 'grant'  as const })),
+      ...schemes.map(eg     => ({ type: 'grant'     as const, category: 'schemes' as const, status: eg.status, eg, variant: 'scheme' as const })),
+      ...(report.stampDuty  ? [{ type: 'stampDuty' as const, category: 'tax'     as const, status: report.stampDuty.isEligible ? 'eligible' : 'ineligible' }] : []),
+    ] as FlatItem[]).sort((a, b) => (STATUS_PRI[a.status] ?? 3) - (STATUS_PRI[b.status] ?? 3))
 
-      {/* ── Section 3: Tax & Duty Savings ── */}
-      {showTaxSection && report.stampDuty && (
-        <div className="flex flex-col" style={{ gap: 20 }}>
-          <SectionHeader
-            icon="🧾"
-            title="Tax & Duty Savings"
-            description="Reductions in government taxes on your purchase"
-          />
-          <StampDutyCard
-            result={report.stampDuty}
-            state={step1.state || 'VIC'}
-            hidden={!showIneligible && !report.stampDuty.isEligible}
-          />
-        </div>
-      )}
-    </div>
-  )
+    // Group consecutive items with the same (status, category) into blocks
+    type Block = { status: string; category: Category; items: FlatItem[] }
+    const blocks: Block[] = []
+    for (const item of flatItems) {
+      const last = blocks[blocks.length - 1]
+      if (last && last.status === item.status && last.category === item.category) {
+        last.items.push(item)
+      } else {
+        blocks.push({ status: item.status, category: item.category as Category, items: [item] })
+      }
+    }
+
+    // When "hide ineligible" toggle is OFF, drop ineligible blocks entirely
+    const visibleBlocks = showIneligible ? blocks : blocks.filter(b => b.status !== 'ineligible')
+
+    return (
+      <div className="px-5 flex flex-col pt-5 pb-6" style={{ gap: 28 }}>
+        {visibleBlocks.map(block => {
+          const meta = CATEGORY_META[block.category]
+          return (
+            <div key={`${block.status}-${block.category}`} className="flex flex-col" style={{ gap: 20 }}>
+              <SectionHeader icon={meta.icon} title={meta.title} description={meta.description} />
+              {block.items.map(item => {
+                if (item.type === 'grant') return (
+                  <GrantCard
+                    key={item.eg.grant.id}
+                    evaluatedGrant={item.eg}
+                    hidden={!showIneligible && item.eg.status === 'ineligible'}
+                    variant={item.variant}
+                  />
+                )
+                return (
+                  <StampDutyCard
+                    key="stamp-duty"
+                    result={report.stampDuty!}
+                    state={step1.state || 'VIC'}
+                    hidden={!showIneligible && !report.stampDuty!.isEligible}
+                  />
+                )
+              })}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#FAFAFA' }}>
+    <div className="min-h-screen flex flex-col bg-[#FAFAFA] dark:bg-background">
       <Navbar />
 
       <main className="w-full pt-14 lg:pt-14.5 pb-16">
 
         {/* ── Mobile layout ── */}
         <div className="lg:hidden">
-          <div className="bg-white">
+          <div className="bg-white dark:bg-card">
             <TotalSavingsHero
               cashGrantsTotal={cashGrantsTotal}
               taxSavingsTotal={taxSavingsTotal}
@@ -185,7 +198,7 @@ export default function GrantsResultsPage() {
           <div className="grid gap-8" style={{ gridTemplateColumns: '1fr 320px', alignItems: 'start' }}>
 
             {/* Left column */}
-            <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)' }}>
+            <div className="bg-white dark:bg-card rounded-2xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)' }}>
               <TotalSavingsHero
                 cashGrantsTotal={cashGrantsTotal}
                 taxSavingsTotal={taxSavingsTotal}
@@ -201,19 +214,19 @@ export default function GrantsResultsPage() {
             {/* Right column — ONE unified card */}
             <div style={{ position: 'sticky', top: 80 }}>
               <div
-                className="bg-white rounded-2xl"
+                className="bg-white dark:bg-card rounded-2xl"
                 style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.08)', overflow: 'hidden' }}
               >
                 {/* Summary section */}
                 <div className="px-6 pt-6 pb-5">
-                  <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.6875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#BBBBBB', marginBottom: 20 }}>
+                  <p className="text-[#BBBBBB] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.6875rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 20 }}>
                     Your summary
                   </p>
 
                   <div className="flex flex-col" style={{ gap: 18 }}>
                     {/* Cash Grants */}
                     <div className="flex justify-between items-baseline">
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>💰 Cash Grants</span>
+                      <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>💰 Cash Grants</span>
                       <span style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.0625rem', color: cashGrantsTotal > 0 ? '#16A34A' : '#CCCCCC' }}>
                         {cashGrantsTotal > 0 ? `$${cashGrantsTotal.toLocaleString('en-AU')}` : '—'}
                       </span>
@@ -221,24 +234,24 @@ export default function GrantsResultsPage() {
 
                     {/* Tax savings */}
                     <div className="flex justify-between items-baseline">
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>🧾 Tax & Duty Savings</span>
-                      <span style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.0625rem', color: taxSavingsTotal > 0 ? '#111111' : '#CCCCCC' }}>
+                      <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>🧾 Tax & Duty Savings</span>
+                      <span className={taxSavingsTotal > 0 ? 'text-[#111111] dark:text-foreground' : 'text-[#CCCCCC] dark:text-muted-foreground/30'} style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.0625rem' }}>
                         {taxSavingsTotal > 0 ? `$${taxSavingsTotal.toLocaleString('en-AU')}` : '—'}
                       </span>
                     </div>
 
                     {/* Eligible schemes */}
                     <div className="flex justify-between items-baseline">
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>🏠 Eligible Schemes</span>
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem', color: eligibleSchemesCount > 0 ? '#16A34A' : '#CCCCCC' }}>
+                      <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>🏠 Eligible Schemes</span>
+                      <span className={eligibleSchemesCount > 0 ? 'text-[#16A34A]' : 'text-[#CCCCCC] dark:text-muted-foreground/30'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
                         {eligibleSchemesCount > 0 ? eligibleSchemesCount : '—'}
                       </span>
                     </div>
 
                     {/* Property target — muted, clearly secondary */}
                     <div className="flex justify-between items-center pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#BBBBBB' }}>Property target</span>
-                      <span style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: '0.8125rem', color: '#BBBBBB' }}>
+                      <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>Property target</span>
+                      <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: '0.8125rem' }}>
                         ${step3.targetPropertyPrice.toLocaleString('en-AU')}
                       </span>
                     </div>
