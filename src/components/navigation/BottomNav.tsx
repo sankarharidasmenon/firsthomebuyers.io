@@ -9,10 +9,12 @@ import { Home, BookmarkCheck, Megaphone, Sparkles, BookOpen, UserCircle } from '
 const TABS = [
   { href: '/',             label: 'Home',       Icon: Home },
   { href: '/my-results',   label: 'My Results', Icon: BookmarkCheck },
+    { href: '/#ai-guidance', label: 'AI',         Icon: Sparkles },
   { href: '/articles',     label: 'Articles',   Icon: BookOpen },
+   { href: '/ads',          label: 'Ads', Icon: Megaphone },
   { href: '/profile',   label: 'My Profile', Icon: UserCircle },
-  { href: '/ads',          label: 'Rent Space', Icon: Megaphone },
-  { href: '/#ai-guidance', label: 'AI',         Icon: Sparkles },
+  // { href: '/ads',          label: 'Ads', Icon: Megaphone },
+  // { href: '/#ai-guidance', label: 'AI',         Icon: Sparkles },
 ] as const
 
 /* ─── Component ─────────────────────────────────────────────────────────── */
