@@ -21,14 +21,14 @@ export function SampleResultsCard() {
           position: 'absolute',
           top: -14,
           left: 24,
-          background: 'white',
-          border: '1px solid #EEEEEE',
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
           borderRadius: 9999,
           padding: '5px 12px',
           fontFamily: 'Inter, sans-serif',
           fontWeight: 500,
           fontSize: '0.75rem',
-          color: '#444444',
+          color: 'var(--secondary-foreground)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
           whiteSpace: 'nowrap',
           zIndex: 1,
@@ -40,8 +40,8 @@ export function SampleResultsCard() {
       {/* Card */}
       <div
         style={{
-          background: '#FFFFFF',
-          border: '1px solid rgba(0,0,0,0.04)',
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
           borderRadius: 24,
           boxShadow: '0 12px 40px rgba(0,0,0,0.06)',
           padding: 32,
@@ -57,16 +57,16 @@ export function SampleResultsCard() {
               fontWeight: 700,
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              color: '#888888',
+              color: 'var(--muted-foreground)',
             }}
           >
             SAMPLE RESULTS — FIRST HOME BUYER · VIC
           </p>
           <span
             style={{
-              background: '#F0FDF4',
-              color: '#16A34A',
-              border: '1px solid #BBF7D0',
+              background: 'var(--color-green-50)',
+              color: 'var(--color-green-600)',
+              border: '1px solid var(--color-green-200)',
               borderRadius: 9999,
               padding: '3px 10px',
               fontSize: '0.6875rem',
@@ -90,7 +90,7 @@ export function SampleResultsCard() {
               fontWeight: 600,
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
-              color: '#888888',
+              color: 'var(--muted-foreground)',
               marginBottom: 4,
             }}
           >
@@ -101,7 +101,7 @@ export function SampleResultsCard() {
               fontFamily: '"JetBrains Mono", monospace',
               fontWeight: 700,
               fontSize: '1.875rem',
-              color: '#111111',
+              color: 'var(--foreground)',
               letterSpacing: '-0.03em',
               lineHeight: 1,
             }}
@@ -112,7 +112,7 @@ export function SampleResultsCard() {
             style={{
               fontFamily: 'Inter, sans-serif',
               fontSize: '0.75rem',
-              color: '#888888',
+              color: 'var(--muted-foreground)',
               marginTop: 4,
             }}
           >
@@ -121,7 +121,7 @@ export function SampleResultsCard() {
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: 'rgba(0,0,0,0.04)', margin: '24px 0' }} />
+        <div style={{ height: 1, background: 'var(--border)', margin: '24px 0' }} />
 
         {/* Estimated savings */}
         <div style={{ marginBottom: 16 }}>
@@ -132,7 +132,7 @@ export function SampleResultsCard() {
               fontWeight: 600,
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
-              color: '#888888',
+              color: 'var(--muted-foreground)',
               marginBottom: 4,
             }}
           >
@@ -143,7 +143,7 @@ export function SampleResultsCard() {
               fontFamily: '"JetBrains Mono", monospace',
               fontWeight: 700,
               fontSize: '2.25rem',
-              color: '#111111',
+              color: 'var(--foreground)',
               letterSpacing: '-0.03em',
               lineHeight: 1,
             }}
@@ -154,7 +154,7 @@ export function SampleResultsCard() {
             style={{
               fontFamily: 'Inter, sans-serif',
               fontSize: '0.75rem',
-              color: '#888888',
+              color: 'var(--muted-foreground)',
               marginTop: 4,
             }}
           >
@@ -167,12 +167,12 @@ export function SampleResultsCard() {
           {GRANTS.map(g => (
             <div key={g.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ color: '#22C55E', fontSize: '0.8125rem', fontWeight: 700 }}>✓</span>
+                <span style={{ color: 'var(--color-green-500)', fontSize: '0.8125rem', fontWeight: 700 }}>✓</span>
                 <span
                   style={{
                     fontFamily: 'Inter, sans-serif',
                     fontSize: '0.8125rem',
-                    color: '#444444',
+                    color: 'var(--secondary-foreground)',
                   }}
                 >
                   {g.name}
@@ -182,7 +182,7 @@ export function SampleResultsCard() {
                 style={{
                   fontFamily: '"JetBrains Mono", monospace',
                   fontSize: '0.8125rem',
-                  color: '#16A34A',
+                  color: 'var(--color-green-600)',
                   fontWeight: 600,
                   whiteSpace: 'nowrap',
                   marginLeft: 8,
@@ -195,7 +195,7 @@ export function SampleResultsCard() {
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: 'rgba(0,0,0,0.04)', margin: '8px 0 24px' }} />
+        <div style={{ height: 1, background: 'var(--border)', margin: '8px 0 24px' }} />
 
         {/* Card CTA */}
         <button
@@ -205,8 +205,8 @@ export function SampleResultsCard() {
           style={{
             display: 'block',
             width: '100%',
-            background: '#111111',
-            color: '#F5E642',
+            background: 'var(--brand-dark-surface)',
+            color: 'var(--brand-yellow)',
             fontFamily: 'Inter, sans-serif',
             fontWeight: 600,
             fontSize: '0.875rem',
@@ -223,7 +223,7 @@ export function SampleResultsCard() {
           style={{
             fontFamily: 'Inter, sans-serif',
             fontSize: '0.75rem',
-            color: '#888888',
+            color: 'var(--muted-foreground)',
             textAlign: 'center',
             marginTop: 10,
           }}

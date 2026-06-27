@@ -18,23 +18,23 @@ const SIZES = {
 
 const VARIANT_CLASSES: Record<Variant, string> = {
   /* gradient is in VARIANT_STYLES below — keep just structural Tailwind here */
-  primary: 'text-[#111111] active:scale-[0.97] btn-shine',
-  secondary: 'bg-transparent border-2 border-[#111111] text-[#111111] hover:bg-[#F5F5F5] active:scale-[0.97]',
-  ghost: 'bg-transparent text-[#444444] hover:bg-[#F5F5F5] active:scale-[0.97]',
-  final: 'text-[#F5E642] active:scale-[0.97]',
+  primary: 'text-primary-foreground active:scale-[0.97] btn-shine',
+  secondary: 'bg-transparent border-2 border-foreground text-foreground hover:bg-accent active:scale-[0.97]',
+  ghost: 'bg-transparent text-secondary-foreground hover:bg-accent active:scale-[0.97]',
+  final: 'bg-foreground text-primary dark:bg-primary dark:text-fn-navy active:scale-[0.97]',
 }
 
 /* Inline styles for gradient variants — CSS classes can't express dynamic gradients reliably */
 const VARIANT_STYLES: Record<Variant, React.CSSProperties> = {
   primary: {
-    background: 'linear-gradient(135deg, #F5E642 0%, #EDD900 100%)',
+    background: 'linear-gradient(135deg, var(--brand-gradient-start) 0%, var(--brand-gradient-end) 100%)',
+    color: 'var(--brand-dark-surface)',
     boxShadow: '0 4px 16px rgba(245,230,66,0.50)',
     transition: 'transform 80ms, box-shadow 120ms, filter 120ms',
   },
   secondary: {},
   ghost: {},
   final: {
-    background: '#111111',
     boxShadow: '0 4px 16px rgba(17,17,17,0.25)',
   },
 }

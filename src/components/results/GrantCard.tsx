@@ -4,6 +4,13 @@ import React, { useState } from 'react'
 import { ChevronDown, Check, X, ExternalLink } from 'lucide-react'
 import type { EvaluatedGrant } from '@/lib/grantEligibility'
 
+// Human-readable benefit descriptions for scheme-type grants (not cash payments)
+const SCHEME_BENEFITS: Record<string, string> = {
+  fhss: 'Save through your super with tax advantages — up to $50k',
+  fhbg: 'Buy with as little as a 5% deposit — no LMI required',
+  'shared-equity': 'Government co-buys up to 40% of your home',
+}
+
 const STATUS_COLOURS: Record<string, string> = {
   eligible: '#22C55E',
   check: '#F59E0B',
@@ -25,11 +32,15 @@ const STATUS_LABELS: Record<string, string> = {
 interface GrantCardProps {
   evaluatedGrant: EvaluatedGrant
   hidden?: boolean
+  variant?: 'grant' | 'scheme'
 }
 
-export function GrantCard({ evaluatedGrant, hidden = false }: GrantCardProps) {
+export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }: GrantCardProps) {
   const [open, setOpen] = useState(false)
   const { grant, status, value, criteria, reason, alternative } = evaluatedGrant
+
+  const isScheme = variant === 'scheme'
+  const schemeBenefit = SCHEME_BENEFITS[grant.id]
 
   const valueDisplay =
     typeof value === 'number'
@@ -38,14 +49,19 @@ export function GrantCard({ evaluatedGrant, hidden = false }: GrantCardProps) {
 
   return (
     <div
-      className={`relative rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] bg-white transition-opacity duration-200 ${hidden ? 'hidden' : ''}`}
+      className={`relative bg-white dark:bg-card dark:border dark:border-border transition-all duration-200 ${hidden ? 'hidden' : ''}`}
       style={{
-        borderLeft: `4px solid ${STATUS_COLOURS[status]}`,
+        borderLeft: `3px solid ${STATUS_COLOURS[status]}`,
+        borderRadius: 14,
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05)',
+        border: `1px solid rgba(0,0,0,0.06)`,
+        borderLeftWidth: 3,
+        borderLeftColor: STATUS_COLOURS[status],
       }}
     >
-      {/* Status badge at top left corner */}
+      {/* Status badge */}
       <span
-        className="absolute -top-3.5 left-4 sm:left-6 rounded-full px-3.5 py-1 text-[0.7rem] sm:text-[0.75rem] font-semibold whitespace-nowrap z-10"
+        className="absolute -top-3.5 left-5 rounded-full px-3 py-1 text-[0.6875rem] font-semibold whitespace-nowrap z-10"
         style={{
           fontFamily: 'Inter, sans-serif',
           background: STATUS_BADGE_STYLES[status].background,
@@ -61,32 +77,49 @@ export function GrantCard({ evaluatedGrant, hidden = false }: GrantCardProps) {
         type="button"
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
-        className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 pt-6 sm:p-5 text-left cursor-pointer bg-none border-none"
+        className="w-full flex items-start justify-between gap-3 px-5 pt-7 pb-4 text-left cursor-pointer bg-none border-none"
       >
-        {/* Name */}
-        <span
-          className="flex-1 text-[1rem] sm:text-[0.9375rem] font-semibold text-[#111111] leading-snug pr-4"
-          style={{ fontFamily: 'Inter, sans-serif' }}
-        >
-          {grant.name}
-        </span>
-
-        <div className="flex items-center justify-between w-full sm:w-auto mt-2 sm:mt-0 gap-4">
-          {/* Value */}
+        {/* Name + optional benefit line for schemes */}
+        <div className="flex-1 pr-4">
           <span
-            className="shrink-0 text-[1.125rem] sm:text-[0.9375rem] font-bold"
-            style={{
-              fontFamily: '"JetBrains Mono", monospace',
-              color: status === 'eligible' ? '#16A34A' : '#9CA3AF',
-            }}
+            className="block text-[1rem] sm:text-[0.9375rem] font-semibold text-[#111111] dark:text-foreground leading-snug"
+            style={{ fontFamily: 'Inter, sans-serif' }}
           >
-            {valueDisplay}
+            {grant.name}
           </span>
+          {isScheme && schemeBenefit && (
+            <span
+              className="block mt-1"
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '0.8125rem',
+                color: status === 'eligible' ? '#16A34A' : '#888888',
+                lineHeight: 1.4,
+              }}
+              // In dark mode: eligible stays green, ineligible gets lighter
+            >
+              {status === 'eligible' ? '✓ ' : ''}{schemeBenefit}
+            </span>
+          )}
+        </div>
 
-          {/* Chevron */}
+        {/* Value (only for cash grants) + chevron */}
+        <div className="flex items-center gap-3 shrink-0 mt-0.5">
+          {!isScheme && (
+            <span
+              style={{
+                fontFamily: '"JetBrains Mono", monospace',
+                fontWeight: 700,
+                fontSize: '0.9375rem',
+                color: status === 'eligible' ? '#16A34A' : '#9CA3AF',
+              }}
+            >
+              {valueDisplay}
+            </span>
+          )}
           <ChevronDown
             size={20}
-            className="shrink-0 text-[#888888] transition-transform duration-200"
+            className="shrink-0 text-grey-mid transition-transform duration-200"
             style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
           />
         </div>
@@ -94,14 +127,12 @@ export function GrantCard({ evaluatedGrant, hidden = false }: GrantCardProps) {
 
       {/* Expanded content */}
       {open && (
-        <div className="px-4 pb-4 border-t border-[#F0F0F0]">
-          <p
-            style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#444444', marginTop: 12, marginBottom: 12 }}
-          >
+        <div className="px-5 pb-5 border-t border-grey-light" style={{ borderTopColor: 'rgba(0,0,0,0.05)' }}>
+          <p className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', marginTop: 12, marginBottom: 12 }}>
             {grant.description}
           </p>
 
-          {/* Criteria list */}
+          {/* Criteria */}
           <ul className="flex flex-col gap-2 mb-3">
             {criteria.map((c, i) => (
               <li key={i} className="flex items-start gap-2">
@@ -109,9 +140,7 @@ export function GrantCard({ evaluatedGrant, hidden = false }: GrantCardProps) {
                   ? <Check size={14} className="text-[#22C55E] mt-0.5 shrink-0" />
                   : <X size={14} className="text-[#9CA3AF] mt-0.5 shrink-0" />
                 }
-                <span
-                  style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#444444' }}
-                >
+                <span className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>
                   {c.text}
                 </span>
               </li>
@@ -120,10 +149,7 @@ export function GrantCard({ evaluatedGrant, hidden = false }: GrantCardProps) {
 
           {/* Ineligible reason */}
           {reason && (
-            <div
-              className="rounded-[8px] p-3 mb-3"
-              style={{ background: '#FFFBEB' }}
-            >
+            <div className="rounded-sm p-3 mb-3" style={{ background: '#FFFBEB' }}>
               <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#92400E' }}>
                 <strong>Why:</strong> {reason}
               </p>
@@ -132,10 +158,7 @@ export function GrantCard({ evaluatedGrant, hidden = false }: GrantCardProps) {
 
           {/* Alternative suggestion */}
           {alternative && (
-            <div
-              className="rounded-[8px] p-3 mb-3"
-              style={{ background: '#FBF6A8' }}
-            >
+            <div className="rounded-sm p-3 mb-3" style={{ background: '#FBF6A8' }}>
               <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#111111' }}>
                 💡 {alternative}
               </p>
@@ -147,7 +170,7 @@ export function GrantCard({ evaluatedGrant, hidden = false }: GrantCardProps) {
             href={grant.officialUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[0.8125rem] text-[#444444] underline hover:text-[#111111]"
+            className="inline-flex items-center gap-1 text-[0.8125rem] text-grey-dark dark:text-muted-foreground underline hover:text-[#111111] dark:hover:text-foreground"
             style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500 }}
           >
             Verify on the official government website

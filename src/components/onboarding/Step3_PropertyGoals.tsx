@@ -33,7 +33,7 @@ export function Step3_PropertyGoals({ data, onChange, onNext, onBack, errors }: 
   return (
     <div className="flex flex-col gap-6 pt-4">
       <h2
-        style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#111111' }}
+        style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}
       >
         Now, let&apos;s talk savings and goals
       </h2>
@@ -68,16 +68,16 @@ export function Step3_PropertyGoals({ data, onChange, onNext, onBack, errors }: 
         <button
           type="button"
           onClick={() => setUnsureOpen(v => !v)}
-          style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#444444', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'none', textAlign: 'left', padding: '2px 0' }}
+          style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--secondary-foreground)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'none', textAlign: 'left', padding: '2px 0' }}
         >
           ⓘ What if I&apos;m unsure?
         </button>
         {unsureOpen && (
           <div
             className="p-3 rounded-[8px]"
-            style={{ background: '#F9F9F9', border: '1px solid #EEEEEE' }}
+            style={{ background: 'var(--secondary)', border: '1px solid var(--border)' }}
           >
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#444444' }}>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--secondary-foreground)' }}>
               Check realestate.com.au or Domain for recent sales in your target suburb.
             </p>
           </div>
@@ -86,8 +86,8 @@ export function Step3_PropertyGoals({ data, onChange, onNext, onBack, errors }: 
 
       {/* Field 3 — Property Type */}
       <div className="flex flex-col gap-2">
-        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: '#222222' }}>
-          What type of property are you looking at?<span className="text-[#888888] ml-0.5">*</span>
+        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
+          What type of property are you looking at?<span className="text-muted-foreground ml-0.5">*</span>
         </label>
         <BadgeChipGroup
           options={PROPERTY_TYPES}
@@ -97,7 +97,7 @@ export function Step3_PropertyGoals({ data, onChange, onNext, onBack, errors }: 
           chipClassName="w-full sm:w-auto"
         />
         {errors.propertyType && (
-          <p role="alert" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#E53E3E' }}>
+          <p role="alert" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--destructive)' }}>
             {errors.propertyType}
           </p>
         )}
@@ -105,8 +105,8 @@ export function Step3_PropertyGoals({ data, onChange, onNext, onBack, errors }: 
 
       {/* Field 4 — First home buyer (shown as 4th but counts as 3rd visible if unsure collapsed) */}
       <div className="flex flex-col gap-2">
-        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: '#222222' }}>
-          Have you or your partner ever owned property in Australia?<span className="text-[#888888] ml-0.5">*</span>
+        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
+          Have you or your partner ever owned property in Australia?<span className="text-muted-foreground ml-0.5">*</span>
         </label>
         <TapCardGroup
           options={FHB_OPTIONS}

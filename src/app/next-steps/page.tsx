@@ -9,7 +9,7 @@ import { DUMMY_USER } from '@/lib/dummyData'
 import {
   Phone, MessageSquare, CalendarDays, Home,
   Bookmark, Share2, FileDown, ArrowRight,
-  CheckCircle2, Check, Loader2,
+  CheckCircle2, Check, Loader2, Mail
 } from 'lucide-react'
 
 type ContactMode = null | 'callback' | 'message' | 'book'
@@ -18,12 +18,12 @@ type SaveState = 'idle' | 'saving' | 'saved'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
-// Card: layered shadow + inset highlight creates Apple-like elevation
+// Card: layered shadow creates Apple-like elevation
 const card: React.CSSProperties = {
-  background: '#FFFFFF',
-  border: '1px solid rgba(0,0,0,0.07)',
+  background: 'var(--card)',
+  border: '1px solid var(--border)',
   borderRadius: 16,
-  boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.07)',
 }
 
 const microLabel: React.CSSProperties = {
@@ -32,7 +32,7 @@ const microLabel: React.CSSProperties = {
   fontSize: '0.6875rem',
   letterSpacing: '0.05em',
   textTransform: 'uppercase',
-  color: '#666666',
+  color: 'var(--muted-foreground)',
   marginBottom: 4,
 }
 
@@ -110,9 +110,9 @@ export default function NextStepsPage() {
   const HeroHeading = () => (
     <div>
       {/* Compact badge */}
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 9999, padding: '4px 10px', marginBottom: 10 }}>
-        <CheckCircle2 size={11} color="#16A34A" />
-        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.625rem', letterSpacing: '0.04em', color: '#16A34A' }}>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 9999, padding: '4px 10px', marginBottom: 10 }}>
+        <CheckCircle2 size={11} color="var(--success-foreground)" />
+        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.625rem', letterSpacing: '0.04em', color: 'var(--success-foreground)' }}>
           Your results are ready
         </span>
       </div>
@@ -121,7 +121,7 @@ export default function NextStepsPage() {
         fontFamily: '"Plus Jakarta Sans", sans-serif',
         fontWeight: 800,
         fontSize: 'clamp(1.625rem, 4vw, 2rem)',
-        color: '#111111',
+        color: 'var(--foreground)',
         lineHeight: 1.1,
         letterSpacing: '-0.015em',
         marginBottom: 8,
@@ -133,7 +133,7 @@ export default function NextStepsPage() {
         fontFamily: 'Inter, sans-serif',
         fontWeight: 400,
         fontSize: '0.9375rem',
-        color: '#666666',
+        color: 'var(--muted-foreground)',
         lineHeight: 1.6,
         maxWidth: 460,
         margin: 0,
@@ -150,38 +150,38 @@ export default function NextStepsPage() {
   const MobilePositionCard = () => (
     <div className="lg:hidden" style={{ ...card, overflow: 'hidden' }}>
       {/* 1. Homes You Could Afford */}
-      <div className="p-5 border-b border-black/5 bg-white">
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#111111', marginBottom: 4 }}>
+      <div className="p-5 border-b border-border bg-card">
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
           🏡 Homes You Could Afford
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: hasBorrowingPower ? 'clamp(1.5rem, 5vw, 1.875rem)' : '1.25rem', color: '#111111', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: hasBorrowingPower ? 'clamp(1.5rem, 5vw, 1.875rem)' : '1.25rem', color: 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {hasBorrowingPower ? `$${(minPrice / 1000).toFixed(0)}k – $${(maxPrice / 1000).toFixed(0)}k` : 'Building capacity...'}
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
           Based on your borrowing power and savings
         </p>
       </div>
       {/* 2. Government Support */}
-      <div className="p-5 border-b border-black/5" style={{ background: '#FAFAF8' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#111111', marginBottom: 4 }}>
+      <div className="p-5 border-b border-border" style={{ background: 'var(--surface)' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
           💰 Government Support
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: '#16A34A', lineHeight: 1.1, marginBottom: 4 }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: 'var(--success-foreground)', lineHeight: 1.1, marginBottom: 4 }}>
           ${grantsTotal.toLocaleString('en-AU')}
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
           Grants and concessions available
         </p>
       </div>
       {/* 3. Deposit Status */}
-      <div className="p-5" style={{ background: '#FAFAF8' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#111111', marginBottom: 4 }}>
+      <div className="p-5" style={{ background: 'var(--surface)' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
           {depositGap > 0 ? '⚠️ Deposit Status' : '✅ Deposit Status'}
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: depositGap > 0 ? '#F59E0B' : '#111111', lineHeight: 1.1, marginBottom: 4 }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: depositGap > 0 ? '#F59E0B' : 'var(--foreground)', lineHeight: 1.1, marginBottom: 4 }}>
           {depositGap > 0 ? `$${(depositGap/1000).toFixed(0)}k short` : "You're covered"}
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
           {depositGap > 0 ? 'How much more you need to reach 20%' : 'No additional deposit required'}
         </p>
       </div>
@@ -192,38 +192,38 @@ export default function NextStepsPage() {
   const DesktopPositionCards = () => (
     <div className="hidden lg:grid grid-cols-3 gap-6">
       {/* 1. Homes You Could Afford */}
-      <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'white' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#111111', marginBottom: 8 }}>
+      <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'var(--card)' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
           🏡 Homes You Could Afford
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: hasBorrowingPower ? '1.875rem' : '1.25rem', color: '#111111', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: hasBorrowingPower ? '1.875rem' : '1.25rem', color: 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {hasBorrowingPower ? `$${(minPrice / 1000).toFixed(0)}k – $${(maxPrice / 1000).toFixed(0)}k` : 'Building capacity...'}
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
           Based on your borrowing power and savings
         </p>
       </div>
       {/* 2. Government Support */}
-      <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'white' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#111111', marginBottom: 8 }}>
+      <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'var(--card)' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
           💰 Government Support
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.875rem', color: '#16A34A', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.875rem', color: 'var(--success-foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           ${grantsTotal.toLocaleString('en-AU')}
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
           Grants and concessions available
         </p>
       </div>
       {/* 3. Deposit Status */}
-      <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'white' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#111111', marginBottom: 8 }}>
+      <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'var(--card)' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
           {depositGap > 0 ? '⚠️ Deposit Status' : '✅ Deposit Status'}
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.875rem', color: depositGap > 0 ? '#F59E0B' : '#111111', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.875rem', color: depositGap > 0 ? '#F59E0B' : 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {depositGap > 0 ? `$${(depositGap/1000).toFixed(0)}k short` : "You're covered"}
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#666666' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
           {depositGap > 0 ? 'How much more you need to reach 20%' : 'No additional deposit required'}
         </p>
       </div>
@@ -235,17 +235,17 @@ export default function NextStepsPage() {
     if (depositGap <= 0) return null
 
     return (
-      <div style={{ ...card, padding: 24, background: '#FFFBF0', border: '1px solid #FDE68A' }}>
-        <h3 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.125rem', color: '#92400E', marginBottom: 12, marginTop: 0 }}>
+      <div style={{ ...card, padding: 24, background: 'var(--amber-bg, rgba(245, 158, 11, 0.1))', border: '1px solid var(--amber-border, rgba(245, 158, 11, 0.3))' }}>
+        <h3 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--warning-foreground)', marginBottom: 12, marginTop: 0 }}>
           🚧 Bridging your deposit gap
         </h3>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: '#451A03', lineHeight: 1.6, marginBottom: 16, marginTop: 0 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: 'var(--foreground)', lineHeight: 1.6, marginBottom: 16, marginTop: 0 }}>
           You're currently <strong>${(depositGap / 1000).toFixed(0)}k short</strong> of the ideal 20% deposit. This is completely normal—the vast majority of first home buyers purchase with less than a 20% deposit. 
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: '#451A03', lineHeight: 1.6, marginBottom: 16, marginTop: 0 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: 'var(--foreground)', lineHeight: 1.6, marginBottom: 16, marginTop: 0 }}>
           A 20% deposit is simply the threshold to avoid Lenders Mortgage Insurance (LMI). It is not a hard limit on buying a home. 
         </p>
-        <ul style={{ listStyleType: 'disc', paddingLeft: 20, margin: 0, fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: '#78350F', lineHeight: 1.6 }}>
+        <ul style={{ listStyleType: 'disc', paddingLeft: 20, margin: 0, fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: 'var(--foreground)', lineHeight: 1.6 }}>
           <li style={{ marginBottom: 8 }}><strong>Explore LMI waivers:</strong> Certain professions and government guarantee schemes can waive the 20% requirement entirely.</li>
           <li style={{ marginBottom: 8 }}><strong>Adjust your budget:</strong> Looking at properties slightly below your maximum capacity can completely close this gap.</li>
           <li><strong>Speak to an expert:</strong> A broker can crunch the exact numbers for your specific situation and find lenders who are friendly to smaller deposits.</li>
@@ -254,58 +254,26 @@ export default function NextStepsPage() {
     )
   }
 
-  // ── 3. PROPERTY CARD ─────────────────────────────────────────────────────────
-  const PropertyCard = () => (
-    <div style={{ ...card, padding: '24px 20px' }}>
-      <div className="flex flex-col items-center text-center gap-3">
-        <div style={{ width: 48, height: 48, borderRadius: 12, background: '#F8F8F6', border: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 24 }}>🏡</span>
-        </div>
-        
-        <div>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem', color: '#111111', marginBottom: 6 }}>
-            Browse Homes In Your Budget
-          </p>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#777777', lineHeight: 1.4 }}>
-            Homes in {stateAbbr} between<br/>
-            <strong style={{ color: '#111111', fontFamily: '"JetBrains Mono", monospace' }}>${(minPrice / 1000).toFixed(0)}k – ${(maxPrice / 1000).toFixed(0)}k</strong>
-          </p>
-        </div>
-
-        <a
-          href={reaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full mt-2 hover:opacity-90 active:scale-[0.98] transition-all duration-150"
-          style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#FFFFFF', background: '#111111', borderRadius: 12, padding: '14px 20px', textDecoration: 'none' }}
-        >
-          Browse Available Homes
-          <ArrowRight size={15} />
-        </a>
-      </div>
-    </div>
-  )
-
   // ── 4. BROKER CARD ───────────────────────────────────────────────────────────
   const BrokerCard = () => (
     <div style={{ ...card, padding: 24 }}>
-      <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#111111', marginBottom: 6 }}>
+      <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 6 }}>
         Talk to a home loan expert
       </p>
-      <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '0.9375rem', color: '#666666', lineHeight: 1.6, marginBottom: 24 }}>
+      <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '0.9375rem', color: 'var(--muted-foreground)', lineHeight: 1.6, marginBottom: 24 }}>
         Sarah can help explain your options and connect you with lenders that match your situation.
       </p>
 
       {/* Broker profile */}
       <div className="flex items-center gap-4 mb-6">
-        <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#F5E642', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: '#111111' }}>
+        <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
           SC
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '1rem', color: '#111111', marginBottom: 2 }}>Sarah Chen</p>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#888888', lineHeight: 1.4 }}>MFAA Accredited · 9 years experience</p>
+          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '1rem', color: 'var(--foreground)', marginBottom: 2 }}>Sarah Chen</p>
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--muted-foreground)', lineHeight: 1.4 }}>MFAA Accredited · 9 years experience</p>
         </div>
-        <span style={{ borderRadius: 9999, padding: '4px 10px', border: '1px solid rgba(0,0,0,0.08)', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.625rem', letterSpacing: '0.04em', color: '#888888', whiteSpace: 'nowrap' }}>
+        <span style={{ borderRadius: 9999, padding: '4px 10px', border: '1px solid var(--border)', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.625rem', letterSpacing: '0.04em', color: 'var(--muted-foreground)', whiteSpace: 'nowrap' }}>
           No obligation
         </span>
       </div>
@@ -318,7 +286,7 @@ export default function NextStepsPage() {
               type="button"
               onClick={() => setContactMode('book')}
               className="hover:opacity-90 active:scale-[0.98] transition-all duration-150"
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#F5E642', color: '#111111', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem', border: 'none', borderRadius: 12, padding: '16px 20px', cursor: 'pointer', marginBottom: 11 }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'var(--primary)', color: 'var(--foreground)', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem', border: 'none', borderRadius: 12, padding: '16px 20px', cursor: 'pointer', marginBottom: 11 }}
             >
               <CalendarDays size={18} style={{ flexShrink: 0 }} />
               <span className="sm:hidden">Talk to Sarah</span>
@@ -327,10 +295,10 @@ export default function NextStepsPage() {
           )}
           {contactMode && (
             <div className="flex justify-between items-center mb-3">
-              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem', color: '#111111' }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem', color: 'var(--foreground)' }}>
                 {contactMode === 'book' ? 'Book a time' : contactMode === 'callback' ? 'Request a callback' : 'Send a message'}
               </span>
-              <button type="button" onClick={() => setContactMode(null)} style={{ background: 'none', border: 'none', color: '#888888', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Cancel</button>
+              <button type="button" onClick={() => setContactMode(null)} style={{ background: 'none', border: 'none', color: 'var(--muted-foreground)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Cancel</button>
             </div>
           )}
 
@@ -343,12 +311,12 @@ export default function NextStepsPage() {
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 required
-                style={{ height: 46, border: '1.5px solid #DDDDDD', borderRadius: 8, padding: '0 14px', fontFamily: 'Inter, sans-serif', fontSize: 15, outline: 'none', width: '100%', color: '#111111', boxSizing: 'border-box' }}
+                style={{ height: 46, border: '1.5px solid #DDDDDD', borderRadius: 8, padding: '0 14px', fontFamily: 'Inter, sans-serif', fontSize: 15, outline: 'none', width: '100%', color: 'var(--foreground)', boxSizing: 'border-box' }}
               />
               <div className="flex gap-2">
                 {(['morning', 'afternoon', 'evening'] as ContactTime[]).map(t => (
                   <button key={t} type="button" onClick={() => setPreferredTime(t)}
-                    style={{ flex: 1, fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', padding: '8px 4px', borderRadius: 8, border: '1.5px solid', borderColor: preferredTime === t ? '#111111' : '#EEEEEE', background: preferredTime === t ? '#111111' : 'white', color: preferredTime === t ? 'white' : '#666666', cursor: 'pointer', fontWeight: preferredTime === t ? 600 : 400 }}
+                    style={{ flex: 1, fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', padding: '8px 4px', borderRadius: 8, border: '1.5px solid', borderColor: preferredTime === t ? 'var(--foreground)' : 'var(--border)', background: preferredTime === t ? 'var(--foreground)' : 'var(--card)', color: preferredTime === t ? 'var(--background)' : 'var(--muted-foreground)', cursor: 'pointer', fontWeight: preferredTime === t ? 600 : 400 }}
                   >
                     {t.charAt(0).toUpperCase() + t.slice(1)}
                   </button>
@@ -357,8 +325,8 @@ export default function NextStepsPage() {
               <button type="submit"
                 style={{
                   background: 'linear-gradient(180deg, #FEF06F 0%, #F5E642 100%)',
-                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 4px rgba(0,0,0,0.05)',
-                  color: '#111111',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                  color: 'var(--foreground)',
                   fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.875rem',
                   border: 'none', borderRadius: 8, padding: 13, cursor: 'pointer', width: '100%',
                   textShadow: '0 1px 0 rgba(255,255,255,0.3)'
@@ -381,8 +349,8 @@ export default function NextStepsPage() {
                 return (
                   <button key={label} type="button"
                     onClick={() => setContactMode(mode)}
-                    className="flex items-center gap-1 hover:text-black transition-colors duration-150"
-                    style={{ background: 'none', border: 'none', fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#888888', cursor: 'pointer', padding: 0 }}
+                    className="flex items-center gap-1 hover:text-foreground transition-colors duration-150"
+                    style={{ background: 'none', border: 'none', fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--muted-foreground)', cursor: 'pointer', padding: 0 }}
                   >
                     {icon}{label}
                   </button>
@@ -395,13 +363,13 @@ export default function NextStepsPage() {
           {(contactMode === 'callback' || contactMode === 'message') && (
             <form onSubmit={handleBrokerSubmit} className="mt-4 flex flex-col gap-3">
               <input type="tel" placeholder="Your phone number" value={phone} onChange={e => setPhone(e.target.value)} required
-                style={{ height: 46, border: '1.5px solid #DDDDDD', borderRadius: 8, padding: '0 14px', fontFamily: 'Inter, sans-serif', fontSize: 15, outline: 'none', width: '100%', color: '#111111', boxSizing: 'border-box' }}
+                style={{ height: 46, border: '1.5px solid #DDDDDD', borderRadius: 8, padding: '0 14px', fontFamily: 'Inter, sans-serif', fontSize: 15, outline: 'none', width: '100%', color: 'var(--foreground)', boxSizing: 'border-box' }}
               />
               {contactMode === 'callback' && (
                 <div className="flex gap-2">
                   {(['morning', 'afternoon', 'evening'] as ContactTime[]).map(t => (
                     <button key={t} type="button" onClick={() => setPreferredTime(t)}
-                      style={{ flex: 1, fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', padding: '8px 4px', borderRadius: 8, border: '1.5px solid', borderColor: preferredTime === t ? '#111111' : '#EEEEEE', background: preferredTime === t ? '#111111' : 'white', color: preferredTime === t ? 'white' : '#666666', cursor: 'pointer', fontWeight: preferredTime === t ? 600 : 400 }}
+                      style={{ flex: 1, fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', padding: '8px 4px', borderRadius: 8, border: '1.5px solid', borderColor: preferredTime === t ? 'var(--foreground)' : 'var(--border)', background: preferredTime === t ? 'var(--foreground)' : 'var(--card)', color: preferredTime === t ? 'var(--background)' : 'var(--muted-foreground)', cursor: 'pointer', fontWeight: preferredTime === t ? 600 : 400 }}
                     >
                       {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
@@ -411,8 +379,8 @@ export default function NextStepsPage() {
               <button type="submit"
                 style={{
                   background: 'linear-gradient(180deg, #FEF06F 0%, #F5E642 100%)',
-                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 4px rgba(0,0,0,0.05)',
-                  color: '#111111',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                  color: 'var(--foreground)',
                   fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.875rem',
                   border: 'none', borderRadius: 8, padding: 13, cursor: 'pointer', width: '100%',
                   textShadow: '0 1px 0 rgba(255,255,255,0.3)'
@@ -423,14 +391,14 @@ export default function NextStepsPage() {
             </form>
           )}
 
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.625rem', color: '#CCCCCC', marginTop: 12, textAlign: 'center' }}>
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.625rem', color: 'var(--muted-foreground)', marginTop: 12, textAlign: 'center' }}>
             Your data is only shared with Sarah when you submit a request.
           </p>
         </>
       ) : (
-        <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <CheckCircle2 size={17} color="#16A34A" style={{ flexShrink: 0 }} />
-          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#16A34A', margin: 0 }}>
+        <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <CheckCircle2 size={17} color="var(--success-foreground)" style={{ flexShrink: 0 }} />
+          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--success-foreground)', margin: 0 }}>
             Request sent! Sarah will be in touch within 1 business day.
           </p>
         </div>
@@ -438,50 +406,223 @@ export default function NextStepsPage() {
     </div>
   )
 
-  // ── 5. ACTIONS ROW ───────────────────────────────────────────────────────────
-  const saveIcon = saveState === 'saving' ? <Loader2 size={16} className="animate-spin" /> : saveState === 'saved' ? <Check size={16} /> : <Bookmark size={16} />
-  const saveLabel = saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved!' : 'Save Results'
+  // ── ACTION CENTER CARD (MODIFIED) ────────────────────────────────────────────
+  const ActionCenterCard = () => {
+    const saveIcon = saveState === 'saving' ? <Loader2 size={16} className="animate-spin" /> : saveState === 'saved' ? <Check size={16} /> : <Bookmark size={16} />
+    const saveLabel = saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved!' : 'Save Results'
 
-  const ActionsCard = () => (
-    <div style={{ ...card, padding: 24 }}>
-      <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: '#111111', marginBottom: 16 }}>
-        Save & Share
-      </p>
-      <div className="flex flex-col gap-3">
-        {[
-          { icon: saveIcon,               label: saveLabel,                    action: handleSave,    active: saveState === 'saved', disabled: saveState === 'saving', primary: true },
-          { icon: <Share2 size={16} />,   label: linkCopied ? 'Copied!' : 'Share Link', action: handleCopyLink, active: linkCopied,         disabled: false, primary: false },
-          { icon: <FileDown size={16} />, label: 'Download PDF',                action: handlePrint,   active: false,                disabled: false, primary: false },
-        ].map(({ icon, label, action, active, disabled, primary }) => (
-          <button key={label} type="button" onClick={action} disabled={disabled}
-            className="transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              padding: '14px 16px',
-              background: primary ? (active ? '#F0FDF4' : '#111111') : 'white',
-              border: primary ? (active ? '1px solid #BBF7D0' : 'none') : '1px solid #E5E5E5',
-              borderRadius: 12, cursor: disabled ? 'default' : 'pointer',
-              color: primary ? (active ? '#16A34A' : 'white') : '#111111',
-              fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem',
-              boxShadow: primary && !active ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-              opacity: disabled ? 0.6 : 1,
-            }}
-          >
-            {icon}
-            {label}
-          </button>
-        ))}
+    const Divider = () => <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: 0 }} />
+
+    return (
+      <div style={{ ...card, padding: 0 }}>
+        {/* Header */}
+        <div style={{ padding: '24px 24px 16px' }}>
+          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.6875rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-foreground)', margin: 0 }}>
+            Your Actions
+          </p>
+        </div>
+
+        {/* Section 1: Property Card */}
+        <div style={{ padding: '0 24px 24px' }}>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: 20 }}>🏡</span>
+              </div>
+              <div>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', margin: 0, lineHeight: 1.2 }}>
+                  Browse Homes
+                </p>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--muted-foreground)', margin: 0, marginTop: 4 }}>
+                  In {stateAbbr} up to ${(maxPrice / 1000).toFixed(0)}k
+                </p>
+              </div>
+            </div>
+
+            <a
+              href={reaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full mt-2 hover:opacity-90 active:scale-[0.98] transition-all duration-150"
+              style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem', color: 'var(--background)', background: 'var(--foreground)', borderRadius: 10, padding: '12px 16px', textDecoration: 'none' }}
+            >
+              View Listings
+              <ArrowRight size={15} />
+            </a>
+          </div>
+        </div>
+
+        <Divider />
+
+        {/* Section 2: Actions Row */}
+        <div style={{ padding: 24 }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Bookmark size={20} color="var(--foreground)" />
+            </div>
+            <div>
+              <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', margin: 0, lineHeight: 1.2 }}>
+                Save & Share
+              </p>
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--muted-foreground)', margin: 0, marginTop: 4 }}>
+                Keep a record of your results
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {[
+              { icon: saveIcon,               label: saveLabel,                    action: handleSave,    active: saveState === 'saved', disabled: saveState === 'saving', primary: true },
+              { icon: <Share2 size={16} />,   label: linkCopied ? 'Copied!' : 'Share Link', action: handleCopyLink, active: linkCopied,         disabled: false, primary: false },
+              { icon: <FileDown size={16} />, label: 'Download PDF',                action: handlePrint,   active: false,                disabled: false, primary: false },
+            ].map(({ icon, label, action, active, disabled, primary }) => (
+              <button key={label} type="button" onClick={action} disabled={disabled}
+                  className="transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    padding: '12px 16px',
+                    borderRadius: 10, cursor: disabled ? 'default' : 'pointer',
+                    fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem',
+                    background: primary ? (active ? 'rgba(34,197,94,0.1)' : 'var(--foreground)') : 'var(--card)',
+                    color: primary ? (active ? 'var(--success-foreground)' : 'var(--background)') : 'var(--foreground)',
+                    border: primary ? (active ? '1px solid rgba(34,197,94,0.3)' : 'none') : '1px solid var(--border)',
+                    boxShadow: primary && !active ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                    opacity: disabled ? 0.6 : 1,
+                  }}
+              >
+                {icon}
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
+
+  // ── 7. FULL WIDTH EMAIL BANNER ───────────────────────────────────────────────
+  const FullWidthEmailBanner = () => {
+    const [email, setEmail] = useState((step1 as any)?.email || '')
+    const [emailState, setEmailState] = useState<'idle' | 'sending' | 'sent'>('idle')
+
+    const handleSendEmail = (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!email || emailState === 'sending') return
+      setEmailState('sending')
+      setTimeout(() => {
+        setEmailState('sent')
+      }, 1200)
+    }
+
+    return (
+      <div 
+        className="w-full mt-12 rounded-[24px] overflow-hidden border border-border shadow-[0_8px_30px_rgba(0,0,0,0.04)] bg-gradient-to-br from-yellow-50 via-yellow-50/50 to-white dark:from-yellow-900/20 dark:via-card dark:to-card"
+      >
+        <div className="flex flex-col lg:flex-row p-6 lg:p-8 lg:px-12 gap-8 lg:gap-12 items-center">
+          
+          {/* Left Column */}
+          <div className="flex-1 w-full text-center lg:text-left">
+            <div className="inline-flex items-center gap-1.5 bg-card border border-border shadow-sm px-3 py-1 rounded-full mb-4">
+              <Mail size={12} className="text-muted-foreground" />
+              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.625rem', letterSpacing: '0.05em', color: 'var(--foreground)' }}>
+                KEEP A COPY
+              </span>
+            </div>
+
+            <h2 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 'clamp(1.875rem, 4vw, 2.5rem)', color: 'var(--foreground)', lineHeight: 1.1, marginBottom: 12 }}>
+              Get your personalised report in your inbox
+            </h2>
+
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', color: 'var(--muted-foreground)', lineHeight: 1.5, marginBottom: 20, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+              Receive your personalised borrowing summary, grants and next steps in your inbox.
+            </p>
+
+            <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-left max-w-lg mx-auto lg:mx-0">
+              {[
+                'Borrowing estimate',
+                'Government grants',
+                'Personalised next steps',
+                'Share with partner'
+              ].map(item => (
+                <div key={item} className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 rounded-full bg-[#16A34A]/10 flex items-center justify-center shrink-0">
+                    <Check size={8} color="var(--success-foreground)" strokeWidth={3} />
+                  </div>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--secondary-foreground)', fontWeight: 500 }}>
+                    {item}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="w-full lg:w-[400px] shrink-0 bg-card rounded-2xl p-5 lg:p-6 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-border">
+            {emailState === 'sent' ? (
+              <div className="text-center py-4">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-3 border border-green-200 dark:border-green-800/50">
+                  <Check size={24} className="text-green-600 dark:text-green-400" />
+                </div>
+                <h3 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--foreground)', marginBottom: 4 }}>
+                  Report sent successfully
+                </h3>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)', marginBottom: 16 }}>
+                  Check your inbox.
+                </p>
+                <button 
+                  onClick={() => setEmailState('idle')}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground underline decoration-[#DDDDDD] underline-offset-4"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  Resend Report
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSendEmail} className="flex flex-col gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-1.5 text-left" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    <input
+                      type="email"
+                      required
+                      placeholder="Enter your email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-surface-2 border border-border rounded-xl text-foreground text-[0.9375rem] focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all pl-10 pr-4"
+                      style={{ fontFamily: 'Inter, sans-serif', height: 52, boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={emailState === 'sending'}
+                  className="w-full flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ background: 'var(--primary)', color: 'var(--foreground)', borderRadius: 12, height: 52, fontWeight: 700, fontSize: '0.9375rem', fontFamily: 'Inter, sans-serif', border: 'none', cursor: emailState === 'sending' ? 'default' : 'pointer', boxShadow: '0 2px 8px rgba(245, 230, 66, 0.25)' }}
+                >
+                  {emailState === 'sending' ? <Loader2 size={18} className="animate-spin" /> : null}
+                  {emailState === 'sending' ? 'Sending...' : 'Send My Report'}
+                </button>
+              </form>
+            )}
+          </div>
+
+        </div>
+      </div>
+    )
+  }
 
   // ── RENDER ────────────────────────────────────────────────────────────────────
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: 'linear-gradient(160deg, #FDFCF7 0%, #F5F3EC 45%, #ECEAE4 100%)' }}
+      style={{ background: 'var(--background)' }}
     >
       <Navbar />
+
 
       {/* ── Mobile: story order ── */}
       <main className="lg:hidden w-full max-w-120 mx-auto px-4 pb-24 flex flex-col gap-6" style={{ paddingTop: 68 }}>
@@ -489,8 +630,8 @@ export default function NextStepsPage() {
         <MobilePositionCard />
         <ShortfallExplanationCard />
         <BrokerCard />
-        <PropertyCard />
-        <ActionsCard />
+        <ActionCenterCard />
+        <FullWidthEmailBanner />
       </main>
 
       {/* ── Desktop: 12-column adaptive layout ── */}
@@ -512,10 +653,10 @@ export default function NextStepsPage() {
 
           {/* Right Column (4 columns): Property + Actions (Sticky) */}
           <div className="flex flex-col gap-6" style={{ position: 'sticky', top: 32 }}>
-            <PropertyCard />
-            <ActionsCard />
+            <ActionCenterCard />
           </div>
         </div>
+        <FullWidthEmailBanner />
       </div>
 
 

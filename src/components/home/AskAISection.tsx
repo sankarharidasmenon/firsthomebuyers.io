@@ -28,8 +28,8 @@ const themeMap: Record<PillTheme, { pill: string; icon: string }> = {
     icon: 'text-fn-yellow-deep',
   },
   slate: {
-    pill: 'bg-gray-100 text-fn-navy hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow-sm',
-    icon: 'text-gray-400',
+    pill: 'bg-muted text-foreground hover:bg-accent hover:-translate-y-0.5 hover:shadow-sm',
+    icon: 'text-muted-foreground',
   },
 }
 
@@ -99,7 +99,7 @@ export default function AskAISection() {
   }
 
   return (
-    <section id="ai-guidance" className="bg-white py-10 scroll-mt-20 lg:scroll-mt-24">
+    <section id="ai-guidance" className="bg-background py-10 scroll-mt-20 lg:scroll-mt-24">
       <ScrollReveal className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* Section header */}
@@ -108,8 +108,8 @@ export default function AskAISection() {
             <Sparkles className="w-3.5 h-3.5" />
             AI-Powered
           </div>
-          <h2 className="text-3xl font-bold text-fn-navy mb-3">Ask FirstNest AI</h2>
-          <p className="text-gray-500 max-w-xl mx-auto text-base leading-relaxed">
+          <h2 className="text-3xl font-bold text-foreground mb-3">Ask FirstNest AI</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto text-base leading-relaxed">
             Get personalised guidance for grants, borrowing capacity, and buying readiness — in plain English.
           </p>
         </div>
@@ -135,10 +135,10 @@ export default function AskAISection() {
             />
 
             {/* Card surface — sits above the gradient */}
-            <div className="relative bg-white rounded-[23px] h-full flex flex-col p-6 lg:p-8 z-10">
+            <div className="relative bg-card rounded-[23px] h-full flex flex-col p-6 lg:p-8 z-10">
 
-              <h3 className="text-xl font-bold text-fn-navy mb-1.5">What do you want to know?</h3>
-              <p className="text-sm text-gray-400 mb-4">Choose a topic or type your own question below.</p>
+              <h3 className="text-xl font-bold text-foreground mb-1.5">What do you want to know?</h3>
+              <p className="text-sm text-muted-foreground mb-4">Choose a topic or type your own question below.</p>
 
               {/* Quick prompts — grid layout for balanced fill */}
               <div className="grid grid-cols-2 xl:grid-cols-3 gap-2 mb-4">
@@ -169,11 +169,11 @@ export default function AskAISection() {
                     }
                   }}
                   rows={3}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-sm text-fn-navy placeholder:text-transparent focus:outline-none focus:border-fn-yellow focus:ring-2 focus:ring-fn-yellow/20 resize-none transition-all duration-150 leading-relaxed"
+                  className="w-full bg-background border border-input rounded-2xl px-4 py-3.5 text-sm text-foreground placeholder:text-transparent focus:outline-none focus:border-fn-yellow focus:ring-2 focus:ring-fn-yellow/20 resize-none transition-all duration-150 leading-relaxed"
                 />
                 {!query && (
                   <p
-                    className="absolute top-3.5 left-4 text-sm text-gray-400 pointer-events-none select-none"
+                    className="absolute top-3.5 left-4 text-sm text-muted-foreground pointer-events-none select-none"
                     style={{ opacity: phFade ? 1 : 0, transition: 'opacity 250ms' }}
                   >
                     {placeholders[phIdx]}
@@ -191,12 +191,12 @@ export default function AskAISection() {
               </button>
 
               {/* Helper note — honest about where response appears */}
-              <p className="text-[11px] text-gray-400 text-center mt-2 leading-snug">
+              <p className="text-[11px] text-muted-foreground text-center mt-2 leading-snug">
                 Your personalised answer will open in the AI Assistant workspace.
               </p>
 
               {/* Capability indicator — not a generated answer, just what AI covers */}
-              <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="mt-4 pt-4 border-t border-border">
                 <div className="flex flex-col gap-1.5">
                   {[
                     'Government scheme matching',
@@ -205,7 +205,7 @@ export default function AskAISection() {
                   ].map(item => (
                     <div key={item} className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-fn-success shrink-0" />
-                      <span className="text-xs text-gray-500">{item}</span>
+                      <span className="text-xs text-muted-foreground">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -256,7 +256,7 @@ export default function AskAISection() {
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[85%] text-xs leading-relaxed px-3.5 py-2.5 rounded-2xl ${
                     msg.role === 'ai'
-                      ? 'bg-white border border-gray-100 text-gray-700 rounded-tl-sm shadow-sm'
+                      ? 'bg-white border border-black/5 text-fn-navy rounded-tl-sm shadow-sm'
                       : 'bg-fn-navy text-white rounded-tr-sm'
                   }`}>
                     {msg.text}

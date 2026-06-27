@@ -35,14 +35,14 @@ export function Step4_SituationCheck({ step1, data, onChange, onSubmit, onBack, 
   return (
     <div className="flex flex-col gap-5 pt-4">
       <h2
-        style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#111111' }}
+        style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}
       >
         Almost there, {firstName}! Just a couple more things.
       </h2>
 
       {/* Field 1 — Employment Type */}
       <div className="flex flex-col gap-2">
-        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: '#222222' }}>
+        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
           How are you currently employed?<span className="text-grey-mid ml-0.5">*</span>
         </label>
         <BadgeChipGroup
@@ -53,7 +53,7 @@ export function Step4_SituationCheck({ step1, data, onChange, onSubmit, onBack, 
           chipClassName="w-full sm:w-auto"
         />
         {errors.employmentType && (
-          <p role="alert" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#E53E3E' }}>
+          <p role="alert" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--destructive)' }}>
             {errors.employmentType}
           </p>
         )}
@@ -75,7 +75,7 @@ export function Step4_SituationCheck({ step1, data, onChange, onSubmit, onBack, 
 
       {/* Field 3 — HECS/HELP Debt */}
       <div className="flex flex-col gap-2">
-        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: '#222222' }}>
+        <label style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
           Do you have a HECS or HELP debt?<span className="text-grey-mid ml-0.5">*</span>
         </label>
         <TapCardGroup
@@ -103,10 +103,10 @@ export function Step4_SituationCheck({ step1, data, onChange, onSubmit, onBack, 
       {/* Completion nudge */}
       <div
         className="flex items-center gap-2.5 px-4 py-3 rounded-sm"
-        style={{ background: '#FAFAFA', border: '1px solid #EEEEEE' }}
+        style={{ background: 'var(--secondary)', border: '1px solid var(--border)' }}
       >
         <span style={{ fontSize: '1rem' }}>🎉</span>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#444444' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--secondary-foreground)' }}>
           Great work — your results are ready to calculate!
         </p>
       </div>

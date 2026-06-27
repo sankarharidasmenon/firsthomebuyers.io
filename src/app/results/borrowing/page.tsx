@@ -57,7 +57,7 @@ export default function BorrowingResultsPage() {
   const [currentResult, setCurrentResult] = useState(baseResult)
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#FAFAFA' }}>
+    <div className="min-h-screen flex flex-col bg-[#FAFAFA] dark:bg-background">
       <Navbar />
 
       <main className="w-full pt-14 lg:pt-16 pb-24">
@@ -91,7 +91,7 @@ export default function BorrowingResultsPage() {
         )}
 
         {/* ── Mobile layout: single column ── */}
-        <div className="lg:hidden bg-white">
+        <div className="lg:hidden bg-white dark:bg-card">
           <BorrowingRangeDisplay
             min={currentResult.min}
             max={currentResult.max}
@@ -124,7 +124,7 @@ export default function BorrowingResultsPage() {
           <div className="grid gap-8" style={{ gridTemplateColumns: '1fr 320px', alignItems: 'start' }}>
 
             {/* Left: hero + deposit gap */}
-            <div className="bg-white rounded-2xl overflow-hidden pb-5" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #EEEEEE' }}>
+            <div className="bg-white dark:bg-card rounded-2xl overflow-hidden pb-5" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #EEEEEE' }}>
               <BorrowingRangeDisplay
                 min={currentResult.min}
                 max={currentResult.max}
@@ -141,7 +141,7 @@ export default function BorrowingResultsPage() {
 
             {/* Right: scenario sliders (sticky) */}
             <div className="flex flex-col gap-4" style={{ position: 'sticky', top: 80 }}>
-              <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #EEEEEE' }}>
+              <div className="bg-white dark:bg-card rounded-2xl overflow-hidden" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #EEEEEE' }}>
                 <ScenarioSliders
                   baseInputs={baseInputs}
                   baseResult={baseResult}

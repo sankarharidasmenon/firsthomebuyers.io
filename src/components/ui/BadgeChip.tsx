@@ -20,8 +20,8 @@ export function BadgeChip({ label, selected = false, onClick, icon, className = 
         'inline-flex justify-center items-center gap-1.5 px-3.5 py-2 rounded-full border transition-all duration-150 cursor-pointer select-none',
         'text-[0.8125rem] font-medium',
         selected
-          ? 'bg-[#111111] text-white border-[#111111]'
-          : 'bg-white text-grey-dark border-[#E0E0E0] hover:border-[#999999] hover:text-[#111111]',
+          ? 'bg-foreground text-background border-foreground'
+          : 'bg-card text-secondary-foreground border-border hover:border-muted-foreground hover:text-foreground',
         className
       ].filter(Boolean).join(' ')}
     >

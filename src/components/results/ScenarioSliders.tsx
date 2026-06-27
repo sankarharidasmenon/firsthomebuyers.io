@@ -72,10 +72,10 @@ export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: Scen
     <div className="px-5 pt-5 pb-5">
       {/* Section header */}
       <div className="mb-4">
-        <h2 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem', color: '#111111' }}>
+        <h2 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--foreground)' }}>
           What if I...?
         </h2>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#AAAAAA', marginTop: 2 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--muted-foreground)', marginTop: 2 }}>
           Adjust the sliders to explore different scenarios
         </p>
       </div>
@@ -127,7 +127,7 @@ export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: Scen
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col gap-2 mt-5 pt-4" style={{ borderTop: '1px solid #F0F0F0' }}>
+      <div className="flex flex-col gap-2 mt-5 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
         <Button onClick={handleSave} variant="primary" fullWidth size="sm">
           {saved ? '✓ Saved!' : '💾 Save this scenario'}
         </Button>
@@ -138,14 +138,14 @@ export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: Scen
             fontFamily: 'Inter, sans-serif',
             fontWeight: 500,
             fontSize: '0.8125rem',
-            color: '#888888',
+            color: 'var(--muted-foreground)',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
             textAlign: 'center',
             padding: '6px',
           }}
-          className="hover:text-[#111111] transition-colors"
+          className="hover:text-foreground transition-colors"
         >
           Reset to original
         </button>

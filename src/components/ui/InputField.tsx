@@ -103,12 +103,12 @@ export function InputField({
       <div className="flex items-center gap-1.5">
         <label
           style={{ fontFamily: 'Inter, sans-serif' }}
-          className="text-[0.9375rem] font-medium text-[#222222]"
+          className="text-[0.9375rem] font-medium text-card-foreground"
         >
           {label}
-          {required && <span className="text-[#888888] ml-0.5">*</span>}
+          {required && <span className="text-muted-foreground ml-0.5">*</span>}
           {optional && (
-            <span className="text-[#999999] font-normal ml-1 text-[0.8125rem]">(optional)</span>
+            <span className="text-muted-foreground font-normal ml-1 text-[0.8125rem]">(optional)</span>
           )}
         </label>
         {tooltip && (
@@ -118,7 +118,7 @@ export function InputField({
               type="button"
               onClick={handleTooltipClick}
               onBlur={() => setTimeout(() => setShowTooltip(false), 150)}
-              className="text-[#BBBBBB] hover:text-[#666666] transition-colors shrink-0"
+              className="text-muted-foreground hover:text-secondary-foreground transition-colors shrink-0"
               aria-label="More information"
               aria-expanded={showTooltip}
             >
@@ -134,7 +134,7 @@ export function InputField({
                   width: TOOLTIP_W,
                   fontFamily: 'Inter, sans-serif',
                 }}
-                className="bg-[#1A1A1A] text-white text-[0.75rem] leading-relaxed rounded-[10px] px-3.5 py-2.5 shadow-xl"
+                className="bg-foreground text-background text-[0.75rem] leading-relaxed rounded-[10px] px-3.5 py-2.5 shadow-xl"
               >
                 {tooltip}
               </div>
@@ -147,7 +147,7 @@ export function InputField({
         {prefix && (
           <span
             style={{ fontFamily: 'Inter, sans-serif' }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AAAAAA] text-[0.9375rem] font-medium pointer-events-none z-10 select-none"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-[0.9375rem] font-medium pointer-events-none z-10 select-none"
           >
             {prefix}
           </span>
@@ -168,16 +168,16 @@ export function InputField({
             fontSize: '16px',
           }}
           className={[
-            'w-full h-[52px] bg-white text-[#222222] rounded-[10px] transition-all duration-150 outline-none',
+            'w-full h-[52px] bg-background text-foreground rounded-[10px] transition-all duration-150 outline-none',
             prefix ? 'pl-8' : 'pl-4',
             'pr-4',
             'border-[1.5px]',
             error
-              ? 'border-[#E53E3E] shadow-[0_0_0_3px_rgba(252,165,165,0.3)]'
+              ? 'border-destructive shadow-[0_0_0_3px_rgba(252,165,165,0.3)]'
               : focused
-              ? 'border-[#111111] shadow-[0_0_0_3px_rgba(245,230,66,0.3)]'
-              : 'border-[#E0E0E0] hover:border-[#BBBBBB]',
-            'placeholder:text-[#BBBBBB]',
+              ? 'border-foreground shadow-[0_0_0_3px_rgba(245,230,66,0.3)]'
+              : 'border-border hover:border-muted-foreground',
+            'placeholder:text-muted-foreground',
           ].join(' ')}
         />
       </div>
@@ -187,7 +187,7 @@ export function InputField({
           role="alert"
           aria-live="polite"
           style={{ fontFamily: 'Inter, sans-serif' }}
-          className="text-[0.8125rem] text-[#E53E3E]"
+          className="text-[0.8125rem] text-destructive"
         >
           {error}
         </p>
@@ -196,7 +196,7 @@ export function InputField({
       {helperText && !error && (
         <p
           style={{ fontFamily: 'Inter, sans-serif' }}
-          className="text-[0.8125rem] text-[#999999]"
+          className="text-[0.8125rem] text-muted-foreground"
         >
           {helperText}
         </p>

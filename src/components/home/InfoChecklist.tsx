@@ -34,7 +34,7 @@ export function InfoChecklist() {
             fontFamily: 'Inter, sans-serif',
             fontWeight: 500,
             fontSize: '0.875rem',
-            color: '#111111',
+            color: 'var(--foreground)',
             textDecoration: 'underline dotted',
             cursor: 'pointer',
             background: 'none',
@@ -57,14 +57,14 @@ export function InfoChecklist() {
         <div ref={contentRef}>
           <div
             className="rounded-[8px] p-4"
-            style={{ background: '#F9F9F9', border: '1px solid #EEEEEE' }}
+            style={{ background: 'var(--secondary)', border: '1px solid var(--border)' }}
           >
             <ul className="flex flex-col gap-2">
               {ITEMS.map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <Check size={14} className="text-[#22C55E] mt-0.5 shrink-0" />
+                  <Check size={14} className="text-green-500 mt-0.5 shrink-0" />
                   <span
-                    style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#444444' }}
+                    style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--secondary-foreground)' }}
                   >
                     {item}
                   </span>
@@ -76,7 +76,7 @@ export function InfoChecklist() {
               style={{
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '0.8125rem',
-                color: '#888888',
+                color: 'var(--muted-foreground)',
                 fontStyle: 'italic',
               }}
             >

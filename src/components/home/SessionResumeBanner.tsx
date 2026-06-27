@@ -29,16 +29,16 @@ export function SessionResumeBanner({ progress, onDismiss }: SessionResumeBanner
 
   return (
     <div
-      style={{ background: '#FBF6A8', borderBottom: '2px solid #F5E642' }}
+      style={{ background: 'var(--brand-yellow-light)', borderBottom: '2px solid var(--brand-yellow)' }}
     >
       {/* Desktop: flex row. Mobile: flex col */}
       <div
-        className="max-w-[1100px] mx-auto px-5 py-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
+        className="max-w-[1100px] mx-auto px-4 py-2 flex flex-row items-center justify-between gap-2"
       >
         <p
-          style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem', color: '#111111' }}
+          style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8125rem', color: '#111111' }}
         >
-          👋 Welcome back! You were on Step {progress.currentStep} of 4.
+          👋 Welcome back! Step {progress.currentStep} of 4.
         </p>
 
         <div className="flex items-center gap-2">
@@ -49,7 +49,7 @@ export function SessionResumeBanner({ progress, onDismiss }: SessionResumeBanner
               fontFamily: 'Inter, sans-serif',
               fontWeight: 600,
               fontSize: '0.8125rem',
-              background: '#F5E642',
+              background: 'var(--primary)',
               color: '#111111',
               border: 'none',
               borderRadius: 9999,
@@ -68,8 +68,8 @@ export function SessionResumeBanner({ progress, onDismiss }: SessionResumeBanner
               fontWeight: 500,
               fontSize: '0.8125rem',
               background: 'transparent',
-              color: confirmingFresh ? '#E53E3E' : '#444444',
-              border: '1px solid #CCCCCC',
+              color: confirmingFresh ? 'var(--destructive)' : '#444444',
+              border: '1px solid rgba(17, 17, 17, 0.2)',
               borderRadius: 9999,
               padding: '7px 16px',
               cursor: 'pointer',

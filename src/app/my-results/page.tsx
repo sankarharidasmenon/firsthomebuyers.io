@@ -68,23 +68,10 @@ function getInsight(s: SavedScenario, isBest: boolean, diff: number): { emoji: s
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 
-const card: React.CSSProperties = {
-  background: '#FFFFFF',
-  border: '1px solid rgba(0,0,0,0.07)',
-  borderRadius: 20,
-  boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 10px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,1)',
-  overflow: 'hidden',
-}
+const cardClass = "bg-[#FFFFFF] dark:bg-card border border-[rgba(0,0,0,0.07)] dark:border-border rounded-[20px] shadow-[0_2px_4px_rgba(0,0,0,0.04),0_10px_32px_rgba(0,0,0,0.07),inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-none overflow-hidden"
 
 // Best plan: white card with subtle left accent only — no green tint everywhere
-const bestCard: React.CSSProperties = {
-  background: '#FFFFFF',
-  border: '1px solid rgba(0,0,0,0.07)',
-  borderLeft: '3px solid #22C55E',
-  borderRadius: 20,
-  boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 10px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)',
-  overflow: 'hidden',
-}
+const bestCardClass = "bg-[#FFFFFF] dark:bg-card border border-[rgba(0,0,0,0.07)] dark:border-border border-l-[3px] border-l-[#22C55E] rounded-[20px] shadow-[0_2px_4px_rgba(0,0,0,0.04),0_10px_32px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-none overflow-hidden"
 
 const microLabel: React.CSSProperties = {
   fontFamily: 'Inter, sans-serif',
@@ -140,9 +127,7 @@ export default function MyResultsPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
-      // Very subtle top→bottom warmth: cream → near-white → white
-      style={{ background: 'linear-gradient(180deg, #FFFDF7 0%, #FAFAF8 55%, #FFFFFF 100%)' }}
+      className="min-h-screen flex flex-col bg-[linear-gradient(180deg,#FFFDF7_0%,#FAFAF8_55%,#FFFFFF_100%)] dark:[background:var(--background)]"
     >
       <Navbar />
 
@@ -152,22 +137,23 @@ export default function MyResultsPage() {
         {loaded && isEmpty && (
           <div className="flex flex-col items-center justify-center pt-20 text-center px-4">
             <div
-              className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
-              style={{ background: '#FDFCF0', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}
+              className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 bg-[#FDFCF0] dark:bg-surface"
+              style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}
             >
               <span style={{ fontSize: '2rem' }}>🏡</span>
             </div>
-            <h1 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: '1.5rem', color: '#111111', marginBottom: 10, letterSpacing: '-0.01em' }}>
+            <h1 className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: '1.5rem', marginBottom: 10, letterSpacing: '-0.01em' }}>
               Your home buying plans will live here
             </h1>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', color: '#666666', maxWidth: 360, marginBottom: 32, lineHeight: 1.65 }}>
+            <p className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', maxWidth: 360, marginBottom: 32, lineHeight: 1.65 }}>
               Answer a few questions to see what you could afford — then save different plans to compare your options side by side.
             </p>
             <Button onClick={() => router.push('/onboarding?flow=grants')} variant="primary" className="px-8" fullWidth={false}>
               Get Started <ArrowRight size={16} className="ml-2 inline" />
             </Button>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#AAAAAA', marginTop: 12 }}>
-              Takes about 3 minutes · No sign-up needed
+            <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', marginTop: 12 }}>
+              Takes about 3 minutes 
+              {/* No sign-up needed */}
             </p>
           </div>
         )}
@@ -178,19 +164,19 @@ export default function MyResultsPage() {
 
             {/* ── PRIORITY #2: Personalised hero ── */}
             <div style={{ marginBottom: 2 }}>
-              <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.6875rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#BBBBBB', marginBottom: 10 }}>
+              <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.6875rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
                 Your home buying journey
               </p>
-              <h1 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 'clamp(1.625rem, 4vw, 2rem)', color: '#111111', letterSpacing: '-0.015em', lineHeight: 1.1, marginBottom: 10 }}>
+              <h1 className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 'clamp(1.625rem, 4vw, 2rem)', letterSpacing: '-0.015em', lineHeight: 1.1, marginBottom: 10 }}>
                 {displayName ? `Welcome back, ${displayName} 👋` : 'Your saved plans 🏡'}
               </h1>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', color: '#555555', lineHeight: 1.65, maxWidth: 500 }}>
+              <div className="text-[#555555] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', lineHeight: 1.65, maxWidth: 500 }}>
                 {totalPlans === 1 ? (
                   <p>You&apos;ve saved your starting point. Use the sliders on your results page to explore what different changes could unlock — then save each plan to compare here.</p>
                 ) : (
                   <>
                     <p>
-                      You&apos;ve explored <strong style={{ color: '#111111' }}>{totalPlans} different ways</strong> to get into your first home.
+                      You&apos;ve explored <strong className="text-[#111111] dark:text-foreground" style={{ fontWeight: 700 }}>{totalPlans} different ways</strong> to get into your first home.
                       {bestImprovement > 0 && (
                         <> One of your plans could unlock <strong style={{ color: '#16A34A' }}>{fmtMoney(bestImprovement)} more</strong> in homes you can afford.</>
                       )}
@@ -203,12 +189,7 @@ export default function MyResultsPage() {
             {/* ── PRIORITY #3: Quick summary strip ── */}
             {showSummaryStrip && (
               <div
-                style={{
-                  background: 'rgba(255,255,255,0.75)',
-                  border: '1px solid rgba(0,0,0,0.07)',
-                  borderRadius: 14,
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                }}
+                className="bg-[rgba(255,255,255,0.75)] dark:bg-card border border-[rgba(0,0,0,0.07)] dark:border-border rounded-[14px] shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-none"
               >
                 <div className="grid grid-cols-3">
                   {[
@@ -222,11 +203,10 @@ export default function MyResultsPage() {
                   ].map(({ label, value, color }, i) => (
                     <div
                       key={label}
-                      className="px-4 py-4 text-center"
-                      style={{ borderLeft: i > 0 ? '1px solid rgba(0,0,0,0.06)' : undefined }}
+                      className={`px-4 py-4 text-center ${i > 0 ? 'border-l border-[rgba(0,0,0,0.06)] dark:border-border' : ''}`}
                     >
                       <p style={microLabel}>{label}</p>
-                      <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: i === 2 ? '0.875rem' : '1.25rem', color, lineHeight: 1.1 }}>
+                      <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700,fontSize: i === 2 ? '0.875rem' : '1.25rem', color, lineHeight: 1.1 }}>
                         {value}
                       </p>
                     </div>
@@ -239,15 +219,15 @@ export default function MyResultsPage() {
             {savedResults && (
               <div>
                 <p style={microLabel}>Your starting point</p>
-                <div style={card}>
-                  <div className="flex items-start justify-between px-6 py-5" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                <div className={cardClass}>
+                  <div className="flex items-start justify-between px-6 py-5 border-b border-[rgba(0,0,0,0.05)] dark:border-border">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#F8F8F5', border: '1px solid rgba(0,0,0,0.06)' }}>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#F8F8F5] dark:bg-surface border border-[rgba(0,0,0,0.06)] dark:border-border">
                         <span style={{ fontSize: '1.125rem' }}>🏡</span>
                       </div>
                       <div>
-                        <p style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem', color: '#111111' }}>Current Position</p>
-                        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#BBBBBB', marginTop: 2 }}>
+                        <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem' }}>Current Position</p>
+                        <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>
                           Saved {formatDate(savedResults.savedAt)} · {savedResults.state}
                         </p>
                       </div>
@@ -261,31 +241,31 @@ export default function MyResultsPage() {
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <p style={microLabel}>Homes you could afford</p>
-                        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 800, fontSize: '1.375rem', color: '#111111', letterSpacing: '-0.02em', lineHeight: 1 }}>
+                        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 800, fontSize: '1.375rem', color: '#111111', letterSpacing: '-0.02em', lineHeight: 1}} className="dark:text-foreground">
                           {fmtMoney(savedResults.borrowing.min)}
-                          <span style={{ color: '#DDDDDD', fontWeight: 300 }}> – </span>
+                          <span className="text-[#DDDDDD] dark:text-border" style={{ fontWeight: 300 }}> – </span>
                           {fmtMoney(savedResults.borrowing.max)}
                         </p>
-                        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', color: '#CCCCCC', marginTop: 4 }}>estimated purchase range</p>
+                        <p className="text-[#CCCCCC] dark:text-muted-foreground/40" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', marginTop: 4 }}>estimated purchase range</p>
                       </div>
                       <div>
                         <p style={microLabel}>Government support</p>
                         <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 800, fontSize: '1.375rem', color: '#16A34A', letterSpacing: '-0.02em', lineHeight: 1 }}>
                           ${savedResults.grantsTotal.toLocaleString('en-AU')}
                         </p>
-                        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', color: '#CCCCCC', marginTop: 4 }}>
+                        <p className="text-[#CCCCCC] dark:text-muted-foreground/40" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', marginTop: 4 }}>
                           grants & concessions in {savedResults.state}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="px-6 py-4" style={{ borderTop: '1px solid rgba(0,0,0,0.05)', background: '#FAFAF8' }}>
+                  <div className="px-6 py-4 bg-[#FAFAF8] dark:bg-surface border-t border-[rgba(0,0,0,0.05)] dark:border-border">
                     <button
                       type="button"
                       onClick={() => router.push('/results/grants')}
-                      className="flex items-center gap-1.5 hover:gap-2.5 transition-all duration-150"
-                      style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8125rem', color: '#444444', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                      className="flex items-center gap-1.5 hover:gap-2.5 transition-all duration-150 text-[#444444] dark:text-muted-foreground hover:text-foreground"
+                      style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8125rem', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     >
                       See the full picture
                       <ArrowRight size={13} />
@@ -311,23 +291,18 @@ export default function MyResultsPage() {
                     const insight = getInsight(scenario, isBest, diff)
 
                     return (
-                      <div
-                        key={scenario.id}
-                        style={isBest ? bestCard : card}
-                        className="transition-transform duration-200 hover:-translate-y-px"
-                      >
+                      <div className={`${isBest ? bestCardClass : cardClass} transition-transform duration-200 hover:-translate-y-px`}>
                         {/* Card header — PRIORITY #4: badge inline, no green background fill */}
-                        <div className="flex items-start justify-between px-6 py-5" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                        <div className="flex items-start justify-between px-6 py-5 border-b border-[rgba(0,0,0,0.04)] dark:border-border">
                           <div className="flex items-center gap-3">
                             <div
-                              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                              style={{ background: '#F8F8F5', border: '1px solid rgba(0,0,0,0.06)' }}
+                              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#F8F8F5] dark:bg-surface border border-[rgba(0,0,0,0.06)] dark:border-border"
                             >
                               <span style={{ fontSize: '1.125rem' }}>{planIcon}</span>
                             </div>
                             <div>
                               <div className="flex items-center gap-2 flex-wrap">
-                                <p style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem', color: '#111111' }}>
+                                <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem' }}>
                                   {planName}
                                 </p>
                                 {/* PRIORITY #4: small premium badge — no background flood */}
@@ -351,7 +326,7 @@ export default function MyResultsPage() {
                                   </span>
                                 )}
                               </div>
-                              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#BBBBBB', marginTop: 2 }}>
+                              <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>
                                 Saved {formatDate(scenario.savedAt)}
                               </p>
                             </div>
@@ -376,18 +351,18 @@ export default function MyResultsPage() {
                                     more homes you can afford
                                   </p>
                                   <p style={{ ...microLabel, marginBottom: 4 }}>Home range</p>
-                                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1rem', color: '#444444', letterSpacing: '-0.01em', lineHeight: 1 }}>
+                                  <p className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', lineHeight: 1 }}>
                                     {fmtMoney(scenario.result.min)}
-                                    <span style={{ color: '#DDDDDD', fontWeight: 300 }}> – </span>
+                                    <span className="text-[#DDDDDD] dark:text-border" style={{ fontWeight: 300 }}> – </span>
                                     {fmtMoney(scenario.result.max)}
                                   </p>
                                 </>
                               ) : (
                                 <>
                                   <p style={microLabel}>Homes you could afford</p>
-                                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 800, fontSize: '1.375rem', color: '#111111', letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 10 }}>
+                                  <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 800, fontSize: '1.375rem', letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 10 }}>
                                     {fmtMoney(scenario.result.min)}
-                                    <span style={{ color: '#DDDDDD', fontWeight: 300 }}> – </span>
+                                    <span className="text-[#DDDDDD] dark:text-border" style={{ fontWeight: 300 }}> – </span>
                                     {fmtMoney(scenario.result.max)}
                                   </p>
                                 </>
@@ -405,20 +380,20 @@ export default function MyResultsPage() {
                                 </div>
                               )}
                               {baselineMax === 0 && diff === 0 && (
-                                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#BBBBBB', fontStyle: 'italic' }}>
+                                <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', fontStyle: 'italic' }}>
                                   Your baseline — nothing changed yet
                                 </p>
                               )}
                             </div>
 
                             {/* What changed */}
-                            <div className="rounded-xl p-4" style={{ background: '#FAFAF8', border: '1px solid rgba(0,0,0,0.05)' }}>
+                            <div className="rounded-xl p-4 bg-[#FAFAF8] dark:bg-surface border border-[rgba(0,0,0,0.05)] dark:border-border">
                               <p style={{ ...microLabel, marginBottom: 8 }}>What you changed</p>
                               <ul className="flex flex-col gap-2">
                                 {scenario.sliders.extraSavings > 0 && (
                                   <li className="flex items-center gap-2">
                                     <span style={{ fontSize: '0.875rem' }}>💰</span>
-                                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#444444' }}>
+                                    <span className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>
                                       Added <strong>${scenario.sliders.extraSavings.toLocaleString('en-AU')}</strong> in savings
                                     </span>
                                   </li>
@@ -426,7 +401,7 @@ export default function MyResultsPage() {
                                 {scenario.sliders.incomeIncrease > 0 && (
                                   <li className="flex items-center gap-2">
                                     <span style={{ fontSize: '0.875rem' }}>📈</span>
-                                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#444444' }}>
+                                    <span className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>
                                       <strong>+${scenario.sliders.incomeIncrease.toLocaleString('en-AU')}/yr</strong> in income
                                     </span>
                                   </li>
@@ -434,7 +409,7 @@ export default function MyResultsPage() {
                                 {scenario.sliders.hasPartner && (
                                   <li className="flex items-center gap-2">
                                     <span style={{ fontSize: '0.875rem' }}>👥</span>
-                                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#444444' }}>
+                                    <span className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>
                                       Partner income of <strong>${scenario.sliders.partnerIncome.toLocaleString('en-AU')}/yr</strong>
                                     </span>
                                   </li>
@@ -442,7 +417,7 @@ export default function MyResultsPage() {
                                 {scenario.sliders.extraSavings === 0 && scenario.sliders.incomeIncrease === 0 && !scenario.sliders.hasPartner && (
                                   <li className="flex items-center gap-2">
                                     <span style={{ fontSize: '0.875rem' }}>🏡</span>
-                                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#999999', fontStyle: 'italic' }}>
+                                    <span className="text-[#999999] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', fontStyle: 'italic' }}>
                                       Your current numbers, no changes
                                     </span>
                                   </li>
@@ -454,10 +429,9 @@ export default function MyResultsPage() {
 
                         {/* PRIORITY #6: insight strip with emoji, feels like coaching not helper text */}
                         <div
-                          className="px-6 py-4"
-                          style={{ borderTop: '1px solid rgba(0,0,0,0.04)', background: '#FAFAF8' }}
+                          className="px-6 py-4 bg-[#FAFAF8] dark:bg-surface border-t border-[rgba(0,0,0,0.04)] dark:border-border"
                         >
-                          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#444444', lineHeight: 1.6 }}>
+                          <p className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', lineHeight: 1.6 }}>
                             <span style={{ marginRight: 6 }}>{insight.emoji}</span>
                             {insight.text}
                           </p>
