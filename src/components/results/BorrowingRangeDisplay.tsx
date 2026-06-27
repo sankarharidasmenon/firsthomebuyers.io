@@ -57,14 +57,13 @@ export function BorrowingRangeDisplay({
     : 'you'
 
   return (
-    <div className="px-5 pt-6 pb-5 fade-up" style={{ borderBottom: '1px solid #F0F0F0' }}>
+    <div className="px-5 pt-6 pb-5 fade-up border-b border-[#F0F0F0] dark:border-border">
       {/* Label */}
-      <p style={{
+      <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{
         fontFamily: 'Inter, sans-serif',
         fontWeight: 600,
         fontSize: '0.6875rem',
         letterSpacing: '0.12em',
-        color: '#AAAAAA',
         textTransform: 'uppercase',
         marginBottom: 4,
         textAlign: 'center',
@@ -73,11 +72,10 @@ export function BorrowingRangeDisplay({
       </p>
 
       {/* Personalised heading */}
-      <p suppressHydrationWarning style={{
+      <p suppressHydrationWarning className="text-[#111111] dark:text-foreground" style={{
         fontFamily: '"Plus Jakarta Sans", sans-serif',
         fontWeight: 700,
         fontSize: '0.9375rem',
-        color: '#111111',
         textAlign: 'center',
         marginBottom: 8,
       }}>
@@ -85,24 +83,22 @@ export function BorrowingRangeDisplay({
       </p>
 
       {/* Hero range */}
-      <p style={{
+      <p className="text-[#111111] dark:text-foreground" style={{
         fontFamily: '"JetBrains Mono", monospace',
         fontWeight: 700,
         fontSize: 'clamp(1.5rem, 6vw, 2.125rem)',
-        color: '#111111',
         textAlign: 'center',
         lineHeight: 1.15,
         letterSpacing: '-0.02em',
       }}>
         ${animatedMin.toLocaleString('en-AU')}
-        <span style={{ color: '#CCCCCC', fontWeight: 300 }}> — </span>
+        <span className="text-[#CCCCCC] dark:text-border" style={{ fontWeight: 300 }}> — </span>
         ${animatedMax.toLocaleString('en-AU')}
       </p>
 
-      <p style={{
+      <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{
         fontFamily: 'Inter, sans-serif',
         fontSize: '0.8125rem',
-        color: '#AAAAAA',
         textAlign: 'center',
         marginTop: 4,
         marginBottom: 16,
@@ -112,63 +108,55 @@ export function BorrowingRangeDisplay({
 
       {/* Recommended property range — subtle accent treatment */}
       <div
-        className="rounded-[10px] px-4 py-3 mb-4"
-        style={{
-          background: '#FEFCE8',
-          borderLeft: '3px solid #F5E642',
-          border: '1px solid #F0E030',
-          borderLeftWidth: 3,
-        }}
+        className="rounded-[10px] px-4 py-3 mb-4 bg-[#FEFCE8] dark:bg-surface border border-[#F0E030] dark:border-[rgba(245,230,66,0.25)]"
+        style={{ borderLeftWidth: 3 }}
       >
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', color: '#999999', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>
+        <p className="text-[#999999] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>
           Recommended property search range
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1rem', color: '#111111', letterSpacing: '-0.01em' }}>
+        <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}>
           ${recommendedMin.toLocaleString('en-AU')} – ${recommendedMax.toLocaleString('en-AU')}
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#AAAAAA', marginTop: 2 }}>
+        <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>
           borrowing + your ${depositAmount.toLocaleString('en-AU')} deposit
         </p>
       </div>
 
       {/* Estimated repayments — two stat tiles */}
       <div>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8125rem', color: '#444444', marginBottom: 8 }}>
+        <p className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8125rem', marginBottom: 8 }}>
           Estimated repayments
         </p>
         <div className="grid grid-cols-2 gap-2">
           <div
-            className="rounded-[10px] px-4 py-3"
-            style={{ background: '#FAFAFA', border: '1px solid #EEEEEE' }}
+            className="rounded-[10px] px-4 py-3 bg-[#FAFAFA] dark:bg-surface border border-[#EEEEEE] dark:border-border"
           >
-            <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.125rem', color: '#111111', letterSpacing: '-0.01em' }}>
+            <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.125rem', letterSpacing: '-0.01em' }}>
               ${monthly.toLocaleString('en-AU')}
             </p>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#AAAAAA', marginTop: 2 }}>
+            <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>
               Monthly
             </p>
           </div>
           <div
-            className="rounded-[10px] px-4 py-3"
-            style={{ background: '#FAFAFA', border: '1px solid #EEEEEE' }}
+            className="rounded-[10px] px-4 py-3 bg-[#FAFAFA] dark:bg-surface border border-[#EEEEEE] dark:border-border"
           >
-            <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.125rem', color: '#111111', letterSpacing: '-0.01em' }}>
+            <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.125rem', letterSpacing: '-0.01em' }}>
               ${fortnightly.toLocaleString('en-AU')}
             </p>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#AAAAAA', marginTop: 2 }}>
+            <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>
               Fortnightly
             </p>
           </div>
         </div>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', color: '#BBBBBB', marginTop: 8, paddingTop: 8, borderTop: '1px solid #F5F5F5', textAlign: 'center' }}>
+        <p className="text-[#BBBBBB] dark:text-muted-foreground/40 border-t border-[#F5F5F5] dark:border-border" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', marginTop: 8, paddingTop: 8, textAlign: 'center' }}>
           at 6.5% p.a. (current avg variable rate)
         </p>
       </div>
 
-      <p style={{
+      <p className="text-[#CCCCCC] dark:text-muted-foreground/40" style={{
         fontFamily: 'Inter, sans-serif',
         fontSize: '0.6875rem',
-        color: '#CCCCCC',
         marginTop: 6,
         textAlign: 'center',
       }}>

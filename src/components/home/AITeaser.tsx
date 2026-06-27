@@ -16,7 +16,7 @@ export function AITeaser() {
   const handleChip = () => router.push('/onboarding?flow=grants')
 
   return (
-    <section style={{ background: 'white', padding: '56px 20px' }} className="lg:py-20">
+    <section style={{ background: 'var(--background)', padding: '56px 20px' }} className="lg:py-20">
       <div className="max-w-[1100px] mx-auto lg:px-12">
 
         {/* Section label */}
@@ -27,7 +27,7 @@ export function AITeaser() {
             fontSize: '0.6875rem',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            color: '#888888',
+            color: 'var(--muted-foreground)',
             textAlign: 'center',
             marginBottom: 12,
           }}
@@ -41,7 +41,7 @@ export function AITeaser() {
             fontFamily: '"Plus Jakarta Sans", sans-serif',
             fontWeight: 700,
             fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
-            color: '#111111',
+            color: 'var(--foreground)',
             textAlign: 'center',
             maxWidth: 480,
             margin: '0 auto 16px',
@@ -56,7 +56,7 @@ export function AITeaser() {
             fontFamily: 'Inter, sans-serif',
             fontWeight: 400,
             fontSize: '0.9375rem',
-            color: '#666666',
+            color: 'var(--muted-foreground)',
             textAlign: 'center',
             maxWidth: 520,
             margin: '0 auto 32px',
@@ -86,18 +86,18 @@ export function AITeaser() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 7,
-                border: '1px solid #DDDDDD',
+                border: '1px solid var(--border)',
                 borderRadius: 9999,
                 padding: '10px 18px',
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 500,
                 fontSize: '0.875rem',
-                color: '#444444',
-                background: 'white',
+                color: 'var(--secondary-foreground)',
+                background: 'var(--card)',
                 cursor: 'pointer',
                 transition: 'border-color 150ms, background 150ms, transform 150ms',
               }}
-              className="hover:border-[#111111] hover:bg-[#F9F9F9] hover:-translate-y-[1px]"
+              className="hover:border-foreground hover:bg-accent hover:-translate-y-[1px]"
             >
               <span>{chip.icon}</span>
               {chip.label}
@@ -136,7 +136,7 @@ export function AITeaser() {
             fontFamily: 'Inter, sans-serif',
             fontWeight: 400,
             fontSize: '0.75rem',
-            color: '#AAAAAA',
+            color: 'var(--muted-foreground)',
             textAlign: 'center',
           }}
         >

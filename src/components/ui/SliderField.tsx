@@ -45,13 +45,13 @@ export function SliderField({
       <div className="flex items-center justify-between">
         <span
           style={{ fontFamily: 'Inter, sans-serif' }}
-          className="text-[0.9375rem] font-medium text-[#222222]"
+          className="text-[0.9375rem] font-medium text-card-foreground"
         >
           {label}
         </span>
         <span
           style={{ fontFamily: 'JetBrains Mono, monospace' }}
-          className="text-[0.9375rem] font-bold text-[#111111]"
+          className="text-[0.9375rem] font-bold text-foreground"
         >
           {formatValue(value)}
         </span>
@@ -66,17 +66,17 @@ export function SliderField({
         aria-label={label}
         className="relative flex items-center w-full h-6 touch-none select-none"
       >
-        <Slider.Track className="relative h-[6px] grow rounded-full bg-[#EEEEEE]">
-          <Slider.Range className="absolute h-full rounded-full bg-[#F5E642]" />
+        <Slider.Track className="relative h-[6px] grow rounded-full bg-border">
+          <Slider.Range className="absolute h-full rounded-full bg-primary" />
         </Slider.Track>
         <Slider.Thumb
-          className="block w-6 h-6 rounded-full bg-[#111111] shadow-[0_2px_8px_rgba(0,0,0,0.2)] cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4C400] focus-visible:ring-offset-2"
+          className="block w-6 h-6 rounded-full bg-foreground shadow-[0_2px_8px_rgba(0,0,0,0.2)] cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-hover focus-visible:ring-offset-2"
           aria-label={label}
           aria-valuetext={formatValue(value)}
         />
       </Slider.Root>
 
-      <div className="flex items-center justify-between text-[0.8125rem] text-[#888888]" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="flex items-center justify-between text-[0.8125rem] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
         <span>{formatValue(min)}</span>
         {deltaValue !== undefined && deltaValue !== 0 && (
           <span
@@ -88,7 +88,7 @@ export function SliderField({
             }}
             className={[
               'px-3 py-0.5 rounded-full text-[0.75rem] font-medium',
-              deltaPositive ? 'bg-[#F5E642] text-[#111111]' : 'bg-[#F0F0F0] text-[#444444]',
+              deltaPositive ? 'bg-primary text-primary-foreground' : 'bg-surface text-secondary-foreground',
             ].join(' ')}
           >
             {deltaPositive ? '+' : ''}

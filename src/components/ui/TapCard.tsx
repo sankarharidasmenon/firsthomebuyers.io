@@ -28,19 +28,19 @@ export function TapCardGroup({ options, value, onChange, className = '' }: TapCa
           className={[
             'flex items-center gap-2.5 px-4 py-3 rounded-[10px] border transition-all duration-150 cursor-pointer text-left',
             value === opt.value
-              ? 'bg-[#F5E642] border-[#D4C400] border-[1.5px]'
-              : 'bg-white border-[#E0E0E0] border-[1.5px] hover:border-[#999999]',
+              ? 'bg-primary border-primary-hover border-[1.5px]'
+              : 'bg-card border-border border-[1.5px] hover:border-muted-foreground',
           ].join(' ')}
         >
           {opt.icon && (
             <span className="text-[1.125rem] leading-none shrink-0">{opt.icon}</span>
           )}
           <div className="min-w-0">
-            <span className="font-semibold text-[0.875rem] text-[#111111] block leading-tight">
+            <span className="font-semibold text-[0.875rem] text-foreground block leading-tight">
               {opt.label}
             </span>
             {opt.description && (
-              <span className="text-[0.75rem] text-[#666666] block mt-0.5 leading-tight">
+              <span className="text-[0.75rem] text-muted-foreground block mt-0.5 leading-tight">
                 {opt.description}
               </span>
             )}
@@ -64,19 +64,19 @@ export function TapCard({ option, selected, onClick }: {
       className={[
         'flex items-center gap-2.5 px-4 py-3 rounded-[10px] border transition-all duration-150 cursor-pointer text-left w-full',
         selected
-          ? 'bg-[#F5E642] border-[#D4C400] border-[1.5px]'
-          : 'bg-white border-[#E0E0E0] border-[1.5px] hover:border-[#999999]',
+          ? 'bg-primary border-primary-hover border-[1.5px]'
+          : 'bg-card border-border border-[1.5px] hover:border-muted-foreground',
       ].join(' ')}
     >
       {option.icon && (
         <span className="text-[1.125rem] leading-none shrink-0">{option.icon}</span>
       )}
       <div className="min-w-0">
-        <span className="font-semibold text-[0.875rem] text-[#111111] block leading-tight">
+        <span className="font-semibold text-[0.875rem] text-foreground block leading-tight">
           {option.label}
         </span>
         {option.description && (
-          <span className="text-[0.75rem] text-[#666666] block mt-0.5 leading-tight">
+          <span className="text-[0.75rem] text-muted-foreground block mt-0.5 leading-tight">
             {option.description}
           </span>
         )}

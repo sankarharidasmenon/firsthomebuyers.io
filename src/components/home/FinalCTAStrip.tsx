@@ -76,11 +76,12 @@ export function FinalCTAStrip() {
             fontFamily: 'Inter, sans-serif',
             fontWeight: 400,
             fontSize: '0.8125rem',
-            color: '#888888',
+            color: 'var(--muted-foreground)',
             display: 'block',
           }}
         >
-          ✓ No sign-up &nbsp;·&nbsp; ✓ No credit check &nbsp;·&nbsp; ✓ Free forever
+          {/* ✓ No sign-up &nbsp;·&nbsp; */}
+           ✓ No credit check &nbsp;·&nbsp; ✓ 100% Free
         </p>
       </div>
     </section>
