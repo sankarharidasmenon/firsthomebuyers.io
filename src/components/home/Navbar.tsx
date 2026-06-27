@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { href: '/my-results', label: 'Outcomes' },
   { href: '/next-steps', label: 'Strategy' },
   { href: '/#ai-guidance', label: 'AI Guidance' },
-  { href: '/ads', label: 'Rent Space' },
+  { href: '/ads', label: 'Ads' },
   { href: '/articles', label: 'Articles' },
   { href: '/profile', label: 'My Profile' },
 ]

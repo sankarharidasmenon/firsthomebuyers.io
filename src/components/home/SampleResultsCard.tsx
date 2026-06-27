@@ -228,7 +228,7 @@ export function SampleResultsCard() {
             marginTop: 10,
           }}
         >
-          Takes about 3 minutes · 100% free
+          Takes about few minutes · 100% free
         </p>
       </div>
     </div>
