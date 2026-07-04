@@ -1,14 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { SampleResultsCard } from './SampleResultsCard'
 
-const MOBILE_STATS = [
-  { value: 'Up to $41,800', label: 'in grants' },
-  { value: 'Borrow $535k', label: 'estimated capacity' },
-  { value: '~3 min', label: 'to check' },
-]
+const VIDEO_ID = '2mihxZObX4s'
 
 export function HeroSection() {
   const router = useRouter()
@@ -29,7 +24,6 @@ export function HeroSection() {
         const pg = JSON.parse(progressRaw)
         if (pg.currentStep) setCurrentStep(pg.currentStep)
         if (pg.flow) setFlow(pg.flow)
-        // Check TTL
         if (pg.expiresAt && new Date(pg.expiresAt) < new Date()) {
           setFirstName(null)
           setCurrentStep(null)
@@ -44,291 +38,367 @@ export function HeroSection() {
   const remainingMins = Math.max(1, remainingSteps)
 
   return (
-    <section
-      className="w-full bg-background"
-      style={{ paddingBottom: '32px' }}
-    >
-      <div
-        className="max-w-[1100px] mx-auto px-5 lg:px-12 pt-6 lg:pt-10"
+    <>
+      <style>{`
+        /* ── Unified hero background ── */
+        .fn-hero {
+          background:
+            radial-gradient(ellipse at 12% 65%, rgba(245,230,66,0.10) 0%, transparent 52%),
+            radial-gradient(ellipse at 78% 22%, rgba(245,230,66,0.08) 0%, transparent 48%),
+            linear-gradient(165deg, #FDF8F0 0%, #FAF5EB 45%, #F7F2E6 100%);
+        }
+        .dark .fn-hero {
+          background: var(--background);
+        }
+
+        /* Floating animation on the video frame */
+        @keyframes fn-float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          40%       { transform: translateY(-7px) rotate(-0.2deg); }
+          70%       { transform: translateY(-3px) rotate(0.15deg); }
+        }
+        .fn-float-animate {
+          animation: fn-float 7s ease-in-out infinite;
+          will-change: transform;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .fn-float-animate { animation: none; }
+        }
+
+        /* ─── Mobile-only heading size ───
+           Inline styles can't be overridden by classes, so font-size and
+           line-height are moved here where a media-query can override them.
+           Desktop (≥768px) restores the original clamp + line-height. */
+        .fn-hero-span { font-size: 2.25rem; }
+        @media (min-width: 768px) {
+          .fn-hero-span { font-size: clamp(2.5rem, 4.8vw, 4.75rem); }
+        }
+
+        .fn-hero-h1 { line-height: 0.98; }
+        @media (min-width: 768px) {
+          .fn-hero-h1 { line-height: 1.04; }
+        }
+
+        /* ─── Mobile-only paragraph ─── */
+        .fn-hero-para {
+          font-size: 0.9375rem;
+          line-height: 1.6;
+          max-width: 34ch;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        @media (min-width: 768px) {
+          .fn-hero-para {
+            font-size: 1.0625rem;
+            line-height: 1.65;
+            max-width: 560px;
+            margin-left: 0;
+            margin-right: 0;
+          }
+        }
+      `}</style>
+
+      {/* ════════════════════════════════════════════════════════════════
+          UNIFIED HERO — one responsive implementation
+          Mobile  : flex-col → [text] [video] [CTAs] stacked
+          Desktop : 2-col CSS grid → text+CTAs left, video right
+      ════════════════════════════════════════════════════════════════ */}
+      <section
+        className="fn-hero flex flex-col justify-center sm:min-h-[70vh] lg:flex-row lg:items-center lg:min-h-[75vh]"
+        style={{ position: 'relative', overflow: 'hidden' }}
       >
-        {/* ── Desktop: two-column 60/40 ── */}
-        <div className="lg:grid lg:gap-16 lg:items-center" style={{ gridTemplateColumns: '1fr 420px' }}>
+        {/* ── Decorative: radial glow — top right ── */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute', top: '-18%', right: '-6%',
+            width: 580, height: 580,
+            background: 'radial-gradient(circle, rgba(245,230,66,0.14) 0%, transparent 68%)',
+            borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
+          }}
+        />
 
-          {/* LEFT COLUMN */}
-          <div>
-            {isReturning ? (
-              /* ── RETURNING USER ── */
-              <div>
-                <h1
+        {/* ── Content ── */}
+        <div className="relative w-full max-w-[1150px] mx-auto px-4 pt-4 pb-2 sm:pt-5 sm:pb-5 lg:px-4 lg:py-7" style={{ zIndex: 1 }}>
+          {/*
+            Layout engine:
+              Mobile  → flex-col with order-1/2/3 controlling position
+              Desktop → CSS grid with explicit col/row placement
+
+            DOM order:      A (text-top)  B (video)  C (cta-bottom)
+            Mobile stack:   1st           2nd        3rd
+            Desktop grid:   col-1 row-1   col-2 r1-2 col-1 row-2
+          */}
+          <div
+            className="flex flex-col lg:grid lg:gap-y-6 lg:gap-x-16"
+            style={{
+              gridTemplateColumns: '58fr 42fr',
+              gridTemplateRows: 'auto auto',
+            }}
+          >
+
+            {/* ── A: Heading + paragraph ── */}
+            {/* Mobile: first  |  Desktop: col-1 row-1 */}
+            <div className="order-1 mb-4 sm:mb-5 lg:mb-0 text-center lg:text-left lg:col-start-1 lg:row-start-1">
+              {isReturning ? (
+                <div>
+                  <h1
+                    style={{
+                      fontFamily: '"Plus Jakarta Sans", sans-serif',
+                      fontWeight: 800,
+                      fontSize: 'clamp(2.25rem, 4vw, 3.75rem)',
+                      lineHeight: 1.08,
+                      letterSpacing: '-0.035em',
+                      color: 'var(--foreground)',
+                      marginBottom: 16,
+                    }}
+                  >
+                    Welcome back,<br />{firstName} 👋
+                  </h1>
+                  <p
+                    style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '1.0625rem',
+                      color: 'var(--muted-foreground)',
+                      lineHeight: 1.6,
+                      marginBottom: 16,
+                    }}
+                  >
+                    Let&apos;s pick up where you left off.
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+                    {[
+                      `Step ${currentStep} of 4 complete`,
+                      `⏱ ~${remainingMins} min left`,
+                      flow === 'grants' ? '🏛️ Checking grants' : '💰 Checking borrowing',
+                    ].map(chip => (
+                      <span
+                        key={chip}
+                        style={{
+                          background: 'var(--card)',
+                          border: '1px solid var(--border)',
+                          borderRadius: 9999,
+                          padding: '7px 16px',
+                          fontFamily: 'Inter, sans-serif',
+                          fontWeight: 500,
+                          fontSize: '0.8125rem',
+                          color: 'var(--secondary-foreground)',
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h1
+                    className="fn-hero-h1"
+                    style={{
+                      fontFamily: '"Plus Jakarta Sans", sans-serif',
+                      fontWeight: 800,
+                      letterSpacing: '-0.04em',
+                      marginBottom: 16,
+                    }}
+                  >
+                    <span className="fn-hero-span" style={{ display: 'block', color: 'var(--foreground)' }}>
+                      Unlock every grant.
+                    </span>
+                    <span className="fn-hero-span" style={{ display: 'block', color: '#C8AA00' }}>
+                      Enter the market
+                    </span>
+                    <span className="fn-hero-span" style={{ display: 'block', color: 'var(--foreground)' }}>
+                      sooner.
+                    </span>
+                  </h1>
+                  <p
+                    className="fn-hero-para"
+                    style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 400,
+                      color: 'var(--muted-foreground)',
+                      marginBottom: 0,
+                    }}
+                  >
+                    FirstNest identifies every Australian government grant and scheme you
+                    qualify for — federal and state — then builds your personalised roadmap
+                    to homeownership.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* ── B: Browser-frame video ── */}
+            {/* Mobile: hidden (video is below-fold on mobile — keeps hero compact)  |  Desktop: col-2 rows 1–2 */}
+            <div className="hidden fn-float-animate lg:block lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:self-center">
+              <div
+                style={{
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  boxShadow:
+                    '0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06)',
+                }}
+              >
+                {/* Chrome bar */}
+                <div
                   style={{
-                    fontFamily: '"Plus Jakarta Sans", sans-serif',
-                    fontWeight: 700,
-                    fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-                    color: 'var(--foreground)',
-                    lineHeight: 1.15,
-                    marginBottom: 16,
+                    background: '#1C1C1E',
+                    padding: '13px 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
                   }}
                 >
-                  Welcome back, {firstName} 👋
-                </h1>
-                <p
-                  style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 400,
-                    fontSize: '1rem',
-                    color: 'var(--muted-foreground)',
-                    marginBottom: 20,
-                  }}
-                >
-                  Let&apos;s pick up where you left off.
-                </p>
-
-                {/* Progress chips */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
-                  {[
-                    `Step ${currentStep} of 4 complete`,
-                    `⏱ ~${remainingMins} min left`,
-                    flow === 'grants' ? '🏛️ Checking grants' : '💰 Checking borrowing',
-                  ].map(chip => (
+                  <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+                    {[
+                      { bg: '#FF5F57', glow: 'rgba(255,95,87,0.5)' },
+                      { bg: '#FEBC2E', glow: 'rgba(254,188,46,0.5)' },
+                      { bg: '#28C840', glow: 'rgba(40,200,64,0.5)' },
+                    ].map(({ bg, glow }) => (
+                      <div key={bg} style={{ width: 13, height: 13, borderRadius: '50%', background: bg, boxShadow: `0 0 5px ${glow}` }} />
+                    ))}
+                  </div>
+                  <div
+                    style={{
+                      flex: 1, background: '#2C2C2E', borderRadius: 8,
+                      padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 8,
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+                      <circle cx="6" cy="6" r="5" stroke="#6B7280" strokeWidth="1" />
+                      <path d="M6 1C4.3 3.2 4 4.5 4 6s.3 2.8 2 5M6 1c1.7 2.2 2 3.5 2 5s-.3 2.8-2 5M1.5 6h9" stroke="#6B7280" strokeWidth="1" strokeLinecap="round" />
+                    </svg>
                     <span
-                      key={chip}
                       style={{
-                        background: 'var(--card)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 9999,
-                        padding: '7px 16px',
-                        fontFamily: 'Inter, sans-serif',
-                        fontWeight: 500,
-                        fontSize: '0.8125rem',
-                        color: 'var(--secondary-foreground)',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                        whiteSpace: 'nowrap',
+                        fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem',
+                        color: '#9CA3AF', letterSpacing: '0.01em', flex: 1, userSelect: 'none',
                       }}
                     >
-                      {chip}
+                      firstnest.com.au
                     </span>
-                  ))}
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <rect x="2.5" y="5.5" width="7" height="5" rx="1.2" stroke="#22C55E" strokeWidth="1" />
+                      <path d="M4.2 5.5V4.2a1.8 1.8 0 013.6 0V5.5" stroke="#22C55E" strokeWidth="1" strokeLinecap="round" />
+                    </svg>
+                  </div>
                 </div>
 
-                {/* Returning CTA pair — side by side */}
-                <div style={{ display: 'flex', gap: 10 }}>
+                {/* YouTube iframe */}
+                <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#000', display: 'block' }}>
+                  <iframe
+                    title="FirstNest intro video"
+                    src={`https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&playlist=${VIDEO_ID}&playsinline=1`}
+                    allow="autoplay; encrypted-media"
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }}
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── C: CTAs + trust ── */}
+            {/* Mobile: third (below video)  |  Desktop: col-1 row-2 */}
+            <div className="order-2 mb-0 lg:col-start-1 lg:row-start-2 lg:self-start">
+              {isReturning ? (
+                <div className="flex flex-col lg:flex-row gap-3 lg:gap-3">
                   <button
                     type="button"
                     onClick={() => router.push(`/onboarding?flow=${flow}&step=${currentStep}`)}
+                    className="w-full lg:flex-1 hover:-translate-y-px hover:shadow-[0_8px_32px_rgba(0,0,0,0.22)] transition-all duration-200"
                     style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: '#111111',
-                      color: '#F5E642',
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 700,
-                      fontSize: '0.875rem',
-                      letterSpacing: '0.02em',
-                      border: 'none',
-                      borderRadius: 9999,
-                      padding: '16px 18px',
-                      cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: '#111111', color: '#F5E642',
+                      fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem',
+                      border: 'none', borderRadius: 9999, padding: '16px 24px',
+                      cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
                       whiteSpace: 'nowrap',
                     }}
                   >
                     Continue →
                   </button>
-
                   <button
                     type="button"
                     onClick={() => router.push('/onboarding?flow=grants')}
+                    className="w-full lg:flex-1 hover:border-foreground transition-all duration-200"
                     style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: 'var(--card)',
-                      color: 'var(--secondary-foreground)',
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 500,
-                      fontSize: '0.875rem',
-                      border: '1.5px solid var(--input)',
-                      borderRadius: 9999,
-                      padding: '16px 18px',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: 'var(--card)', color: 'var(--foreground)',
+                      fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem',
+                      border: '1.5px solid var(--border)', borderRadius: 9999, padding: '16px 24px',
+                      cursor: 'pointer', whiteSpace: 'nowrap',
                     }}
-                    className="hover:border-foreground transition-colors duration-150"
                   >
                     Start fresh
                   </button>
                 </div>
-              </div>
-            ) : (
-              /* ── FIRST-TIME VISITOR ── */
-              <div>
-                {/* Two-line headline */}
-                <h1
-                  style={{
-                    fontFamily: '"Plus Jakarta Sans", sans-serif',
-                    fontWeight: 800,
-                    lineHeight: 1.06,
-                    marginBottom: 28,
-                    letterSpacing: '-0.035em',
-                  }}
-                >
-                  <span
-                    style={{
-                      display: 'block',
-                      fontSize: 'clamp(2.25rem, 5.5vw, 3.5rem)',
-                      color: 'var(--foreground)',
-                    }}
+              ) : (
+                <div>
+                  {/* Two CTA buttons — stacked on mobile, side-by-side on desktop */}
+                  <div
+                    className="flex flex-col lg:flex-row gap-3 lg:gap-5 mb-2 sm:mb-3"
                   >
-                    Your home buying
-                  </span>
-                  <span
-                    style={{
-                      display: 'block',
-                      fontSize: 'clamp(2.25rem, 5.5vw, 3.5rem)',
-                      color: 'var(--foreground)',
-                    }}
-                  >
-                    journey starts
-                  </span>
-                  <span
-                    style={{
-                      display: 'block',
-                      fontSize: 'clamp(2.25rem, 5.5vw, 3.5rem)',
-                      color: '#C8AA00',
-                    }}
-                  >
-                    here.
-                  </span>
-                </h1>
-
-                {/* Sub-paragraph */}
-                <p
-                  style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 400,
-                    fontSize: '1.0625rem',
-                    color: 'var(--muted-foreground)',
-                    maxWidth: 460,
-                    lineHeight: 1.6,
-                    marginBottom: 24,
-                  }}
-                >
-                  FirstNest shows Australian first home buyers exactly what government
-                  grants they qualify for, how much they can borrow, and what to do next.
-                  {/* — in about 3 minutes. */}
-                </p>
-
-                {/* Reorder wrapper: CTAs first on mobile, stats first on desktop */}
-                <div className="flex flex-col">
-
-                {/* Stat chips — order-2 on mobile, order-1 on desktop */}
-                <div
-                  className="order-2 lg:order-1 grid grid-cols-2 lg:flex lg:flex-nowrap gap-2.5 lg:gap-3 w-full mb-0 lg:mb-7"
-                >
-                  {MOBILE_STATS.map((s, i) => (
-                    <div
-                      key={s.label}
-                      className={`flex flex-col lg:flex-row items-center justify-center bg-muted border border-border rounded-[16px] lg:rounded-full py-2.5 px-1 lg:px-3 lg:py-1.5 ${
-                        i === 2 ? 'col-span-2 justify-self-center px-8 lg:px-3' : 'w-full lg:w-auto'
-                      }`}
+                    <button
+                      type="button"
+                      onClick={() => router.push('/onboarding?flow=grants')}
+                      className="w-full lg:flex-1 hover:-translate-y-px hover:shadow-[0_8px_28px_rgba(245,230,66,0.55)] transition-all duration-200"
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        gap: 8,
+                        background: 'linear-gradient(135deg, #F5E642 0%, #EDD900 100%)',
+                        color: '#111111',
+                        fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem',
+                        letterSpacing: '0.01em',
+                        border: 'none', borderRadius: 9999,
+                        padding: '16px 24px',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 16px rgba(245,230,66,0.35)',
+                        whiteSpace: 'nowrap',
+                      }}
                     >
-                      <span
-                        className="font-mono font-bold text-[0.8125rem] text-foreground whitespace-nowrap text-center"
-                      >
-                        {s.value}
-                      </span>
-                      <span
-                        className="font-sans text-[0.6875rem] text-muted-foreground mt-0.5 lg:mt-0 lg:ml-1.5 text-center lg:text-left lg:whitespace-nowrap leading-tight"
-                      >
-                        {s.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                      Grants & Schemes
+                    </button>
 
-                {/* CTA pair — order-1 on mobile, order-2 on desktop */}
-                <div className="order-1 lg:order-2 flex flex-col lg:flex-row lg:items-start gap-3 mb-7 lg:mb-0">
-                  <button
-                    type="button"
-                    onClick={() => router.push('/onboarding?flow=grants')}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 8,
-                      background: 'linear-gradient(135deg, #F5E642 0%, #EDD900 100%)',
-                      color: '#111111',
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 700,
-                      fontSize: '0.9375rem',
-                      letterSpacing: '0.01em',
-                      border: 'none',
-                      borderRadius: 9999,
-                      padding: '16px 24px',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 16px rgba(245,230,66,0.3)',
-                      transition: 'all 0.2s',
-                      whiteSpace: 'nowrap',
-                    }}
-                    className="hover:-translate-y-px hover:shadow-[0_6px_24px_rgba(245,230,66,0.50)]"
-                  >
-                    {/* Show My Eligible Schemes */}
-                    Grants & Schemes 
-                  </button>
-
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <button
                       type="button"
                       onClick={() => router.push('/onboarding?flow=borrowing')}
+                      className="w-full lg:flex-1 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(245,230,66,0.25)] transition-all duration-200"
                       style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                         gap: 8,
-                        background: 'linear-gradient(var(--background), var(--background)) padding-box, linear-gradient(135deg, #F5E642 0%, #C8AA00 40%, #F5E642 70%, #D4C400 100%) border-box',
+                        background: 'var(--card)',
                         color: 'var(--foreground)',
-                        fontFamily: 'Inter, sans-serif',
-                        fontWeight: 600,
-                        fontSize: '0.9375rem',
-                        border: '1.5px solid transparent',
-                        borderRadius: 9999,
-                        padding: '16px 24px',
+                        fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem',
+                        border: '2px solid #F5E642', borderRadius: 9999,
+                        padding: '14px 24px',
                         cursor: 'pointer',
-                        transition: 'all 0.2s',
                         whiteSpace: 'nowrap',
                       }}
-                      className="hover:brightness-110"
                     >
-                     Borrowing Capacity
+                      Borrowing Capacity
                     </button>
-                    <p
-                      style={{
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: '0.75rem',
-                        color: 'var(--muted-foreground)',
-                        textAlign: 'center',
-                        marginTop: 10,
-                      }}
-                    >
-                      No credit check · 100% free
-                    </p>
                   </div>
-                </div>
-                </div>{/* end reorder wrapper */}
-              </div>
-            )}
-          </div>
 
-          {/* RIGHT COLUMN — desktop only */}
-          <div className="hidden lg:block" style={{ paddingTop: 24 }}>
-            <SampleResultsCard />
+                  {/* Trust line */}
+                  <p
+                    className="text-center lg:text-left"
+                    style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '0.8125rem',
+                      color: 'var(--muted-foreground)',
+                      fontWeight: 400,
+                    }}
+                  >
+                    No credit check · 100% free · Takes around 3 minutes
+                  </p>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }

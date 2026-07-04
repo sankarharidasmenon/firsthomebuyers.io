@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/User/AppData/Local/Temp/claude/f--firstnest-v3/d1361799-1f59-426d-b6fa-60b0b0fdef4e/scratchpad/hero-verify/**)",
+      "Bash(npx --no-install -p playwright node measure.js)",
+      "Read(//c/Users/User/AppData/Local/npm-cache/_npx/**)",
+      "Bash(curl -s http://localhost:3000 -o /tmp_page.html -w \"%{http_code}\\\\n\")",
+      "Bash(grep -o \"Failed to compile\\\\|SyntaxError\\\\|Error:\" /tmp_page.html)",
+      "Read(//c/Users/User/AppData/Local/Temp/claude/f--firstnest-v3/d1361799-1f59-426d-b6fa-60b0b0fdef4e/scratchpad/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000)",
+      "Bash(export NODE_PATH=\"/c/Users/User/AppData/Local/npm-cache/_npx/705bc6b22212b352/node_modules\")",
+      "Bash(curl -s -o /dev/null -w \"http status: %{http_code}\\\\n\" http://localhost:3000)",
+      "PowerShell(npm run build 2>&1)"
+    ]
+  }
+}

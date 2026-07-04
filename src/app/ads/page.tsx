@@ -25,7 +25,8 @@ interface Zone {
   ctaLabel?: string
   ctaUrl?: string
   price: string
-  mediaUrl?: string
+  mediaUrl?: string   // local path: /videos/ad-{id}.mp4 — drop compressed MP4 in public/videos/
+  posterUrl?: string  // shown while video loads (or when no video file exists yet)
   desktopOnly?: boolean
 }
 
@@ -50,7 +51,8 @@ const ZONES: Zone[] = [
   { id: '005', status: 'occupied', size: 'large', type: 'video',
     advertiser: 'Coastal Real Estate', tagline: 'Coastal living at its finest',
     ctaLabel: 'View Properties', ctaUrl: '#', price: '$399/mo',
-    mediaUrl: 'https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4' },
+    mediaUrl: '/videos/ad-005.mp4',
+    posterUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop' },
   { id: '006', status: 'occupied', size: 'small', type: 'image',
     advertiser: 'TrueNorth Conveyancing', tagline: 'Stress-free property transfer',
     ctaLabel: 'Get a Quote', ctaUrl: '#', price: '$99/mo',
@@ -63,7 +65,8 @@ const ZONES: Zone[] = [
   { id: '009', status: 'occupied', size: 'medium', type: 'video',
     advertiser: 'BlueSky Properties', tagline: 'Your future starts here',
     ctaLabel: 'See All Listings', ctaUrl: '#', price: '$199/mo',
-    mediaUrl: 'https://videos.pexels.com/video-files/2098822/2098822-uhd_2560_1440_25fps.mp4' },
+    mediaUrl: '/videos/ad-009.mp4',
+    posterUrl: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&auto=format&fit=crop' },
   { id: '010', status: 'occupied', size: 'small', type: 'image',
     advertiser: 'Nest & Co.', tagline: 'Building nests, making homes',
     ctaLabel: 'Book Inspection', ctaUrl: '#', price: '$99/mo',
@@ -80,7 +83,8 @@ const ZONES: Zone[] = [
   { id: '014', status: 'occupied', size: 'medium', type: 'video',
     advertiser: 'First Keys Realty', tagline: 'First keys, first home',
     ctaLabel: 'Find My Home', ctaUrl: '#', price: '$199/mo',
-    mediaUrl: 'https://videos.pexels.com/video-files/4763824/4763824-uhd_2560_1440_25fps.mp4' },
+    mediaUrl: '/videos/ad-014.mp4',
+    posterUrl: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&auto=format&fit=crop' },
   { id: '015', status: 'occupied', size: 'small', type: 'image',
     advertiser: 'Harbour View Real Estate', tagline: 'Harbour views for everyone',
     ctaLabel: 'View Listings', ctaUrl: '#', price: '$99/mo',
@@ -89,7 +93,8 @@ const ZONES: Zone[] = [
   { id: '017', status: 'occupied', size: 'large', type: 'video',
     advertiser: 'Atlas Home Loans', tagline: 'Navigate your path home',
     ctaLabel: 'Get Pre-Approval', ctaUrl: '#', price: '$399/mo',
-    mediaUrl: 'https://videos.pexels.com/video-files/3004829/3004829-uhd_2560_1440_25fps.mp4' },
+    mediaUrl: '/videos/ad-017.mp4',
+    posterUrl: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop' },
   { id: '018', status: 'occupied', size: 'small', type: 'image',
     advertiser: 'Prestige Property Group', tagline: 'Prestige in every street',
     ctaLabel: 'Contact an Agent', ctaUrl: '#', price: '$99/mo',
@@ -119,7 +124,8 @@ const ZONES: Zone[] = [
   { id: '028', status: 'occupied', size: 'large', type: 'video',
     advertiser: 'GreenBuild Homes', tagline: 'Sustainable homes for modern Australia',
     ctaLabel: 'Explore Designs', ctaUrl: '#', price: '$399/mo',
-    mediaUrl: 'https://videos.pexels.com/video-files/4828450/4828450-uhd_2560_1440_25fps.mp4' },
+    mediaUrl: '/videos/ad-028.mp4',
+    posterUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop' },
   { id: '029', status: 'occupied', size: 'small', type: 'image',
     advertiser: 'SettleSure Legal', tagline: 'Settlement you can trust',
     ctaLabel: 'Get a Quote', ctaUrl: '#', price: '$99/mo',
@@ -143,7 +149,8 @@ const ZONES: Zone[] = [
   { id: '036', status: 'occupied', size: 'large', type: 'video', desktopOnly: true,
     advertiser: 'NexGen Developments', tagline: "Building tomorrow's homes today",
     ctaLabel: 'View Projects', ctaUrl: '#', price: '$399/mo',
-    mediaUrl: 'https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4' },
+    mediaUrl: '/videos/ad-036.mp4',
+    posterUrl: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&auto=format&fit=crop' },
   { id: '037', status: 'occupied', size: 'small', type: 'image', desktopOnly: true,
     advertiser: 'RateHaven Finance', tagline: 'Find your best rate today',
     ctaLabel: 'Compare Rates', ctaUrl: '#', price: '$99/mo',
@@ -503,9 +510,12 @@ export default function AdsPage() {
                       {zone.type === 'video' ? (
                         <video
                           autoPlay muted loop playsInline
+                          preload="none"
+                          poster={zone.posterUrl}
                           className="ads-media absolute inset-0 w-full h-full object-cover"
-                          src={zone.mediaUrl}
-                        />
+                        >
+                          {zone.mediaUrl && <source src={zone.mediaUrl} type="video/mp4" />}
+                        </video>
                       ) : (
                         <img
                           src={zone.mediaUrl ?? ''}
