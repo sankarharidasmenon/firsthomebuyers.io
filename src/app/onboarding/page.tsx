@@ -59,14 +59,24 @@ function OnboardingContent() {
   const flow = (params.get('flow') ?? 'grants') as Flow
   const initialStep = parseInt(params.get('step') ?? '1', 10)
 
+  const [mounted, setMounted] = useState(false)
   const [currentStep, setCurrentStep] = useState(initialStep)
   const [direction, setDirection] = useState<1 | -1>(1)
   const [errors, setErrors] = useState<StepErrors>({})
 
-  const [step1, setStep1State] = useState<Step1Data>(() => getStep1() ?? DEFAULT_STEP1)
-  const [step2, setStep2State] = useState<Step2Data>(() => getStep2() ?? DEFAULT_STEP2)
-  const [step3, setStep3State] = useState<Step3Data>(() => getStep3() ?? DEFAULT_STEP3)
-  const [step4, setStep4State] = useState<Step4Data>(() => getStep4() ?? DEFAULT_STEP4)
+  const [step1, setStep1State] = useState<Step1Data>(DEFAULT_STEP1)
+  const [step2, setStep2State] = useState<Step2Data>(DEFAULT_STEP2)
+  const [step3, setStep3State] = useState<Step3Data>(DEFAULT_STEP3)
+  const [step4, setStep4State] = useState<Step4Data>(DEFAULT_STEP4)
+
+  // Hydrate from localStorage on client only — avoids SSR/client mismatch
+  useEffect(() => {
+    setStep1State(getStep1() ?? DEFAULT_STEP1)
+    setStep2State(getStep2() ?? DEFAULT_STEP2)
+    setStep3State(getStep3() ?? DEFAULT_STEP3)
+    setStep4State(getStep4() ?? DEFAULT_STEP4)
+    setMounted(true)
+  }, [])
 
   // Auto-save for current step data
   const saveStep1 = useCallback((data: Step1Data) => setStep1(data), [])
@@ -135,6 +145,8 @@ function OnboardingContent() {
     center: { x: 0, opacity: 1 },
     exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%', opacity: 0 }),
   }
+
+  if (!mounted) return <div className="min-h-screen bg-white" />
 
   return (
     <StepWrapper

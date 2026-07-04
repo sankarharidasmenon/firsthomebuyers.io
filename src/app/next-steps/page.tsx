@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Navbar } from '@/components/home/Navbar'
-import { getStep1, getStep2, getStep3, getStep4, setMyResults } from '@/lib/localStorage'
+import { getStep1, getStep2, getStep3, getStep4, setMyResults, type Step1Data, type Step3Data } from '@/lib/localStorage'
 import { calculateBorrowingCapacity } from '@/lib/calculations'
 import { evaluateEligibility } from '@/lib/grantEligibility'
 import { DUMMY_USER } from '@/lib/dummyData'
@@ -48,6 +48,7 @@ const sectionTag: React.CSSProperties = {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function NextStepsPage() {
+  const [mounted, setMounted] = useState(false)
   const [contactMode, setContactMode] = useState<ContactMode>(null)
   const [submitted, setSubmitted] = useState(false)
   const [phone, setPhone] = useState('')
@@ -55,7 +56,24 @@ export default function NextStepsPage() {
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [linkCopied, setLinkCopied] = useState(false)
 
-  const { borrowing, grantsTotal, step1, step3, state, depositGap } = useMemo(() => {
+  const [{ borrowing, grantsTotal, step1, step3, state, depositGap }, setPageData] = useState<{
+    borrowing: { min: number; max: number }
+    grantsTotal: number
+    step1: Step1Data
+    step3: Step3Data
+    state: string
+    depositGap: number
+  }>({
+    borrowing: { min: 0, max: 0 },
+    grantsTotal: 0,
+    step1: { firstName: DUMMY_USER.firstName, state: DUMMY_USER.state, buyingWith: 'solo' },
+    step3: { depositAmount: DUMMY_USER.depositAmount, targetPropertyPrice: DUMMY_USER.targetPropertyPrice, propertyType: 'house', firstHomeBuyer: true },
+    state: DUMMY_USER.state,
+    depositGap: 0,
+  })
+
+  // Compute all derived data client-side only — localStorage is not available on the server
+  useEffect(() => {
     const s1 = getStep1() ?? { firstName: DUMMY_USER.firstName, state: DUMMY_USER.state, buyingWith: 'solo' as const }
     const s2 = getStep2() ?? { annualIncome: DUMMY_USER.annualIncome, partnerIncome: 0, monthlyExpenses: DUMMY_USER.monthlyExpenses }
     const s3 = getStep3() ?? { depositAmount: DUMMY_USER.depositAmount, targetPropertyPrice: DUMMY_USER.targetPropertyPrice, propertyType: 'house' as const, firstHomeBuyer: true }
@@ -74,7 +92,8 @@ export default function NextStepsPage() {
 
     const report = evaluateEligibility(s1, s2, s3, s4)
     const depositGap = Math.max((s3.targetPropertyPrice * 0.2) - s3.depositAmount, 0)
-    return { borrowing, grantsTotal: report.grantsTotal, step1: s1, step3: s3, state: s1.state || 'VIC', depositGap }
+    setPageData({ borrowing, grantsTotal: report.grantsTotal, step1: s1, step3: s3, state: s1.state || 'VIC', depositGap })
+    setMounted(true)
   }, [])
 
   const firstName = step1.firstName || 'there'
@@ -117,7 +136,7 @@ export default function NextStepsPage() {
         </span>
       </div>
 
-      <h1 suppressHydrationWarning style={{
+      <h1 style={{
         fontFamily: '"Plus Jakarta Sans", sans-serif',
         fontWeight: 800,
         fontSize: 'clamp(1.625rem, 4vw, 2rem)',
@@ -616,6 +635,12 @@ export default function NextStepsPage() {
   }
 
   // ── RENDER ────────────────────────────────────────────────────────────────────
+  if (!mounted) return (
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--background)' }}>
+      <Navbar />
+    </div>
+  )
+
   return (
     <div
       className="min-h-screen flex flex-col"

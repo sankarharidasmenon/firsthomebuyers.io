@@ -11,7 +11,7 @@ const STATS = [
 export function SocialProof() {
   return (
     <section style={{ background: 'var(--secondary)', padding: '56px 20px' }} className="lg:py-20">
-      <div className="max-w-[1100px] mx-auto lg:px-12">
+      <div className="max-w-[1150px] mx-auto px-4 lg:px-4">
 
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-center">
 

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from 'next/font/google'
+import { Plus_Jakarta_Sans, Inter, JetBrains_Mono, Fraunces } from 'next/font/google'
 import './globals.css'
 import { BottomNav } from '@/components/navigation/BottomNav'
 import { Footer } from '@/components/layout/Footer'
@@ -28,6 +28,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-serif',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
   title: 'FirstNest — Know Your Budget. Know Your Grants.',
   description: "Australia's smartest first home buyer tool — free, fast, no login needed.",
@@ -43,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable}`}
       suppressHydrationWarning
     >
       <head>

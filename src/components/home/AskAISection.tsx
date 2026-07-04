@@ -99,14 +99,14 @@ export default function AskAISection() {
   }
 
   return (
-    <section id="ai-guidance" className="bg-background py-10 scroll-mt-20 lg:scroll-mt-24">
-      <ScrollReveal className="max-w-7xl mx-auto px-6 lg:px-8">
+    <section id="ai-guidance" className="bg-background pt-10 pb-4 lg:pb-6 scroll-mt-20 lg:scroll-mt-24">
+      <ScrollReveal className="max-w-[1150px] mx-auto px-4 lg:px-4">
 
         {/* Section header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-fn-yellow-light text-fn-navy text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-widest">
             <Sparkles className="w-3.5 h-3.5" />
-            AI-Powered
+            Sample Preview
           </div>
           <h2 className="text-3xl font-bold text-foreground mb-3">Ask FirstNest AI</h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-base leading-relaxed">
@@ -218,7 +218,7 @@ export default function AskAISection() {
 
             {/* Animated AI checklist */}
             <div className="bg-white/70 rounded-2xl p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-fn-yellow mb-3">AI scanning your profile</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-fn-yellow mb-3">Sample AI output</p>
               <div className="flex flex-col gap-2.5">
                 {aiSteps.map((step, i) => {
                   const done = i < checkedCount
@@ -272,8 +272,7 @@ export default function AskAISection() {
                 <p className="text-2xl font-extrabold text-fn-navy leading-none">AUD $41,800</p>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-fn-success animate-pulse" />
-                <p className="text-[9px] font-bold text-fn-navy/50 uppercase tracking-widest">Live</p>
+                <p className="text-[9px] font-bold text-fn-navy/50 uppercase tracking-widest">Sample</p>
               </div>
             </div>
 

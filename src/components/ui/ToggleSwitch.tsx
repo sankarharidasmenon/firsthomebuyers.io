@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useId } from 'react'
 import * as Switch from '@radix-ui/react-switch'
 
 interface ToggleSwitchProps {
@@ -11,7 +11,8 @@ interface ToggleSwitchProps {
 }
 
 export function ToggleSwitch({ checked, onCheckedChange, label, id }: ToggleSwitchProps) {
-  const switchId = id ?? `toggle-${Math.random().toString(36).slice(2, 7)}`
+  const generatedId = useId()
+  const switchId = id ?? generatedId
 
   return (
     <div className="flex items-center gap-2">
