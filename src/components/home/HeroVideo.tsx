@@ -92,7 +92,7 @@ export function HeroVideo() {
             textAlign: 'center',
           }}
         >
-          <p
+          {/* <p
             style={{
               fontFamily: 'Inter, sans-serif',
               fontWeight: 600,
@@ -103,7 +103,7 @@ export function HeroVideo() {
             }}
           >
             Watch: How FirstNest works for Aussie first home buyers
-          </p>
+          </p> */}
         </div>
       </div>
     </div>

@@ -63,7 +63,7 @@ export function Navbar() {
         <style>{`
           @media (min-width: 1024px) { .fn-nav { height: 64px !important; } }
         `}</style>
-        <div className="fn-nav max-w-300 mx-auto h-full flex items-center justify-between px-5 lg:px-12">
+        <div className="fn-nav max-w-[1150px] mx-auto h-full flex items-center justify-between px-4 lg:px-4">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 no-underline" aria-label="FirstNest home">

@@ -2,7 +2,10 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft } from 'lucide-react'
+import {
+  ChevronLeft, Home, TrendingUp, Gift, Tag, Shield,
+  Lock, Calculator, Building2, FileText, Star,
+} from 'lucide-react'
 import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
 import { Navbar } from '@/components/home/Navbar'
 
@@ -156,19 +159,142 @@ export function StepWrapper({
         </div>
       </div>
 
-      {/* Desktop content
+      {/* Desktop content — two-column layout
           Offset: navbar 64 + progress 3 + controls row ~45 = 112px */}
-      <div className="hidden lg:flex flex-col flex-1" style={{ paddingTop: 112 }}>
-        <main className="flex-1 w-full max-w-145 mx-auto px-6 pt-4 pb-10">
-          {children}
-        </main>
+      <div
+        className="hidden lg:flex flex-col flex-1 bg-background"
+        style={{ paddingTop: 112, minHeight: '100vh' }}
+      >
+        <div className="w-full max-w-360 mx-auto px-10 xl:px-16 pt-8 pb-14">
+          <div
+            className="grid items-start"
+            style={{ gridTemplateColumns: '3fr 2fr', gap: '3.5rem' }}
+          >
 
-        {/* Footer */}
-        {/* <footer className="w-full pt-6 pb-8 text-center" style={{ background: '#111111' }}>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--muted-foreground)' }}>
-            © 2025 FirstNest · Not financial advice · Free to use
-          </p>
-        </footer> */}
+            {/* ── LEFT: form wrapped in premium card ── */}
+            <div
+              className="bg-card rounded-[28px] border border-border"
+              style={{
+                padding: '36px 40px',
+                boxShadow: '0 2px 20px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)',
+              }}
+            >
+              {children}
+            </div>
+
+            {/* ── RIGHT: sticky info panel ── */}
+            <div className="flex flex-col gap-3" style={{ position: 'sticky', top: 124 }}>
+
+              {/* 1 — Header + checklist */}
+              <div
+                className="bg-card rounded-2xl border border-border"
+                style={{ padding: '20px 24px', boxShadow: '0 1px 6px rgba(0,0,0,0.05)' }}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className="flex items-center justify-center rounded-xl shrink-0"
+                    style={{ width: 40, height: 40, background: 'var(--color-lemon)' }}
+                  >
+                    {/* Icon always sits on lemon — must stay dark in both themes */}
+                    <Home size={18} color="#111111" />
+                  </div>
+                  <p style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--foreground)', lineHeight: 1.25 }}>
+                    Buying your first home
+                  </p>
+                </div>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: 'var(--muted-foreground)', marginBottom: 10, lineHeight: 1.5 }}>
+                  We only ask a few questions so we can calculate:
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {([
+                    [TrendingUp, 'Your borrowing capacity'],
+                    [Gift,       'Grants you qualify for'],
+                    [Tag,        'Stamp duty savings'],
+                    [Shield,     'Government schemes'],
+                  ] as const).map(([Icon, label]) => (
+                    <div key={label} className="flex items-center gap-2">
+                      <Icon size={13} color="var(--color-green)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--foreground)', fontWeight: 500 }}>
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2 — Privacy */}
+              <div
+                className="flex items-start gap-3 bg-card rounded-2xl border border-border"
+                style={{ padding: '20px 24px', boxShadow: '0 1px 6px rgba(0,0,0,0.05)' }}
+              >
+                <div
+                  className="flex items-center justify-center rounded-xl shrink-0"
+                  style={{ width: 32, height: 32, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', marginTop: 1 }}
+                >
+                  <Lock size={14} color="var(--color-green)" />
+                </div>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
+                  Your information stays{' '}
+                  <strong style={{ color: 'var(--foreground)', fontWeight: 600 }}>private</strong>
+                  {' '}and is only used to personalise your results. No credit check.
+                </p>
+              </div>
+
+              {/* 3 — What happens next (timeline) */}
+              <div
+                className="bg-card rounded-2xl border border-border"
+                style={{ padding: '20px 24px', boxShadow: '0 1px 6px rgba(0,0,0,0.05)' }}
+              >
+                <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8125rem', color: 'var(--foreground)', marginBottom: 14 }}>
+                  What happens next
+                </p>
+                <div className="flex flex-col">
+                  {([
+                    [Calculator, 'Calculate borrowing power'],
+                    [Building2,  'Check grant eligibility'],
+                    [FileText,   'Build your action plan'],
+                    [Star,       'View your results'],
+                  ] as const).map(([Icon, label], i) => {
+                    const done = i < currentStep
+                    return (
+                      <div key={label}>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="flex items-center justify-center rounded-full shrink-0"
+                            style={{
+                              width: 28, height: 28,
+                              background: done ? 'var(--color-lemon)' : 'var(--secondary)',
+                              border: done ? 'none' : '1.5px solid var(--border)',
+                              transition: 'background 400ms',
+                            }}
+                          >
+                            {/* Lemon bg is brand-fixed — icon stays dark; inactive uses theme token */}
+                            <Icon size={13} color={done ? '#111111' : 'var(--muted-foreground)'} strokeWidth={2} />
+                          </div>
+                          <span style={{
+                            fontFamily: 'Inter, sans-serif',
+                            fontSize: '0.8125rem',
+                            fontWeight: done ? 600 : 400,
+                            color: done ? 'var(--foreground)' : 'var(--muted-foreground)',
+                            transition: 'color 400ms',
+                          }}>
+                            {label}
+                          </span>
+                        </div>
+                        {i < 3 && (
+                          <div style={{ width: 28, display: 'flex', justifyContent: 'center', margin: '3px 0' }}>
+                            <div style={{ width: 1.5, height: 12, background: 'var(--border)', borderRadius: 1 }} />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+            </div>{/* end right panel */}
+          </div>{/* end grid */}
+        </div>
       </div>
 
       <AutoSaveIndicator show={autoSaveVisible} />

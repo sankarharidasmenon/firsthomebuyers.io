@@ -18,10 +18,10 @@ const X_PATH        = 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6
 const YOUTUBE_PATH  = 'M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z'
 
 const SOCIAL = [
-  { path: GITHUB_PATH,   label: 'GitHub' },
-  { path: LINKEDIN_PATH, label: 'LinkedIn' },
-  { path: X_PATH,        label: 'X (Twitter)' },
-  { path: YOUTUBE_PATH,  label: 'YouTube' },
+  { path: GITHUB_PATH,   label: 'GitHub', color: '#ffffff' },
+  { path: LINKEDIN_PATH, label: 'LinkedIn', color: '#0077b5' },
+  { path: X_PATH,        label: 'X (Twitter)', color: '#ffffff' },
+  { path: YOUTUBE_PATH,  label: 'YouTube', color: '#ff0000' },
 ]
 
 const PRODUCT = [
@@ -64,15 +64,23 @@ export function Footer() {
 
         .fn-social-btn {
           display: flex; align-items: center; justify-content: center;
-          width: 34px; height: 34px; border-radius: 8px;
-          background: var(--primary); color: var(--primary-foreground);
-          transition: background 130ms, transform 130ms;
+          width: 36px; height: 36px; border-radius: 10px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+          border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+          color: var(--brand);
+          transition: all 200ms ease;
         }
-        .fn-social-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .fn-social-btn:hover { 
+          background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+          border-color: rgba(255,255,255,0.2);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+          transform: translateY(-2px);
+        }
       `}</style>
 
       {/* ── Main columns: Brand | Product | Official Sources ── */}
-      <div className="max-w-275 mx-auto px-5 lg:px-12 pt-14 pb-12">
+      <div className="max-w-275 mx-auto px-5 lg:px-12 pt-10 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16 text-center lg:text-left">
 
           {/* Col 1: Brand */}
@@ -99,9 +107,9 @@ export function Footer() {
               Australia&apos;s free first home buyer tool — grants, borrowing power and your next step.
             </p>
 
-            <div style={{ display: 'flex', gap: 6 }}>
-              {SOCIAL.map(({ path, label }) => (
-                <a key={label} href="#" aria-label={label} className="fn-social-btn">
+            <div style={{ display: 'flex', gap: 6, marginLeft: '-8px' }}>
+              {SOCIAL.map(({ path, label, color }) => (
+                <a key={label} href="#" aria-label={label} className="fn-social-btn" style={{ '--brand': color } as React.CSSProperties}>
                   <SvgIcon path={path} />
                 </a>
               ))}
@@ -143,23 +151,22 @@ export function Footer() {
 
       {/* ── Bottom bar ── */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <div className="max-w-275 mx-auto px-5 lg:px-12 py-6 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+        <div className="max-w-275 mx-auto px-5 lg:px-12 py-6 flex flex-col gap-4">
           <p style={{
-            fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem',
-            color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap', flexShrink: 0,
-          }}>
-            © 2026 FirstNestAI
-          </p>
-          <p style={{
-            fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem',
-            color: 'rgba(255,255,255,0.65)', lineHeight: 1.7,
-            maxWidth: 680, textAlign: 'center',
-          }} className="lg:text-left">
+            fontFamily: 'Inter, sans-serif', fontSize: '0.75rem',
+            color: 'rgba(255,255,255,0.7)', lineHeight: 1.6,
+          }} className="w-full text-left">
             FirstNest provides general information only and does not constitute financial, legal or taxation advice.
             All borrowing estimates and grant eligibility results are indicative only and may not reflect your actual
             circumstances. Grant values and eligibility criteria change frequently — always verify with the relevant
             state or federal authority. Consult a licensed financial adviser or mortgage broker before making any
             property or borrowing decisions.
+          </p>
+          <p style={{
+            fontFamily: 'Inter, sans-serif', fontSize: '0.75rem',
+            color: 'rgba(255,255,255,0.5)',
+          }}>
+            © 2026 FirstNestAI
           </p>
         </div>
       </div>
