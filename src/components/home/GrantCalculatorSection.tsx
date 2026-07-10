@@ -1,12 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Sparkles, CheckCircle2, Home, Landmark, Calculator, PiggyBank, ArrowRight, Check, Lock, ShieldCheck, Gift } from 'lucide-react'
-import { SliderField } from '@/components/ui/SliderField'
-import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
+import { Sparkles, CheckCircle2, Home, Landmark, PiggyBank, Check, Lock, ShieldCheck, Gift, Wallet, MapPin, Building, Info, ArrowRight } from 'lucide-react'
+import * as Slider from '@radix-ui/react-slider'
 import { Button } from '@/components/ui/button'
-import { evaluateEligibility, EligibilityReport } from '@/lib/grantEligibility'
+import { fetchEligibility, type EligibilityResult } from '@/lib/schemes/eligibilityClient'
 import {
   Select,
   SelectContent,
@@ -21,6 +19,7 @@ function AnimatedNumber({ value }: { value: number }) {
 
   useEffect(() => {
     let startTime: number
+    let animationFrameId: number
     const duration = 500 // ms
     const startValue = displayValue
 
@@ -32,11 +31,12 @@ function AnimatedNumber({ value }: { value: number }) {
       setDisplayValue(Math.floor(startValue + (value - startValue) * easeOutQuart))
 
       if (factor < 1) {
-        requestAnimationFrame(animate)
+        animationFrameId = requestAnimationFrame(animate)
       }
     }
 
-    requestAnimationFrame(animate)
+    animationFrameId = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(animationFrameId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
@@ -53,24 +53,35 @@ export function GrantCalculatorSection() {
   const [depositAmount, setDepositAmount] = useState(70000)
   const [buyingWith, setBuyingWith] = useState<'solo' | 'partner'>('solo')
 
-  const [report, setReport] = useState<EligibilityReport | null>(null)
+  const [result, setResult] = useState<EligibilityResult | null>(null)
+  const [calcError, setCalcError] = useState(false)
 
+  // Eligibility is computed by the database via the Phase 2A API. Debounced so
+  // slider drags don't spam the network; stale responses are ignored.
   useEffect(() => {
-    // Generate mocked step data to feed the existing eligibility engine
-    const step1 = { state, buyingWith, firstName: 'User' }
-    const step2 = { annualIncome: 90000, partnerIncome: buyingWith === 'partner' ? 90000 : 0, monthlyExpenses: 2000 }
-    const step3 = { depositAmount, targetPropertyPrice: propertyPrice, propertyType, firstHomeBuyer: true }
-    const step4 = { employmentType: 'fulltime' as const, creditCardLimit: 0, hecsDebt: false, otherLoanRepayments: 0 }
-
-    const result = evaluateEligibility(step1, step2, step3, step4)
-    setReport(result)
+    let cancelled = false
+    const timer = setTimeout(() => {
+      fetchEligibility({
+        state,
+        firstHomeBuyer: true,
+        income: 90000 + (buyingWith === 'partner' ? 90000 : 0),
+        hasPartner: buyingWith === 'partner',
+        propertyPrice,
+        deposit: depositAmount,
+        propertyType,
+        singleParent: buyingWith === 'partner' ? false : undefined,
+      })
+        .then((res) => { if (!cancelled) { setResult(res); setCalcError(false) } })
+        .catch(() => { if (!cancelled) setCalcError(true) })
+    }, 300)
+    return () => { cancelled = true; clearTimeout(timer) }
   }, [state, propertyType, propertyPrice, depositAmount, buyingWith])
 
-  const totalSavings = report?.grantsTotal || 0
-  const eligibleGrants = report?.grants.filter(g => g.status === 'eligible') || []
+  const totalSavings = result ? result.cashGrantsTotal + result.taxSavingsTotal : 0
+  const eligibleGrants = result ? result.items.filter((i) => i.eg.status === 'eligible').map((i) => i.eg) : []
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#FDF8F0] dark:bg-background py-10 lg:py-12 border-y border-border/40">
+    <section id="grant-calculator" className="relative w-full overflow-hidden scroll-mt-20 lg:scroll-mt-24 bg-[#FDF8F0] dark:bg-background py-10 lg:py-12 border-y border-border/40">
       {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--color-fn-yellow-pale)_0%,_transparent_60%)] dark:bg-[radial-gradient(ellipse_at_top_left,_rgba(245,230,66,0.05)_0%,_transparent_60%)] opacity-80" />
@@ -84,13 +95,14 @@ export function GrantCalculatorSection() {
           <div className="flex flex-col justify-between h-full fade-up py-0 lg:py-2">
             <div>
               <div className="flex flex-col items-center text-center lg:items-start lg:text-left w-full">
-                <div className="inline-flex items-center gap-2 bg-fn-yellow-light text-fn-navy text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-widest">
+                {/* <div className="inline-flex items-center gap-2 bg-fn-yellow-light text-fn-navy text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-widest">
                   <Sparkles className="w-3.5 h-3.5" />
                   Grant Calculator
-                </div>
+                </div> */}
 
-                <h2 className="text-3xl lg:text-5xl font-bold leading-[1.15] tracking-tight text-foreground mb-4 max-w-[320px] lg:max-w-none">
-                  See what you <br className="hidden lg:inline" /> could <span className="gradient-text italic pr-1">unlock,</span> <br className="hidden lg:inline" /> right now
+                <h2 className="text-3xl font-bold text-foreground mb-4 max-w-[320px] lg:max-w-none" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Grant Calculator
+                  {/* <br className="hidden lg:inline" /> could <span className="pr-1">unlock,</span> <br className="hidden lg:inline" /> right now */}
                 </h2>
 
                 <p className="text-[0.9375rem] lg:text-base text-secondary-foreground mb-5 lg:mb-6 max-w-[300px] lg:max-w-[380px]" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -125,149 +137,166 @@ export function GrantCalculatorSection() {
           </div>
 
           {/* RIGHT SIDE: Calculator Card */}
-          <div className="relative fade-up" style={{ animationDelay: '100ms' }}>
-            <div className="absolute -inset-1 bg-gradient-to-b from-primary/30 to-transparent rounded-[24px] blur-xl opacity-50 dark:opacity-20" />
-
-            <div className="relative flex flex-col bg-white dark:bg-card border border-border dark:border-border rounded-[24px] p-4 lg:p-4 shadow-modal">
-
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FFFCE8] text-primary-hover dark:bg-primary/20 dark:text-primary">
+          <div className="relative fade-up w-full" style={{ animationDelay: '100ms' }}>
+            <div className="relative flex flex-col bg-white/40 backdrop-blur-3xl border border-white/70 dark:from-surface dark:to-surface/50 dark:border-border rounded-[24px] p-4 sm:p-6 lg:p-7 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ring-1 ring-inset ring-white/60">
+              
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FFFCE8] text-[#D4B952] dark:bg-primary/20 dark:text-primary">
                   <Home size={18} />
                 </div>
-                <h3 className="text-lg font-bold font-heading text-foreground">Your Grant Snapshot</h3>
+                <h3 className="text-[1.125rem] font-bold text-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Your Grant Snapshot</h3>
               </div>
 
-              {/* Fields */}
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[0.8125rem] font-semibold text-secondary-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+              {/* Form Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[0.75rem] text-muted-foreground font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
                     State / Territory
                   </label>
-                  <div className="relative">
-                    <Select value={state} onValueChange={setState}>
-                      <SelectTrigger 
-                        className="w-full h-[38px] px-3 bg-background dark:bg-input border border-border dark:border-border rounded-[10px] text-[0.875rem] font-medium focus:ring-2 focus:ring-primary outline-none cursor-pointer hover:border-muted-foreground transition-colors"
-                        style={{ fontFamily: 'Inter, sans-serif' }}
-                      >
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent position="popper" sideOffset={4}>
-                        <SelectItem value="NSW">New South Wales (NSW)</SelectItem>
-                        <SelectItem value="VIC">Victoria (VIC)</SelectItem>
-                        <SelectItem value="QLD">Queensland (QLD)</SelectItem>
-                        <SelectItem value="WA">Western Australia (WA)</SelectItem>
-                        <SelectItem value="SA">South Australia (SA)</SelectItem>
-                        <SelectItem value="TAS">Tasmania (TAS)</SelectItem>
-                        <SelectItem value="ACT">Australian Capital Territory (ACT)</SelectItem>
-                        <SelectItem value="NT">Northern Territory (NT)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Select value={state} onValueChange={setState}>
+                    <SelectTrigger
+                      className="w-full h-11 px-3.5 bg-transparent border border-[#E4DFD2] dark:border-border/50 rounded-xl text-[0.875rem] font-medium text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none hover:border-border transition-colors shadow-sm"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                    >
+                      <div className="flex items-center gap-2.5 w-full text-left">
+                        <MapPin size={16} className="text-[#D4B952] shrink-0 opacity-80" />
+                        <span className="truncate"><SelectValue placeholder="Select state" /></span>
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent position="popper" sideOffset={4} className="rounded-xl shadow-xl">
+                      <SelectItem value="NSW">New South Wales (NSW)</SelectItem>
+                      <SelectItem value="VIC">Victoria (VIC)</SelectItem>
+                      <SelectItem value="QLD">Queensland (QLD)</SelectItem>
+                      <SelectItem value="WA">Western Australia (WA)</SelectItem>
+                      <SelectItem value="SA">South Australia (SA)</SelectItem>
+                      <SelectItem value="TAS">Tasmania (TAS)</SelectItem>
+                      <SelectItem value="ACT">Australian Capital Territory (ACT)</SelectItem>
+                      <SelectItem value="NT">Northern Territory (NT)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label className="text-[0.8125rem] font-semibold text-secondary-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[0.75rem] text-muted-foreground font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Property Type
                   </label>
-                  <div className="relative">
-                    <Select value={propertyType} onValueChange={(value) => setPropertyType(value as any)}>
-                      <SelectTrigger 
-                        className="w-full h-[38px] px-3 bg-background dark:bg-input border border-border dark:border-border rounded-[10px] text-[0.875rem] font-medium focus:ring-2 focus:ring-primary outline-none cursor-pointer hover:border-muted-foreground transition-colors"
-                        style={{ fontFamily: 'Inter, sans-serif' }}
-                      >
-                        <SelectValue placeholder="Select property type" />
-                      </SelectTrigger>
-                      <SelectContent position="popper" sideOffset={4}>
-                        <SelectItem value="house">Existing House</SelectItem>
-                        <SelectItem value="townhouse">Townhouse</SelectItem>
-                        <SelectItem value="apartment">Apartment</SelectItem>
-                        <SelectItem value="offplan">New build / Off-the-plan</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Select value={propertyType} onValueChange={(value) => setPropertyType(value as 'house' | 'townhouse' | 'apartment' | 'offplan')}>
+                    <SelectTrigger
+                      className="w-full h-11 px-3.5 bg-transparent border border-[#E4DFD2] dark:border-border/50 rounded-xl text-[0.875rem] font-medium text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none hover:border-border transition-colors shadow-sm"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                    >
+                      <div className="flex items-center gap-2.5 w-full text-left">
+                        <Building size={16} className="text-[#D4B952] shrink-0 opacity-80" />
+                        <span className="truncate"><SelectValue placeholder="Select property type" /></span>
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent position="popper" sideOffset={4} className="rounded-xl shadow-xl">
+                      <SelectItem value="house">Existing House</SelectItem>
+                      <SelectItem value="townhouse">Townhouse</SelectItem>
+                      <SelectItem value="apartment">Apartment</SelectItem>
+                      <SelectItem value="offplan">New build / Off-the-plan</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              <div className="mb-3">
-                <SliderField
-                  label="Estimated Property Price"
-                  value={propertyPrice}
+              {/* Slider Area */}
+              <div className="flex flex-col mb-4">
+                <label className="flex items-center gap-1.5 text-[0.75rem] text-muted-foreground font-medium mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Estimated Property Price <Info size={14} className="opacity-50" />
+                </label>
+                
+                <Slider.Root
+                  className="relative flex items-center select-none touch-none w-full h-5 mb-1"
+                  value={[propertyPrice]}
                   min={300000}
                   max={1200000}
                   step={10000}
-                  onChange={setPropertyPrice}
-                />
+                  onValueChange={(val) => setPropertyPrice(val[0])}
+                >
+                  <Slider.Track className="relative grow rounded-full h-[4px]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #E4DFD2, #E4DFD2 3px, transparent 3px, transparent 6px)' }}>
+                    <Slider.Range className="absolute bg-[#D4B952] rounded-full h-full" />
+                  </Slider.Track>
+                  <Slider.Thumb
+                    className="block w-[18px] h-[18px] bg-[#D4B952] border-[3px] border-white dark:border-background rounded-full shadow-md focus:outline-none focus:ring-4 focus:ring-primary/20 transition-transform hover:scale-110 cursor-grab active:cursor-grabbing"
+                    aria-label="Property Price"
+                  />
+                </Slider.Root>
+
+                <div className="flex justify-between items-center mt-2.5 text-[0.75rem] font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <span className="w-[60px] text-left text-[0.6875rem] uppercase tracking-wide">$300K</span>
+                  <span className="text-[1.125rem] font-bold text-foreground tracking-tight tabular-nums flex-1 text-center">
+                    <AnimatedNumber value={propertyPrice} />
+                  </span>
+                  <span className="w-[60px] text-right text-[0.6875rem] uppercase tracking-wide">$1.2M+</span>
+                </div>
               </div>
 
-              {/* Live Results Card */}
-              <div className="bg-[#FFFCE8] dark:bg-primary/5 rounded-[16px] p-3 mb-2.5 border border-primary/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 text-primary-hover dark:text-primary">
-                    <Landmark size={16} />
+              {/* Inner Grants Card */}
+              <div className="bg-[#FCFAF5] dark:bg-card/50 border border-[#F1ECD9] dark:border-border/50 rounded-2xl p-4 sm:p-5 mb-4 mt-4">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#FCEEA4]/40 text-[#C9A227] dark:bg-primary/20 dark:text-primary">
+                    <Wallet size={16} strokeWidth={2.5} />
                   </div>
-                  <span className="font-bold text-[1rem] font-heading text-foreground">Estimated Grants & Savings</span>
+                  <span className="font-bold text-[0.9375rem] text-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Estimated Grants & Savings</span>
                 </div>
 
-                <div className="space-y-1 mb-2">
-                  {report?.stampDuty?.isEligible && (
-                    <div className="flex justify-between items-center font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      <span className="text-[0.875rem] text-secondary-foreground">Stamp Duty Concession</span>
-                      <span className="text-foreground text-[1rem]"><AnimatedNumber value={report.stampDuty.saving} /></span>
-                    </div>
-                  )}
+                <div className="flex flex-col w-full gap-3.5 mb-2 min-h-[180px]">
                   {eligibleGrants.map((eg, i) => (
-                    <div key={i} className="flex justify-between items-center font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      <span className="text-[0.875rem] text-secondary-foreground">{eg.grant.name}</span>
-                      <span className="text-foreground text-[1rem]">
+                    <div key={i} className="flex items-start sm:items-center justify-between gap-3 sm:gap-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      <span className="font-medium text-[0.875rem] text-foreground leading-snug">{eg.grant.name}</span>
+                      <span className={`text-[#C9A227] font-bold tracking-tight mt-0.5 sm:mt-0 tabular-nums ${typeof eg.value === 'number' ? 'text-[0.9375rem] shrink-0' : 'text-right text-[0.75rem] sm:text-[0.8125rem] max-w-[55%] sm:max-w-none leading-tight'}`}>
                         {typeof eg.value === 'number' ? <AnimatedNumber value={eg.value} /> : eg.value}
                       </span>
                     </div>
                   ))}
-                  {!report?.stampDuty?.isEligible && eligibleGrants.length === 0 && (
-                    <div className="text-[0.875rem] text-muted-foreground italic" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      Adjust values to see eligible grants.
+                  {eligibleGrants.length === 0 && (
+                    <div className="py-2 text-center text-[0.875rem] text-muted-foreground italic" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {calcError ? 'Unable to estimate right now — please try again.' : 'Adjust values to see eligible grants.'}
                     </div>
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-primary/20 dark:border-border flex justify-between items-center">
-                  <span className="font-bold text-[1.0625rem] text-foreground font-heading">Total Estimated Value</span>
-                  <span className="text-2xl font-bold gradient-text" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                {/* Footer Total */}
+                <div className="mt-4 pt-4 border-t border-[#F1ECD9] dark:border-border/40 flex justify-between items-center gap-2">
+                  <span className="font-bold text-[0.875rem] sm:text-[0.9375rem] text-foreground leading-tight" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Total Estimated Value
+                  </span>
+                  <span className="text-[1.5rem] sm:text-[1.75rem] font-bold text-[#C9A227] tracking-tight shrink-0 tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>
                     <AnimatedNumber value={totalSavings} />
                   </span>
                 </div>
               </div>
 
-              <div className="text-[0.65rem] text-muted-foreground mb-2.5 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div className="text-[0.625rem] text-muted-foreground mb-6 leading-relaxed" style={{ fontFamily: 'Inter, sans-serif' }}>
                 * Stamp duty savings, LMI savings and cash grants combined.<br />
                 Eligibility conditions apply. FHSS assumes max voluntary contributions over 4 years.
               </div>
 
-              {/* CTA Box */}
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-3 bg-background dark:bg-input rounded-[16px] border border-border dark:border-border shadow-sm gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FFFCE8] dark:bg-primary/20 text-primary-hover dark:text-primary shrink-0">
-                    <Gift size={16} />
+              {/* Bottom Sticky CTA inside the card */}
+              <div className="p-4 bg-white dark:bg-input border border-[#E4DFD2] dark:border-border/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FFFCE8] text-[#C9A227] dark:bg-primary/20 dark:text-primary shrink-0">
+                    <Gift size={18} strokeWidth={2} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-bold text-foreground mb-0.5 font-heading text-[0.9375rem]">Want your personalised results?</span>
-                    <span className="text-[0.75rem] text-secondary-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <span className="font-bold text-foreground text-[0.875rem]" style={{ fontFamily: 'Inter, sans-serif' }}>Want your personalised results?</span>
+                    <span className="text-[0.6875rem] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
                       Answer a few quick questions to see what you qualify for.
                     </span>
                   </div>
                 </div>
-                <Button variant="primary" className="w-full lg:w-auto whitespace-nowrap h-9 text-[0.8125rem]" onClick={() => window.location.href = '/onboarding'}>
-                  Get My Results <ArrowRight className="ml-1.5" size={16} />
+                <Button 
+                  className="w-full sm:w-auto whitespace-nowrap h-10 px-5 rounded-lg bg-[#D4B952] hover:bg-[#C2A740] text-white font-bold text-[0.8125rem] transition-colors"
+                  onClick={() => window.location.href = '/onboarding'}
+                >
+                  Get My Results <ArrowRight size={14} className="ml-1.5" />
                 </Button>
               </div>
-            </div>
 
-            {/* Mobile Disclaimer (Hidden on desktop) */}
-            <div className="flex lg:hidden mt-4 p-2.5 rounded-xl bg-primary/5 border border-primary/10 gap-2.5 text-[0.75rem] text-secondary-foreground max-w-full">
-              <div className="mt-0.5 text-primary-hover"><Sparkles size={14} fill="currentColor" /></div>
-              <p><strong>Results are estimates only.</strong> Final eligibility is subject to government rules.</p>
             </div>
           </div>
+
         </div>
       </div>
     </section>

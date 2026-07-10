@@ -1,12 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-
-const VIDEO_ID = '2mihxZObX4s'
 
 export function HeroSection() {
   const router = useRouter()
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [muted, setMuted] = useState(true)
+
+  const toggleMute = () => {
+    const v = videoRef.current
+    if (!v) return
+    const next = !v.muted
+    v.muted = next
+    if (!next) {
+      // ensure playback continues after unmuting
+      v.play().catch(() => { })
+    }
+    setMuted(next)
+  }
   const [firstName, setFirstName] = useState<string | null>(null)
   const [currentStep, setCurrentStep] = useState<number | null>(null)
   const [flow, setFlow] = useState<'grants' | 'borrowing'>('grants')
@@ -29,7 +41,7 @@ export function HeroSection() {
           setCurrentStep(null)
         }
       }
-    } catch {}
+    } catch { }
     setIsLoaded(true)
   }, [])
 
@@ -69,9 +81,9 @@ export function HeroSection() {
            Inline styles can't be overridden by classes, so font-size and
            line-height are moved here where a media-query can override them.
            Desktop (≥768px) restores the original clamp + line-height. */
-        .fn-hero-span { font-size: 2.25rem; }
+        .fn-hero-span { font-size: 2.125rem; }
         @media (min-width: 768px) {
-          .fn-hero-span { font-size: clamp(2.5rem, 4.8vw, 4.75rem); }
+          .fn-hero-span { font-size: clamp(2.25rem, 4vw, 4.25rem); }
         }
 
         .fn-hero-h1 { line-height: 0.98; }
@@ -144,7 +156,7 @@ export function HeroSection() {
                 <div>
                   <h1
                     style={{
-                      fontFamily: '"Plus Jakarta Sans", sans-serif',
+                      fontFamily: 'Inter, sans-serif',
                       fontWeight: 800,
                       fontSize: 'clamp(2.25rem, 4vw, 3.75rem)',
                       lineHeight: 1.08,
@@ -197,21 +209,21 @@ export function HeroSection() {
                   <h1
                     className="fn-hero-h1"
                     style={{
-                      fontFamily: '"Plus Jakarta Sans", sans-serif',
+                      fontFamily: 'Inter, sans-serif',
                       fontWeight: 800,
                       letterSpacing: '-0.04em',
                       marginBottom: 16,
                     }}
                   >
                     <span className="fn-hero-span" style={{ display: 'block', color: 'var(--foreground)' }}>
-                      Unlock every grant.
+                      Unlock every grants & schemes
                     </span>
-                    <span className="fn-hero-span" style={{ display: 'block', color: '#C8AA00' }}>
+                    {/* <span className="fn-hero-span" style={{ display: 'block', color: 'var(--foreground)', fontFamily: 'Inter, sans-serif' }}>
                       Enter the market
                     </span>
                     <span className="fn-hero-span" style={{ display: 'block', color: 'var(--foreground)' }}>
                       sooner.
-                    </span>
+                    </span> */}
                   </h1>
                   <p
                     className="fn-hero-para"
@@ -222,9 +234,10 @@ export function HeroSection() {
                       marginBottom: 0,
                     }}
                   >
-                    FirstNest identifies every Australian government grant and scheme you
+                    {/* FirstNest identifies every Australian government grant and scheme you
                     qualify for — federal and state — then builds your personalised roadmap
-                    to homeownership.
+                    to homeownership. */}
+                    FirstNest matches you with all Australian government schemes and grants , <span className="font-bold">building a customised roadmap to buying your first home </span>.
                   </p>
                 </div>
               )}
@@ -242,28 +255,28 @@ export function HeroSection() {
                 }}
               >
                 {/* Chrome bar */}
-                <div
+                {/* <div
                   style={{
                     background: '#1C1C1E',
-                    padding: '13px 16px',
+                    padding: '6px 14px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 12,
+                    gap: 10,
                   }}
                 >
-                  <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                     {[
                       { bg: '#FF5F57', glow: 'rgba(255,95,87,0.5)' },
                       { bg: '#FEBC2E', glow: 'rgba(254,188,46,0.5)' },
                       { bg: '#28C840', glow: 'rgba(40,200,64,0.5)' },
                     ].map(({ bg, glow }) => (
-                      <div key={bg} style={{ width: 13, height: 13, borderRadius: '50%', background: bg, boxShadow: `0 0 5px ${glow}` }} />
+                      <div key={bg} style={{ width: 11, height: 11, borderRadius: '50%', background: bg, boxShadow: `0 0 4px ${glow}` }} />
                     ))}
                   </div>
                   <div
                     style={{
-                      flex: 1, background: '#2C2C2E', borderRadius: 8,
-                      padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 8,
+                      flex: 1, background: '#2C2C2E', borderRadius: 7,
+                      padding: '3px 12px', display: 'flex', alignItems: 'center', gap: 8,
                     }}
                   >
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
@@ -283,17 +296,59 @@ export function HeroSection() {
                       <path d="M4.2 5.5V4.2a1.8 1.8 0 013.6 0V5.5" stroke="#22C55E" strokeWidth="1" strokeLinecap="round" />
                     </svg>
                   </div>
-                </div>
+                </div> */}
 
-                {/* YouTube iframe */}
-                <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#000', display: 'block' }}>
-                  <iframe
-                    title="FirstNest intro video"
-                    src={`https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&playlist=${VIDEO_ID}&playsinline=1`}
-                    allow="autoplay; encrypted-media"
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }}
-                    loading="lazy"
-                  />
+                {/* Hero video — viewport clips the composited video to the rounded frame */}
+                <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#000', display: 'block', overflow: 'hidden', borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    aria-label="FirstNest intro video"
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', border: 'none', display: 'block' }}
+                  >
+                    <source src="/videos/final_complete.mp4" type="video/mp4" />
+                  </video>
+
+                  {/* Unmute / mute toggle */}
+                  <button
+                    type="button"
+                    onClick={toggleMute}
+                    aria-label={muted ? 'Unmute video' : 'Mute video'}
+                    style={{
+                      position: 'absolute',
+                      bottom: 12,
+                      right: 12,
+                      width: 40,
+                      height: 40,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 9999,
+                      border: '1px solid rgba(255,255,255,0.25)',
+                      background: 'rgba(0,0,0,0.55)',
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      backdropFilter: 'blur(4px)',
+                    }}
+                  >
+                    {muted ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                        <line x1="23" y1="9" x2="17" y2="15" />
+                        <line x1="17" y1="9" x2="23" y2="15" />
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
@@ -337,61 +392,77 @@ export function HeroSection() {
                 <div>
                   {/* Two CTA buttons — stacked on mobile, side-by-side on desktop */}
                   <div
-                    className="flex flex-col lg:flex-row gap-3 lg:gap-5 mb-2 sm:mb-3"
+                    className="flex flex-col lg:flex-row gap-3 lg:gap-5 mb-2 sm:mb-3 items-end"
                   >
-                    <button
-                      type="button"
-                      onClick={() => router.push('/onboarding?flow=grants')}
-                      className="w-full lg:flex-1 hover:-translate-y-px hover:shadow-[0_8px_28px_rgba(245,230,66,0.55)] transition-all duration-200"
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        gap: 8,
-                        background: 'linear-gradient(135deg, #F5E642 0%, #EDD900 100%)',
-                        color: '#111111',
-                        fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem',
-                        letterSpacing: '0.01em',
-                        border: 'none', borderRadius: 9999,
-                        padding: '16px 24px',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 16px rgba(245,230,66,0.35)',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Grants & Schemes
-                    </button>
+                    {/* Primary CTA + Trust Text Column */}
+                    <div className="flex flex-col w-full lg:flex-1 min-w-0 relative">
+                      <div className="w-full flex justify-center mb-2.5">
+                        <p
+                          className="text-center mx-auto"
+                          style={{
+                            width: 'fit-content',
+                            maxWidth: 'none',
+                            fontFamily: 'Inter, sans-serif',
+                            fontSize: '12.5px',
+                            color: 'var(--muted-foreground)',
+                            fontWeight: 400,
+                            lineHeight: 1.3,
+                            letterSpacing: '0',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          No credit check<span className="mx-1">&middot;</span>100% free<span className="mx-1">&middot;</span>Takes a few minutes
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => router.push('/onboarding?flow=grants')}
+                        className="w-full bg-[#F5E642] border-2 border-[#F5E642] hover:bg-white hover:border-white active:scale-[0.98] shadow-sm hover:shadow-md transition-colors duration-300 ease-out text-[#111111] flex items-center justify-center gap-2 rounded-full px-[14px] py-[14px] z-10"
+                        style={{
+                          fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem',
+                          letterSpacing: '0.01em',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Grants & Schemes
+                      </button>
+                    </div>
 
-                    <button
-                      type="button"
-                      onClick={() => router.push('/onboarding?flow=borrowing')}
-                      className="w-full lg:flex-1 hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(245,230,66,0.25)] transition-all duration-200"
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        gap: 8,
-                        background: 'var(--card)',
-                        color: 'var(--foreground)',
-                        fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem',
-                        border: '2px solid #F5E642', borderRadius: 9999,
-                        padding: '14px 24px',
-                        cursor: 'pointer',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Borrowing Capacity
-                    </button>
+                    {/* Secondary CTA Column */}
+                    <div className="flex flex-col w-full lg:flex-1 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => router.push('/onboarding?flow=borrowing')}
+                        className="w-full bg-white border-2 border-[#F5E642] hover:bg-[#F5E642] active:scale-[0.98] shadow-sm hover:shadow-md transition-colors duration-300 ease-out text-[#111111] flex items-center justify-center gap-2 rounded-full px-6 py-[14px]"
+                        style={{
+                          fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Borrowing Capacity
+                      </button>
+                    </div>
                   </div>
 
                   {/* Trust line */}
-                  <p
+                  {/* <p
                     className="text-center lg:text-left"
                     style={{
                       fontFamily: 'Inter, sans-serif',
                       fontSize: '0.8125rem',
                       color: 'var(--muted-foreground)',
                       fontWeight: 400,
+                      marginBottom: 18,
                     }}
                   >
-                    No credit check · 100% free · Takes around 3 minutes
-                  </p>
+                    No credit check · 100% free · Takes around few minutes
+                  </p> */}
+
+                  {/* ── Download badges ── */}
+
+
+
+
                 </div>
               )}
             </div>

@@ -25,7 +25,7 @@ export function QuickAccessCards() {
         <span style={{ fontSize: '1.75rem', lineHeight: 1 }}>🏛️</span>
         <div style={{ flex: 1 }}>
           <p style={{
-            fontFamily: '"Plus Jakarta Sans", sans-serif',
+            fontFamily: 'Inter, sans-serif',
             fontWeight: 700,
             fontSize: '0.9375rem',
             color: 'var(--foreground)',
@@ -78,7 +78,7 @@ export function QuickAccessCards() {
         <span style={{ fontSize: '1.75rem', lineHeight: 1 }}>💰</span>
         <div style={{ flex: 1 }}>
           <p style={{
-            fontFamily: '"Plus Jakarta Sans", sans-serif',
+            fontFamily: 'Inter, sans-serif',
             fontWeight: 700,
             fontSize: '0.9375rem',
             color: 'var(--foreground)',

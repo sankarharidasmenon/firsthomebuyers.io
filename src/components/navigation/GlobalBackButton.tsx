@@ -8,8 +8,8 @@ export function GlobalBackButton() {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Don't show on the home page or onboarding flow
-  if (pathname === '/' || pathname.startsWith('/onboarding')) return null
+  // Don't show on the home page, onboarding flow, or any forums page
+  if (pathname === '/' || pathname.startsWith('/forums') || pathname.startsWith('/onboarding')) return null
 
   return (
     <>

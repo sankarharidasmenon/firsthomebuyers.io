@@ -1,0 +1,42 @@
+{
+  "name": "government-data-extractor",
+  "version": "1.0.0",
+  "description": "Phase 1 — Australian Government First Home Buyer scheme data extraction engine. Crawls official .gov.au sources and exports structured scheme data to Excel.",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "extract": "ts-node src/index.ts",
+    "extract:dry": "ts-node src/index.ts --dry-run",
+    "discover": "ts-node src/discover.ts",
+    "discover:only": "ts-node src/discover.ts --discover-only",
+    "quality": "ts-node src/quality.ts",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "australia",
+    "first-home-buyer",
+    "government-schemes",
+    "scraper",
+    "excel"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "date-fns": "^3.6.0",
+    "exceljs": "^4.4.0",
+    "fast-xml-parser": "^4.5.0",
+    "p-limit": "^3.1.0",
+    "pdf-parse": "^1.1.1",
+    "playwright": "^1.61.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/pdf-parse": "^1.1.4",
+    "rimraf": "^5.0.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}

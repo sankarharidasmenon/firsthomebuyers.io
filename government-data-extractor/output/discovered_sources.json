@@ -1,0 +1,20 @@
+[
+  {
+    "authority": "ACT Revenue Office",
+    "authorityId": "act-revenue",
+    "jurisdiction": "ACT",
+    "level": "Territory",
+    "url": "https://www.revenue.act.gov.au/home-buyer-assistance/home-buyer-concession-scheme",
+    "title": "Home Buyer Concession Scheme",
+    "confidence": 98,
+    "status": "existing",
+    "contentHash": "49ff690e6576e0c69dd9cd34baec7b1ec668695541d253ad826759b2422dddea",
+    "matchedKnownId": "act-home-buyer-concession",
+    "typeHint": "Stamp Duty Relief",
+    "category": "Stamp Duty Assistance",
+    "reason": "Matched \"home buyer concession\" → Stamp Duty Assistance.",
+    "relatedPages": [],
+    "pdfUrls": [],
+    "discoveredAt": "2026-07-08T06:12:17.910Z"
+  }
+]

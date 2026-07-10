@@ -2,9 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { Navbar } from '@/components/home/Navbar'
-import { getStep1, getStep2, getStep3, getStep4, setMyResults, type Step1Data, type Step3Data } from '@/lib/localStorage'
+import { getStep1, getStep2, getStep3, getStep4, type Step1Data, type Step3Data } from '@/lib/localStorage'
+import { useAuth } from '@/lib/auth/AuthProvider'
+import { saveResult } from '@/lib/scenarios/actions'
+import { toast } from 'sonner'
 import { calculateBorrowingCapacity } from '@/lib/calculations'
-import { evaluateEligibility } from '@/lib/grantEligibility'
+import { fetchEligibility } from '@/lib/schemes/eligibilityClient'
 import { DUMMY_USER } from '@/lib/dummyData'
 import {
   Phone, MessageSquare, CalendarDays, Home,
@@ -48,6 +51,7 @@ const sectionTag: React.CSSProperties = {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function NextStepsPage() {
+  const { requireAuth } = useAuth()
   const [mounted, setMounted] = useState(false)
   const [contactMode, setContactMode] = useState<ContactMode>(null)
   const [submitted, setSubmitted] = useState(false)
@@ -90,10 +94,23 @@ export default function NextStepsPage() {
       employmentType: s4.employmentType,
     })
 
-    const report = evaluateEligibility(s1, s2, s3, s4)
     const depositGap = Math.max((s3.targetPropertyPrice * 0.2) - s3.depositAmount, 0)
-    setPageData({ borrowing, grantsTotal: report.grantsTotal, step1: s1, step3: s3, state: s1.state || 'VIC', depositGap })
+    // Government-support total comes from the database via the eligibility API.
+    setPageData({ borrowing, grantsTotal: 0, step1: s1, step3: s3, state: s1.state || 'VIC', depositGap })
     setMounted(true)
+
+    fetchEligibility({
+      state: s1.state,
+      firstHomeBuyer: s3.firstHomeBuyer,
+      income: s2.annualIncome + (s1.buyingWith === 'partner' ? (s2.partnerIncome || 0) : 0),
+      hasPartner: s1.buyingWith === 'partner',
+      propertyPrice: s3.targetPropertyPrice,
+      deposit: s3.depositAmount,
+      propertyType: s3.propertyType,
+      singleParent: s1.buyingWith === 'partner' ? false : undefined,
+    })
+      .then((res) => setPageData((prev) => ({ ...prev, grantsTotal: res.cashGrantsTotal + res.taxSavingsTotal })))
+      .catch(() => { /* keep grantsTotal at 0 on failure */ })
   }, [])
 
   const firstName = step1.firstName || 'there'
@@ -105,12 +122,21 @@ export default function NextStepsPage() {
   // Save: idle → saving (500ms) → saved (2.5s) → idle
   const handleSave = () => {
     if (saveState !== 'idle') return
-    setSaveState('saving')
-    setTimeout(() => {
-      setMyResults({ borrowing, grantsTotal, eligibleGrants: [], state, firstName })
-      setSaveState('saved')
-      setTimeout(() => setSaveState('idle'), 2500)
-    }, 500)
+    requireAuth(
+      async () => {
+        setSaveState('saving')
+        const res = await saveResult({ borrowing, grantsTotal, eligibleGrants: [], state, firstName })
+        if (res.ok) {
+          setSaveState('saved')
+          toast.success('Saved to My Results.')
+          setTimeout(() => setSaveState('idle'), 2500)
+        } else {
+          setSaveState('idle')
+          toast.error(res.error)
+        }
+      },
+      { reason: 'Sign in to save your snapshot and pick up where you left off.' }
+    )
   }
   const handleCopyLink = () => {
     const hash = Math.random().toString(36).slice(2, 9)
@@ -137,7 +163,7 @@ export default function NextStepsPage() {
       </div>
 
       <h1 style={{
-        fontFamily: '"Plus Jakarta Sans", sans-serif',
+        fontFamily: 'Inter, sans-serif',
         fontWeight: 800,
         fontSize: 'clamp(1.625rem, 4vw, 2rem)',
         color: 'var(--foreground)',
@@ -173,7 +199,7 @@ export default function NextStepsPage() {
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
           🏡 Homes You Could Afford
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: hasBorrowingPower ? 'clamp(1.5rem, 5vw, 1.875rem)' : '1.25rem', color: 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: hasBorrowingPower ? 'clamp(1.5rem, 5vw, 1.875rem)' : '1.25rem', color: 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {hasBorrowingPower ? `$${(minPrice / 1000).toFixed(0)}k – $${(maxPrice / 1000).toFixed(0)}k` : 'Building capacity...'}
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
@@ -185,7 +211,7 @@ export default function NextStepsPage() {
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
           💰 Government Support
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: 'var(--success-foreground)', lineHeight: 1.1, marginBottom: 4 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: 'var(--success-foreground)', lineHeight: 1.1, marginBottom: 4 }}>
           ${grantsTotal.toLocaleString('en-AU')}
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
@@ -197,7 +223,7 @@ export default function NextStepsPage() {
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
           {depositGap > 0 ? '⚠️ Deposit Status' : '✅ Deposit Status'}
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: depositGap > 0 ? '#F59E0B' : 'var(--foreground)', lineHeight: 1.1, marginBottom: 4 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: depositGap > 0 ? '#F59E0B' : 'var(--foreground)', lineHeight: 1.1, marginBottom: 4 }}>
           {depositGap > 0 ? `$${(depositGap/1000).toFixed(0)}k short` : "You're covered"}
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
@@ -215,7 +241,7 @@ export default function NextStepsPage() {
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
           🏡 Homes You Could Afford
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: hasBorrowingPower ? '1.875rem' : '1.25rem', color: 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: hasBorrowingPower ? '1.875rem' : '1.25rem', color: 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {hasBorrowingPower ? `$${(minPrice / 1000).toFixed(0)}k – $${(maxPrice / 1000).toFixed(0)}k` : 'Building capacity...'}
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
@@ -227,7 +253,7 @@ export default function NextStepsPage() {
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
           💰 Government Support
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.875rem', color: 'var(--success-foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.875rem', color: 'var(--success-foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           ${grantsTotal.toLocaleString('en-AU')}
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
@@ -239,7 +265,7 @@ export default function NextStepsPage() {
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
           {depositGap > 0 ? '⚠️ Deposit Status' : '✅ Deposit Status'}
         </p>
-        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.875rem', color: depositGap > 0 ? '#F59E0B' : 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.875rem', color: depositGap > 0 ? '#F59E0B' : 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {depositGap > 0 ? `$${(depositGap/1000).toFixed(0)}k short` : "You're covered"}
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
@@ -255,7 +281,7 @@ export default function NextStepsPage() {
 
     return (
       <div style={{ ...card, padding: 24, background: 'var(--amber-bg, rgba(245, 158, 11, 0.1))', border: '1px solid var(--amber-border, rgba(245, 158, 11, 0.3))' }}>
-        <h3 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--warning-foreground)', marginBottom: 12, marginTop: 0 }}>
+        <h3 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--warning-foreground)', marginBottom: 12, marginTop: 0 }}>
           🚧 Bridging your deposit gap
         </h3>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: 'var(--foreground)', lineHeight: 1.6, marginBottom: 16, marginTop: 0 }}>
@@ -285,7 +311,7 @@ export default function NextStepsPage() {
 
       {/* Broker profile */}
       <div className="flex items-center gap-4 mb-6">
-        <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
+        <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
           SC
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -548,7 +574,7 @@ export default function NextStepsPage() {
               </span>
             </div>
 
-            <h2 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 'clamp(1.875rem, 4vw, 2.5rem)', color: 'var(--foreground)', lineHeight: 1.1, marginBottom: 12 }}>
+            <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: 'clamp(1.875rem, 4vw, 2.5rem)', color: 'var(--foreground)', lineHeight: 1.1, marginBottom: 12 }}>
               Get your personalised report in your inbox
             </h2>
 
@@ -582,7 +608,7 @@ export default function NextStepsPage() {
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-3 border border-green-200 dark:border-green-800/50">
                   <Check size={24} className="text-green-600 dark:text-green-400" />
                 </div>
-                <h3 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--foreground)', marginBottom: 4 }}>
+                <h3 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--foreground)', marginBottom: 4 }}>
                   Report sent successfully
                 </h3>
                 <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)', marginBottom: 16 }}>

@@ -198,7 +198,7 @@ export function StepWrapper({
                     {/* Icon always sits on lemon — must stay dark in both themes */}
                     <Home size={18} color="#111111" />
                   </div>
-                  <p style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--foreground)', lineHeight: 1.25 }}>
+                  <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--foreground)', lineHeight: 1.25 }}>
                     Buying your first home
                   </p>
                 </div>

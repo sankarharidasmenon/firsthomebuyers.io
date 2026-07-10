@@ -175,8 +175,8 @@ export function InputField({
             error
               ? 'border-destructive shadow-[0_0_0_3px_rgba(252,165,165,0.3)]'
               : focused
-              ? 'border-foreground shadow-[0_0_0_3px_rgba(245,230,66,0.3)]'
-              : 'border-border hover:border-muted-foreground',
+                ? 'border-foreground shadow-[0_0_0_3px_rgba(245,230,66,0.3)]'
+                : 'border-border hover:border-muted-foreground',
             'placeholder:text-muted-foreground',
           ].join(' ')}
         />

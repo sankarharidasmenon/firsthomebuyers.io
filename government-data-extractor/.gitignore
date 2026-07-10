@@ -1,0 +1,9 @@
+node_modules/
+dist/
+logs/*.log
+output/.change-state.json
+*.tsbuildinfo
+
+# Excel lock files + timestamped fallback copies (written when main file is locked)
+~$*.xlsx
+output/government_schemes.*T*.xlsx

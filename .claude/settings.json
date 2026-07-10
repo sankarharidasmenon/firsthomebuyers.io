@@ -10,7 +10,39 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000)",
       "Bash(export NODE_PATH=\"/c/Users/User/AppData/Local/npm-cache/_npx/705bc6b22212b352/node_modules\")",
       "Bash(curl -s -o /dev/null -w \"http status: %{http_code}\\\\n\" http://localhost:3000)",
-      "PowerShell(npm run build 2>&1)"
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(npx tsc --noEmit)",
+      "Bash(npm --version)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(DEBUG=1 npx ts-node src/index.ts --only=vic-first-home-owner-grant --dry-run)",
+      "Bash(npx ts-node *)",
+      "WebSearch",
+      "Bash(supabase --help)",
+      "Bash(supabase projects *)",
+      "Read(//c/Users/User/.supabase/**)",
+      "Bash(curl -s http://localhost:3000/api/schemes)",
+      "Bash(node -e 'let d=\"\";process.stdin.on\\(\"data\",c=>d+=c\\).on\\(\"end\",\\(\\)=>{console.log\\(d\\)}\\)')",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -o /tmp/badresp.json -w 'HTTP %{http_code}\\\\n' -X POST http://localhost:3000/api/admin/master-data/upload -H 'x-admin-token: change-me-super-admin-token' -F file=@/tmp/bad.xlsx)",
+      "Read(//tmp/**)",
+      "Bash(node -e 'let d=\"\";process.stdin.on\\(\"data\",c=>d+=c\\).on\\(\"end\",\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\(\"scheme count still:\",j.count\\)}\\)')",
+      "Bash(rm -f /tmp/bad.xlsx /tmp/badresp.json)",
+      "Bash(curl -s -o ./_badresp.json -w 'HTTP %{http_code}\\\\n' -X POST http://localhost:3000/api/admin/master-data/upload -H 'x-admin-token: change-me-super-admin-token' -F file=@./_bad.xlsx)",
+      "Bash(node -e 'const j=require\\(\"./_badresp.json\"\\);console.log\\(\"success:\",j.success,\"| first error:\",j.errors?.[0]?.message\\)')",
+      "Bash(node -e 'let d=\"\";process.stdin.on\\(\"data\",c=>d+=c\\).on\\(\"end\",\\(\\)=>{console.log\\(\"scheme count still:\",JSON.parse\\(d\\).count\\)}\\)')",
+      "Bash(curl -s -o /dev/null -w \"upload API reachable from host: HTTP %{http_code} \\(401 expected w/o token\\)\\\\n\" -X POST http://localhost:3000/api/admin/master-data/upload)",
+      "Bash(sleep 1; echo \"=== dev log errors during homepage/featured ===\"; grep -iE 'error|unhandled|cannot read|is not a function' /tmp/next-dev3.log | grep -viE 'favicon|EBUSY|Fast Refresh' | head -12 || echo \"\\(none\\)\" *)",
+      "Bash(curl -s 'http://localhost:3000/api/schemes/eligible?state=VIC&firstHomeBuyer=true&income=90000&propertyPrice=650000&propertyType=house&deposit=65000')",
+      "Bash(node -e 'let d=\"\";process.stdin.on\\(\"data\",c=>d+=c\\).on\\(\"end\",\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\(\"eligible:\",j.count, \"| states:\", [...new Set\\(j.schemes.map\\(s=>s.applicable_states.replace\\(/ .*/,\"\"\\)\\)\\)].join\\(\",\"\\)\\)}\\)')",
+      "Bash(curl -s \"http://localhost:3000/api/schemes\")",
+      "Bash(node -e 'let d=\"\";process.stdin.on\\(\"data\",c=>d+=c\\).on\\(\"end\",\\(\\)=>{console.log\\(\"total schemes:\",JSON.parse\\(d\\).count\\)}\\)')",
+      "Bash(curl -s -o /dev/null \"http://localhost:3000/results/grants\")",
+      "Bash(grep -v \"// \")",
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\(p.scripts\\)\\)\")",
+      "Bash(grep -v '^$')"
+    ],
+    "additionalDirectories": [
+      "f:\\firstnest-v3"
     ]
   }
 }
