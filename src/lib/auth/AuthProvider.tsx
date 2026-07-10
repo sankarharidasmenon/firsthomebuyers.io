@@ -7,6 +7,9 @@
  *  - the "pending action" pattern: requireAuth(fn) runs fn now if signed in,
  *    otherwise opens the modal and runs fn automatically after sign-in,
  *  - first-login guest→Supabase migration,
+ *  - onboarding hydration: `onboardingReady` is false until Supabase answers
+ *    are written into localStorage, preventing a race where results pages read
+ *    empty localStorage before hydration completes,
  *  - a `next` return URL (from proxy redirects) to send the user back to the
  *    exact page they were trying to reach.
  *
@@ -26,6 +29,7 @@ import type { User } from '@supabase/supabase-js';
 import { getBrowserClient } from '@/lib/supabase/client';
 import type { Profile } from '@/lib/auth/session';
 import { migrateGuestDataIfAny } from '@/lib/scenarios/migrateGuest';
+import { resolveOnboardingAnswers } from '@/lib/onboardingPersistence';
 import { AuthModal } from '@/components/auth/AuthModal';
 
 type PendingAction = () => void | Promise<void>;
@@ -40,6 +44,14 @@ interface AuthContextValue {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  /**
+   * True once onboarding answers are guaranteed to be in localStorage.
+   *
+   * - Guest users: true immediately (localStorage is the only store).
+   * - Authenticated users: false until resolveOnboardingAnswers() completes,
+   *   preventing results pages from reading empty localStorage before hydration.
+   */
+  onboardingReady: boolean;
   signOut: () => Promise<void>;
   openAuth: (opts?: OpenAuthOpts) => void;
   closeAuth: () => void;
@@ -64,6 +76,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  /**
+   * Tracks whether onboarding answers have been written into localStorage.
+   * Starts as false; set to true once resolveOnboardingAnswers resolves (or
+   * immediately for guests).  Results pages must wait for this before reading
+   * localStorage.
+   */
+  const [onboardingReady, setOnboardingReady] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [reason, setReason] = useState(DEFAULT_REASON);
@@ -84,15 +103,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [supabase]
   );
 
-  // React to a real sign-in transition: migrate guest data, run the pending
-  // action, close the modal, then route to any `next` URL.
-  const handleSignedIn = useCallback(async () => {
+  // React to a real sign-in transition: migrate guest data, hydrate
+  // localStorage from Supabase, run any pending action, then navigate.
+  const handleSignedIn = useCallback(async (nextUser: User) => {
     setModalOpen(false);
+    setOnboardingReady(false); // block results pages during hydration
+
     try {
-      await migrateGuestDataIfAny();
+      await migrateGuestDataIfAny(nextUser.id);
     } catch {
       /* migration is best-effort */
     }
+
+    try {
+      await resolveOnboardingAnswers(nextUser);
+    } catch {
+      /* hydration is best-effort */
+    }
+
+    // localStorage is now populated — results pages may read.
+    setOnboardingReady(true);
 
     const action = pendingActionRef.current;
     pendingActionRef.current = null;
@@ -112,12 +142,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!active) return;
-      setUser(data.user ?? null);
-      wasSignedInRef.current = Boolean(data.user);
-      if (data.user) loadProfile(data.user.id);
-      setLoading(false);
+      const authUser = data.user ?? null;
+      setUser(authUser);
+      wasSignedInRef.current = Boolean(authUser);
+
+      if (authUser) {
+        loadProfile(authUser.id);
+        // Authenticated on load — hydrate localStorage before signalling ready.
+        try {
+          await resolveOnboardingAnswers(authUser);
+        } catch {
+          /* best-effort */
+        }
+      }
+
+      // Safe to set both flags together: if no user, onboardingReady = true
+      // immediately (nothing to fetch); if user, we've already hydrated above.
+      if (active) {
+        setOnboardingReady(true);
+        setLoading(false);
+      }
     });
 
     const {
@@ -130,6 +176,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loadProfile(nextUser.id);
       } else {
         setProfile(null);
+        // Signed out — no Supabase to hydrate; localStorage is the store again.
+        setOnboardingReady(true);
       }
 
       const wasSignedIn = wasSignedInRef.current;
@@ -138,7 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Only fire post-login side-effects on a genuine signed-out → signed-in
       // transition (not on initial hydration or token refresh).
       if (nextUser && !wasSignedIn && event === 'SIGNED_IN') {
-        handleSignedIn();
+        handleSignedIn(nextUser);
       }
     });
 
@@ -198,7 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, signOut, openAuth, closeAuth, requireAuth }}
+      value={{ user, profile, loading, onboardingReady, signOut, openAuth, closeAuth, requireAuth }}
     >
       {children}
       <AuthModal

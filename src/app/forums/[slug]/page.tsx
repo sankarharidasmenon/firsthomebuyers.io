@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ChevronRight, Clock, Link2 } from 'lucide-react'
-import { getDiscussionBySlug, getTrending, CATEGORY_META } from '@/lib/forumsData'
+import { getDiscussionBySlug, getTrending, getThread, getReplyCount, CATEGORY_META } from '@/lib/forumsData'
 import { Avatar } from '@/components/forums/Avatar'
 import { DiscussionStats } from '@/components/forums/DiscussionStats'
 import { CategoryBadge, StatusBadges } from '@/components/forums/ForumBadge'
@@ -26,6 +26,8 @@ export default async function DiscussionPage({ params }: { params: Promise<{ slu
 
   const meta = CATEGORY_META[d.category]
   const related = getTrending(4).filter((x) => x.slug !== d.slug).slice(0, 3)
+  const thread = getThread(d)
+  const replyCount = getReplyCount(d)
 
   return (
     <main className="bg-background pt-14 lg:pt-18">
@@ -77,7 +79,7 @@ export default async function DiscussionPage({ params }: { params: Promise<{ slu
                     </p>
                   </div>
                 </div>
-                <DiscussionStats replies={d.replies} views={d.views} likes={d.likes} />
+                <DiscussionStats replies={replyCount} views={d.views} likes={d.likes} />
               </div>
 
               {/* Body */}
@@ -126,9 +128,9 @@ export default async function DiscussionPage({ params }: { params: Promise<{ slu
 
             {/* Replies */}
             <section className="mt-16">
-              <SectionHeading title={`${d.replies} Replies`} meta="Helpful answers first" />
+              <SectionHeading title={`${replyCount} ${replyCount === 1 ? 'Reply' : 'Replies'}`} meta="Helpful answers first" />
               <div className="mt-8 flex flex-col gap-6">
-                {d.thread.map((r) => (
+                {thread.map((r) => (
                   <ReplyCard key={r.id} reply={r} originalPoster={d.author.name} />
                 ))}
               </div>

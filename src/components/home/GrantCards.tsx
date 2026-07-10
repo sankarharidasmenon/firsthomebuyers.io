@@ -26,6 +26,12 @@ interface Scheme {
   pillStyle: string
   cardBg: string
   dark: boolean
+  /* Layout-only additions: which marquee row the card belongs to, and the
+     jurisdiction label shown next to the Australian flag in the top metadata
+     row ("Australia" for federal schemes, or the state code e.g. "VIC"). */
+  kind: 'grant' | 'scheme'
+  flagLabel: string
+  flagSrc: string
 }
 
 /* The six original card style presets — kept byte-for-byte so the look, colours
@@ -50,8 +56,53 @@ interface ApiScheme {
   status?: string | null
   official_url?: string | null
   type?: string | null
+  level?: string | null
+  applicable_states?: string | null
   benefit_type?: string | null
   minimum_deposit?: string | null
+}
+
+/* Australian jurisdiction codes, longest-first so tokens never collide. */
+const STATE_CODES = ['NSW', 'VIC', 'QLD', 'TAS', 'ACT', 'WA', 'SA', 'NT'] as const
+
+/* Jurisdiction → badge label + local flag SVG (public/flags). Federal schemes
+   use the national flag; state schemes use that state/territory's own flag. */
+const FLAGS: Record<string, { label: string; src: string }> = {
+  AU: { label: 'Australia', src: '/flags/au.svg' },
+  ACT: { label: 'ACT', src: '/flags/act.svg' },
+  NSW: { label: 'NSW', src: '/flags/nsw.svg' },
+  NT: { label: 'NT', src: '/flags/nt.svg' },
+  QLD: { label: 'QLD', src: '/flags/qld.svg' },
+  SA: { label: 'SA', src: '/flags/sa.svg' },
+  TAS: { label: 'TAS', src: '/flags/tas.svg' },
+  VIC: { label: 'VIC', src: '/flags/vic.svg' },
+  WA: { label: 'WA', src: '/flags/wa.svg' },
+}
+
+/* Which marquee row a card belongs to. A "Grant" (by type, or by name when the
+   type is blank) goes in the Grants row; everything else is a Scheme. */
+function deriveKind(s: ApiScheme): 'grant' | 'scheme' {
+  const t = (s.type || '').trim()
+  const basis = t || (s.scheme_name || '')
+  return /grant/i.test(basis) ? 'grant' : 'scheme'
+}
+
+/* Jurisdiction of a scheme → a key into FLAGS. Federal schemes → 'AU'; state
+   schemes → the state code. Federal detection mirrors the repository rule: match
+   an explicit "all states/territories"/nation-wide phrase, never a bare
+   "AUSTRALIA" (which also appears inside "Western/South Australia"). */
+function deriveFlagCode(s: ApiScheme): string {
+  const states = (s.applicable_states || '').toUpperCase()
+  const level = (s.level || '').toUpperCase()
+  const federal =
+    level.includes('FEDERAL') ||
+    level.includes('NATIONAL') ||
+    /ALL STATES|ALL TERRITORIES|NATION|AUSTRALIA[- ]WIDE/.test(states)
+  if (federal) return 'AU'
+  for (const code of STATE_CODES) {
+    if (new RegExp(`\\b${code}\\b`).test(states)) return code
+  }
+  return 'AU'
 }
 
 function initials(name: string): string {
@@ -112,7 +163,8 @@ function toCard(s: ApiScheme, i: number): Scheme {
   const preset = STYLE_PRESETS[i % STYLE_PRESETS.length]
   const heroTitle = (s.scheme_name || '').trim() || 'Government Scheme'
   const { primary, secondary } = deriveBenefit(s)
-  
+  const flag = FLAGS[deriveFlagCode(s)] ?? FLAGS.AU
+
   return {
     heroTitle,
     abbr: (s.acronym || '').trim() || initials(heroTitle),
@@ -123,6 +175,9 @@ function toCard(s: ApiScheme, i: number): Scheme {
     status: (s.status || '').trim(),
     url: (s.official_url || '').trim(),
     pill: (s.status || '').trim() || 'Scheme',
+    kind: deriveKind(s),
+    flagLabel: flag.label,
+    flagSrc: flag.src,
     ...preset,
   }
 }
@@ -134,11 +189,22 @@ function SchemeCard({ s, outer, clone = false }: { s: Scheme; outer: string; clo
   return (
     <div
       aria-hidden={clone || undefined}
-      className={`${s.cardBg} rounded-3xl border ${s.dark ? 'border-white/10' : 'border-gray-100'} shadow-sm p-6 flex flex-col gap-3 hover:-translate-y-1 hover:scale-[1.01] hover:shadow-lg transition-all duration-300 cursor-default ${outer}`}
+      className={`${s.cardBg} rounded-3xl border ${s.dark ? 'border-white/10' : 'border-gray-100'} shadow-sm p-5 sm:p-6 flex flex-col gap-3 hover:-translate-y-1 hover:scale-[1.01] hover:shadow-lg transition-all duration-300 cursor-default ${outer}`}
     >
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-bold uppercase tracking-widest text-fn-yellow">{s.abbr}</span>
-        {s.pill && <span className={`text-xs font-semibold px-3 py-1 rounded-full ${s.pillStyle}`}>{s.pill}</span>}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={s.flagSrc}
+            alt={`${s.flagLabel} flag`}
+            title={s.flagLabel}
+            width={48}
+            height={24}
+            className={`w-12 h-6 shrink-0 object-cover rounded-[5px] shadow-sm ring-1 ${s.dark ? 'ring-white/25' : 'ring-black/10'}`}
+          />
+          <span className="text-xs font-bold uppercase tracking-widest text-fn-yellow truncate">{s.abbr}</span>
+        </div>
+        {s.pill && <span className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full ${s.pillStyle}`}>{s.pill}</span>}
       </div>
       <div>
         <p className={`${titleClass} font-extrabold ${s.dark ? 'text-white' : 'text-fn-navy'} line-clamp-3`}>{s.heroTitle}</p>
@@ -162,6 +228,26 @@ function SchemeCard({ s, outer, clone = false }: { s: Scheme; outer: string; clo
           </a>
         </div>
       )}
+    </div>
+  )
+}
+
+/* One continuously-scrolling marquee row. The card set is rendered twice and the
+   track translates -50%, so the loop is seamless (no jump). Pause-on-hover and
+   reduced-motion are handled by the shared CSS below. Used for BOTH mobile and
+   desktop — only the card width/gap changes responsively. */
+function MarqueeRow({ items, idPrefix }: { items: Scheme[]; idPrefix: string }): ReactNode {
+  const cardOuter = 'fn-marquee-card shrink-0 w-[248px] mr-3 sm:w-[280px] sm:mr-4 lg:w-[320px] lg:mr-6'
+  return (
+    <div className="fn-marquee-viewport relative w-full overflow-hidden">
+      <div className="fn-marquee-track flex w-max py-3">
+        {items.map((s, i) => (
+          <SchemeCard key={`${idPrefix}-a-${i}`} s={s} outer={cardOuter} />
+        ))}
+        {items.map((s, i) => (
+          <SchemeCard key={`${idPrefix}-b-${i}`} s={s} outer={cardOuter} clone />
+        ))}
+      </div>
     </div>
   )
 }
@@ -204,7 +290,7 @@ export const GrantCards = () => {
   const load = useCallback(async () => {
     setState('loading')
     try {
-      const res = await fetch('/api/schemes/featured', { cache: 'no-store' })
+      const res = await fetch('/api/schemes/featured?limit=60', { cache: 'no-store' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       const list: Scheme[] = (data.schemes ?? []).map(toCard)
@@ -224,16 +310,16 @@ export const GrantCards = () => {
     load()
   }, [load])
 
-  const half = Math.ceil(schemes.length / 2)
-  let schemesRow1 = schemes.slice(0, half)
-  let schemesRow2 = schemes.slice(half)
+  // Row 1 = grants only, Row 2 = schemes only — split automatically by kind.
+  let grantsRow = schemes.filter((s) => s.kind === 'grant')
+  let schemesRow = schemes.filter((s) => s.kind === 'scheme')
 
   // Ensure rows are wide enough to cover the screen so the marquee doesn't show blank space when looping
-  while (schemesRow1.length > 0 && schemesRow1.length < 8) {
-    schemesRow1 = [...schemesRow1, ...schemesRow1]
+  while (grantsRow.length > 0 && grantsRow.length < 8) {
+    grantsRow = [...grantsRow, ...grantsRow]
   }
-  while (schemesRow2.length > 0 && schemesRow2.length < 8) {
-    schemesRow2 = [...schemesRow2, ...schemesRow2]
+  while (schemesRow.length > 0 && schemesRow.length < 8) {
+    schemesRow = [...schemesRow, ...schemesRow]
   }
 
   return (
@@ -269,47 +355,25 @@ export const GrantCards = () => {
         </div>
       )}
 
-      {/* ── Ready ── (identical layout to the original) */}
+      {/* ── Ready ── Two independent marquee rows (mobile + desktop):
+          Row 1 = Government Grants, Row 2 = Government Schemes. */}
       {state === 'ready' && (
-        <>
-          {/* Mobile + Tablet: native horizontal scroll with snap */}
-          <div className="lg:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory px-5 py-4 scroll-pl-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {schemes.map((s, i) => (
-              <SchemeCard key={`mobile-${i}`} s={s} outer="snap-start shrink-0 w-[78%] sm:w-[55%] md:w-[42%]" />
-            ))}
-          </div>
-
-          {/* Desktop: two continuous marquee rows */}
-          <div className="hidden lg:flex flex-col gap-6">
-            <div className="fn-marquee-viewport relative w-full overflow-hidden">
-              <div className="fn-marquee-track flex w-max py-3">
-                {schemesRow1.map((s, i) => (
-                  <SchemeCard key={`r1a-${i}`} s={s} outer="fn-marquee-card shrink-0 w-[320px] mr-6" />
-                ))}
-                {schemesRow1.map((s, i) => (
-                  <SchemeCard key={`r1b-${i}`} s={s} outer="fn-marquee-card shrink-0 w-[320px] mr-6" clone />
-                ))}
-              </div>
-            </div>
-
-            <div className="fn-marquee-viewport relative w-full overflow-hidden">
-              <div className="fn-marquee-track flex w-max py-3">
-                {schemesRow2.map((s, i) => (
-                  <SchemeCard key={`r2a-${i}`} s={s} outer="fn-marquee-card shrink-0 w-[320px] mr-6" />
-                ))}
-                {schemesRow2.map((s, i) => (
-                  <SchemeCard key={`r2b-${i}`} s={s} outer="fn-marquee-card shrink-0 w-[320px] mr-6" clone />
-                ))}
-              </div>
-            </div>
-          </div>
-        </>
+        <div className="flex flex-col gap-5 lg:gap-8">
+          {grantsRow.length > 0 && (
+            <MarqueeRow items={grantsRow} idPrefix="grants" />
+          )}
+          {schemesRow.length > 0 && (
+            <MarqueeRow items={schemesRow} idPrefix="schemes" />
+          )}
+        </div>
       )}
 
       <style>{`
         .fn-marquee-track {
-          animation: fn-marquee-scroll 42s linear infinite;
+          animation: fn-marquee-scroll 32s linear infinite;
           will-change: transform;
+          transform: translateZ(0);
+          backface-visibility: hidden;
         }
         @keyframes fn-marquee-scroll {
           from { transform: translate3d(0, 0, 0); }
