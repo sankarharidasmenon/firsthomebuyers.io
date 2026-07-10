@@ -25,12 +25,19 @@ export interface BorrowingResult {
 export interface ScenarioRow {
   id: string;
   scenario_name: string | null;
-  kind: 'result' | 'scenario';
+  kind: 'result' | 'scenario' | 'onboarding';
   answers: Record<string, unknown>;
   borrowing_results: BorrowingResult;
   eligible_schemes: string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface OnboardingAnswers {
+  step1: Record<string, unknown>;
+  step2: Record<string, unknown>;
+  step3: Record<string, unknown>;
+  step4: Record<string, unknown>;
 }
 
 export interface SaveScenarioInput {
@@ -228,4 +235,79 @@ export async function migrateGuestData(payload: {
   const { error } = await supabase.from('saved_scenarios').insert(rows);
   if (error) return { ok: false, error: error.message };
   return { ok: true, data: { inserted: rows.length } };
+}
+
+/**
+ * Persist the four onboarding step answers for the current user.
+ *
+ * True upsert logic: if an onboarding row already exists it is updated
+ * in-place; otherwise a new row is inserted.  This guarantees exactly
+ * one row per user and eliminates the data-loss window that a
+ * DELETE→INSERT approach would have.
+ */
+export async function saveOnboardingAnswers(
+  answers: OnboardingAnswers
+): Promise<ActionResult<{ id: string }>> {
+  const supabase = await getServerAuthClient();
+  const userId = await currentUserId();
+  if (!userId) return { ok: false, error: 'Not signed in.' };
+
+  // Check whether a row already exists for this user.
+  const { data: existing, error: selectErr } = await supabase
+    .from('saved_scenarios')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('kind', 'onboarding')
+    .maybeSingle();
+
+  if (selectErr) return { ok: false, error: selectErr.message };
+
+  if (existing?.id) {
+    // Row exists — UPDATE it in place (no delete, no gap in data).
+    const { data, error } = await supabase
+      .from('saved_scenarios')
+      .update({ answers: answers as unknown as Record<string, unknown> })
+      .eq('id', existing.id)
+      .select('id')
+      .single();
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, data: { id: data.id as string } };
+  }
+
+  // No existing row — INSERT a fresh one.
+  const { data, error } = await supabase
+    .from('saved_scenarios')
+    .insert({
+      user_id: userId,
+      kind: 'onboarding',
+      answers: answers as unknown as Record<string, unknown>,
+      borrowing_results: { min: 0, max: 0 },
+      eligible_schemes: [],
+    })
+    .select('id')
+    .single();
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, data: { id: data.id as string } };
+}
+
+/**
+ * Load the onboarding step answers from Supabase for the current user.
+ * Returns null if no onboarding row exists yet.
+ */
+export async function loadOnboardingAnswers(): Promise<ActionResult<OnboardingAnswers | null>> {
+  const supabase = await getServerAuthClient();
+  const userId = await currentUserId();
+  if (!userId) return { ok: false, error: 'Not signed in.' };
+
+  const { data, error } = await supabase
+    .from('saved_scenarios')
+    .select('answers')
+    .eq('user_id', userId)
+    .eq('kind', 'onboarding')
+    .maybeSingle();
+
+  if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: true, data: null };
+  return { ok: true, data: data.answers as unknown as OnboardingAnswers };
 }

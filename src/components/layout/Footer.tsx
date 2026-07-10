@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Home, ExternalLink } from 'lucide-react'
+import { Home, ExternalLink, Star } from 'lucide-react'
 
 /* ─── Social SVG paths ───────────────────────────────────────────────────── */
 function SvgIcon({ path }: { path: string }) {
@@ -99,6 +99,16 @@ export function Footer() {
         }
         .fn-ftr-legal { color: rgba(255,255,255,0.45); text-decoration: none; transition: color 120ms; }
         .fn-ftr-legal:hover { color: #ffffff; }
+
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .fn-marquee {
+          display: flex;
+          width: max-content;
+          animation: marquee 35s linear infinite;
+        }
       `}</style>
 
       {/* ── Main columns: Brand | Product | Official Sources | Legal ── */}
@@ -194,16 +204,35 @@ export function Footer() {
       {/* ── Bottom bar ── */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="max-w-275 mx-auto px-5 lg:px-12 py-6 flex flex-col gap-4">
+          {/* Desktop Disclaimer */}
           <p style={{
             fontFamily: 'Inter, sans-serif', fontSize: '0.75rem',
             color: 'rgba(255,255,255,0.7)', lineHeight: 1.6,
-          }} className="w-full text-left">
+          }} className="hidden md:block w-full text-left">
             FirstNest provides general information only and does not constitute financial, legal or taxation advice.
             All borrowing estimates and grant eligibility results are indicative only and may not reflect your actual
             circumstances. Grant values and eligibility criteria change frequently — always verify with the relevant
             state or federal authority. Consult a licensed financial adviser or mortgage broker before making any
             property or borrowing decisions.
           </p>
+
+          {/* Mobile Marquee Disclaimer */}
+          <div className="md:hidden w-full overflow-hidden relative">
+            <div className="fn-marquee">
+              <div className="flex items-center gap-4 pr-4">
+                <span className="text-[11px] text-white/70" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  FirstNest provides general information only and does not constitute financial, legal or taxation advice. All borrowing estimates and grant eligibility results are indicative only and may not reflect your actual circumstances. Grant values and eligibility criteria change frequently — always verify with the relevant state or federal authority. Consult a licensed financial adviser or mortgage broker before making any property or borrowing decisions.
+                </span>
+                <Star size={10} className="text-white/50 flex-shrink-0" />
+              </div>
+              <div className="flex items-center gap-4 pr-4">
+                <span className="text-[11px] text-white/70" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  FirstNest provides general information only and does not constitute financial, legal or taxation advice. All borrowing estimates and grant eligibility results are indicative only and may not reflect your actual circumstances. Grant values and eligibility criteria change frequently — always verify with the relevant state or federal authority. Consult a licensed financial adviser or mortgage broker before making any property or borrowing decisions.
+                </span>
+                <Star size={10} className="text-white/50 flex-shrink-0" />
+              </div>
+            </div>
+          </div>
 
           {/* <div style={{
             fontFamily: 'Inter, sans-serif', fontSize: '12.5px',
@@ -219,17 +248,9 @@ export function Footer() {
             <Link href="#" className="fn-ftr-legal">Disclaimer</Link>
           </div> */}
 
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mt-2">
-            <div style={{
-              fontFamily: 'Inter, sans-serif', fontSize: '0.75rem',
-              color: 'rgba(255,255,255,0.5)', display: 'flex', flexDirection: 'column', gap: '4px',
-            }}>
-              <span>© 2026 FirstNest AI. All rights reserved.</span>
-              <span>Built for Australian first-home buyers.</span>
-            </div>
-
+          <div className="flex flex-col gap-3 mt-2">
             {/* Acknowledgement of Country */}
-            <div className="flex items-start gap-3 max-w-[500px]">
+            <div className="flex items-start gap-3 w-full">
               <div className="flex gap-2 shrink-0 pt-0.5">
                 {/* Aboriginal Flag */}
                 <svg width="24" height="16" viewBox="0 0 24 16" className="rounded-[3px] overflow-hidden opacity-90">
@@ -251,6 +272,14 @@ export function Footer() {
               }}>
                 FirstNest acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country throughout Australia and their continuing connection to land, waters and community.
               </p>
+            </div>
+
+            <div style={{
+              fontFamily: 'Inter, sans-serif', fontSize: '0.75rem',
+              color: 'rgba(255,255,255,0.5)', display: 'flex', flexDirection: 'column', gap: '4px',
+            }} className="items-center text-center">
+              <span>© 2026 FirstNest AI. All rights reserved.</span>
+              <span>Built for Australian first-home buyers.</span>
             </div>
           </div>
         </div>

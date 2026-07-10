@@ -15,6 +15,7 @@ import { saveResult } from '@/lib/scenarios/actions'
 import { toast } from 'sonner'
 import { DUMMY_USER } from '@/lib/dummyData'
 import { fetchEligibility, type EligibilityResult, type EligibilityItem, type DisplayCategory } from '@/lib/schemes/eligibilityClient'
+import { subscribeOnboardingUpdated } from '@/lib/onboardingChannel'
 
 // Section header — airy, not heavy
 function SectionHeader({ icon, title, description }: { icon: string; title: string; description: string }) {
@@ -43,7 +44,7 @@ const CATEGORY_META = {
 
 export default function GrantsResultsPage() {
   const router = useRouter()
-  const { requireAuth } = useAuth()
+  const { requireAuth, onboardingReady } = useAuth()
   const [showIneligible, setShowIneligible] = useState(true)
   const [saved, setSaved] = useState(false)
 
@@ -82,7 +83,11 @@ export default function GrantsResultsPage() {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { 
+    if (!onboardingReady) return
+    load() 
+    return subscribeOnboardingUpdated(load)
+  }, [load, onboardingReady])
 
   const handleSave = () => {
     if (!result) return
