@@ -65,7 +65,7 @@ export function TotalSavingsHero({
           <span style={{ fontSize: '1rem', marginBottom: 8, opacity: 0.85 }}>💰</span>
           <p
             className={cashGrantsTotal > 0 ? 'text-[#16A34A]' : 'text-[#CCCCCC] dark:text-muted-foreground/40'}
-            style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1rem, 3.5vw, 1.375rem)', lineHeight: 1, marginBottom: 6, letterSpacing: '-0.01em' }}
+            style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1rem, 3.5vw, 1.375rem)', lineHeight: 1, marginBottom: 6, letterSpacing: '-0.01em' }}
           >
             {cashGrantsTotal > 0 ? `$${animatedCash.toLocaleString('en-AU')}` : '—'}
           </p>
@@ -82,7 +82,7 @@ export function TotalSavingsHero({
           <span style={{ fontSize: '1rem', marginBottom: 8, opacity: 0.85 }}>🧾</span>
           <p
             className={taxSavingsTotal > 0 ? 'text-[#111111] dark:text-foreground' : 'text-[#CCCCCC] dark:text-muted-foreground/40'}
-            style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1rem, 3.5vw, 1.375rem)', lineHeight: 1, marginBottom: 6, letterSpacing: '-0.01em' }}
+            style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1rem, 3.5vw, 1.375rem)', lineHeight: 1, marginBottom: 6, letterSpacing: '-0.01em' }}
           >
             {taxSavingsTotal > 0 ? `$${animatedTax.toLocaleString('en-AU')}` : '—'}
           </p>
@@ -99,7 +99,7 @@ export function TotalSavingsHero({
           <span style={{ fontSize: '1rem', marginBottom: 8, opacity: 0.85 }}>🏠</span>
           <p
             className={eligibleSchemesCount > 0 ? 'text-[#111111] dark:text-foreground' : 'text-[#CCCCCC] dark:text-muted-foreground/40'}
-            style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: 'clamp(1rem, 3.5vw, 1.375rem)', lineHeight: 1, marginBottom: 6, letterSpacing: '-0.01em' }}
+            style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1rem, 3.5vw, 1.375rem)', lineHeight: 1, marginBottom: 6, letterSpacing: '-0.01em' }}
           >
             {eligibleSchemesCount > 0 ? String(eligibleSchemesCount) : '—'}
           </p>

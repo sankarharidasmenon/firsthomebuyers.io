@@ -28,9 +28,9 @@ interface Zone {
   mediaUrl?: string   // local path: /videos/ad-{id}.mp4 — drop compressed MP4 in public/videos/
   posterUrl?: string  // shown while video loads (or when no video file exists yet)
   desktopOnly?: boolean
+  objectFit?: 'cover' | 'contain'
 }
 
-type SizeFilter = 'all' | 'small' | 'medium' | 'large'
 
 /* ─── Zone data — 40 total (30 mobile, 40 desktop) ──────────────────────── */
 const ZONES: Zone[] = [
@@ -47,7 +47,7 @@ const ZONES: Zone[] = [
     advertiser: 'Metro Home Loans', tagline: 'Rates that work for you',
     ctaLabel: 'Book a Free Call', ctaUrl: '#', price: '$199/mo',
     mediaUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop' },
-  { id: '004', status: 'vacant', size: 'small', price: '$99/mo' },
+  { id: '004', status: 'occupied', size: 'small', type: 'image', advertiser: 'Test Ad Small', tagline: 'Testing small box', ctaLabel: 'Click Here', ctaUrl: '#', price: '$99/mo', mediaUrl: '/ad-image.jpeg', objectFit: 'cover' },
   { id: '005', status: 'occupied', size: 'large', type: 'video',
     advertiser: 'Coastal Real Estate', tagline: 'Coastal living at its finest',
     ctaLabel: 'View Properties', ctaUrl: '#', price: '$399/mo',
@@ -61,7 +61,7 @@ const ZONES: Zone[] = [
     advertiser: 'OpenDoor Finance', tagline: 'Open the door to ownership',
     ctaLabel: 'Apply Online', ctaUrl: '#', price: '$199/mo',
     mediaUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&auto=format&fit=crop' },
-  { id: '008', status: 'vacant', size: 'small', price: '$99/mo' },
+  { id: '008', status: 'occupied', size: 'large', type: 'image', advertiser: 'Test Ad Large', tagline: 'Testing large box', ctaLabel: 'Click Here', ctaUrl: '#', price: '$399/mo', mediaUrl: '/ad-image.jpeg', objectFit: 'cover' },
   { id: '009', status: 'occupied', size: 'medium', type: 'video',
     advertiser: 'BlueSky Properties', tagline: 'Your future starts here',
     ctaLabel: 'See All Listings', ctaUrl: '#', price: '$199/mo',
@@ -109,7 +109,7 @@ const ZONES: Zone[] = [
     ctaLabel: 'Free Consultation', ctaUrl: '#', price: '$99/mo',
     mediaUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop' },
   { id: '022', status: 'vacant', size: 'small', price: '$99/mo' },
-  { id: '023', status: 'vacant', size: 'medium', price: '$199/mo' },
+  { id: '023', status: 'occupied', size: 'medium', type: 'image', advertiser: 'Test Ad Medium', tagline: 'Testing medium box', ctaLabel: 'Click Here', ctaUrl: '#', price: '$199/mo', mediaUrl: '/ad-image.jpeg', objectFit: 'contain' },
   { id: '024', status: 'vacant', size: 'small', price: '$99/mo' },
   /* ── 025–030  still mobile-visible ────────────────────────────────────── */
   { id: '025', status: 'occupied', size: 'small', type: 'image',
@@ -197,13 +197,10 @@ function SerialBadge({ id, dark = false }: { id: string; dark?: boolean }) {
 
 /* ─── Page component ────────────────────────────────────────────────────── */
 export default function AdsPage() {
-  const [filter, setFilter] = useState<SizeFilter>('all')
   const [modal, setModal] = useState<Zone | null>(null)
   const [copied, setCopied] = useState(false)
 
-  const filtered = filter === 'all' ? ZONES : ZONES.filter(z => z.size === filter)
-  const vacantCount   = ZONES.filter(z => z.status === 'vacant').length
-  const occupiedCount = ZONES.filter(z => z.status === 'occupied').length
+  const filtered = ZONES
 
   const handleCopy = (zoneId: string) => {
     const text = `${zoneId} — ads@firstnest.com.au`
@@ -273,13 +270,13 @@ export default function AdsPage() {
           @media (min-width: 640px) { .ads-stat-chip { padding: 7px 16px; } }
 
           /* ── Mobile hero — compact spacing overrides ────────────────── */
-          .ads-h-title { margin-bottom: 8px !important; }
+          .ads-h-title { margin-bottom: 0 !important; }
           .ads-h-desc  { font-size: 0.9375rem !important; line-height: 1.55 !important; margin-bottom: 10px !important; }
           .ads-h-chips { margin-bottom: 10px !important; gap: 6px !important; }
           .ads-h-cta   { gap: 8px !important; }
           .ads-h-btn   { padding: 10px 18px !important; min-height: 44px !important; font-size: 0.875rem !important; }
           @media (min-width: 1024px) {
-            .ads-h-title { margin-bottom: 20px !important; }
+            .ads-h-title { margin-bottom: 0 !important; }
             .ads-h-desc  { font-size: 1.0625rem !important; line-height: 1.6 !important; margin-bottom: 28px !important; }
             .ads-h-chips { margin-bottom: 32px !important; gap: 8px !important; }
             .ads-h-cta   { gap: 12px !important; }
@@ -289,7 +286,7 @@ export default function AdsPage() {
 
         {/* ── HERO ─────────────────────────────────────────────────────────── */}
         <header
-          className="relative overflow-hidden px-4 md:px-8 lg:px-12 pt-2 pb-3 lg:pt-10 lg:pb-16 bg-white dark:bg-card border-b border-[#EEEEEE] dark:border-border"
+          className="relative overflow-hidden px-4 md:px-8 lg:px-12 pt-3 pb-3 lg:pt-4 lg:pb-4 bg-white dark:bg-card border-b border-[#EEEEEE] dark:border-border"
         >
           {/* Decorative yellow glow — top-right */}
           <div aria-hidden="true" style={{
@@ -309,170 +306,25 @@ export default function AdsPage() {
           }} />
 
           <div className="relative max-w-3xl">
-            {/* Brand label */}
-            <div className="flex items-center gap-3 mb-2 lg:mb-7">
-              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.8125rem', color: 'var(--foreground)' }}>
-                FirstNest
-              </span>
-              <span style={{
-                background: 'var(--color-lemon)',
-                color: 'var(--color-black)',
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 700,
-                fontSize: '0.6875rem',
-                letterSpacing: '0.08em',
-                padding: '3px 10px',
-                borderRadius: 9999,
-              }}>
-                ADS
-              </span>
-              <span className="bg-[#DDDDDD] dark:bg-border" style={{ width: 1, height: 14, display: 'inline-block' }} />
-              <span className="text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>
-                Premium Digital Billboard Network
-              </span>
-            </div>
-
             {/* Headline */}
             <h1 className="ads-h-title text-[var(--color-black)] dark:text-foreground" style={{
-              fontFamily: '"Plus Jakarta Sans", sans-serif',
+              fontFamily: 'Inter, sans-serif',
               fontWeight: 800,
-              fontSize: 'clamp(1.75rem, 5vw, 3.25rem)',
-              lineHeight: 1.1,
-              letterSpacing: '-0.03em',
-              marginBottom: 20,
+              fontSize: 'clamp(1.5rem, 3.6vw, 2.25rem)',
+              lineHeight: 1.15,
+              letterSpacing: '-0.02em',
+              marginBottom: 0,
             }}>
-              Your next client is already here.{' '}
-              <span style={{ color: '#C8AA00' }}>Rent the space.</span>
+              Welcome your next client.{' '}
+              <span style={{ color: '#C8AA00' }}>Secure the space.</span>
             </h1>
 
-            {/* Subtext */}
-            <p className="ads-h-desc text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 400,
-              fontSize: '1.0625rem',
-              lineHeight: 1.6,
-              marginBottom: 28,
-              maxWidth: 500,
-            }}>
-              Fixed monthly pricing. Zero lock-in contracts. Reach first home buyers when they&apos;re actively searching.
-            </p>
-
-            {/* Stat chips — matches homepage style */}
-            <div className="ads-h-chips" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
-              {[
-                { label: '40 Billboard' },
-                { label: '3 Size Formats' },
-                { label: 'From $99/mo' },
-              ].map(({ label }) => (
-                <span key={label} className="ads-stat-chip bg-[#FAFAFA] dark:bg-surface border border-[#EEEEEE] dark:border-border text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{
-                  borderRadius: 9999,
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: 500,
-                  fontSize: '0.8125rem',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                  whiteSpace: 'nowrap' as const,
-                }}>
-                  {label}
-                </span>
-              ))}
-            </div>
-
-            {/* CTA pair */}
-            <div className="flex flex-col sm:flex-row ads-h-cta">
-              <button
-                className="ads-btn-primary ads-h-btn"
-                onClick={() => document.getElementById('billboard-grid')?.scrollIntoView({ behavior: 'smooth' })}
-                style={{
-                  background: 'var(--color-lemon)',
-                  color: 'var(--color-black)',
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: 700,
-                  fontSize: '0.9375rem',
-                  padding: '15px 28px',
-                  borderRadius: 'var(--radius-lg)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  minHeight: 52,
-                  boxShadow: '0 4px 16px rgba(245,230,66,0.35)',
-                }}
-              >
-                View Available Zones
-              </button>
-              <a
-                href="mailto:ads@firstnest.com.au?subject=Media Kit Request — FirstNest ADS"
-                className="ads-btn-outline ads-h-btn border-[1.5px] border-[#DDDDDD] dark:border-border text-[var(--color-black)] dark:text-foreground"
-                style={{
-                  background: 'transparent',
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: 600,
-                  fontSize: '0.9375rem',
-                  padding: '15px 28px',
-                  borderRadius: 'var(--radius-lg)',
-                  cursor: 'pointer',
-                  minHeight: 52,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textDecoration: 'none',
-                }}
-              >
-                Download Media Kit
-              </a>
-            </div>
           </div>
         </header>
 
-        {/* ── FILTER BAR — sticky below Navbar ───────────────────────────── */}
-        <div
-          id="billboard-grid"
-          className="sticky top-14 lg:top-16 z-30 px-4 md:px-8 lg:px-12 bg-white dark:bg-card border-b border-[#EEEEEE] dark:border-border"
-          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
-        >
-          <div className="flex items-center justify-center sm:justify-between gap-4 py-3">
-            <span className="hidden sm:inline text-[var(--color-grey-mid)] dark:text-muted-foreground" style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '0.8125rem',
-              whiteSpace: 'nowrap' as const,
-            }}>
-              {vacantCount} available · {occupiedCount} occupied
-            </span>
-
-            {/* Segmented control */}
-            <div className="bg-[#F3F3F1] dark:bg-surface" style={{
-              display: 'flex',
-              borderRadius: 10,
-              padding: 3,
-              gap: 2,
-              flexShrink: 0,
-            }}>
-              {(['all', 'small', 'medium', 'large'] as SizeFilter[]).map(f => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={filter === f ? 'ads-pill-active' : 'ads-pill-inactive'}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: 8,
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '0.8125rem',
-                    background: 'transparent',
-                    transition: 'all 150ms',
-                    minHeight: 34,
-                    whiteSpace: 'nowrap' as const,
-                  }}
-                >
-                  {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* ── BENTO GRID ─────────────────────────────────────────────────── */}
         <section
+          id="billboard-grid"
           className="px-3 sm:px-4 md:px-6 lg:px-8 py-6"
           aria-label="Billboard zones"
         >
@@ -490,7 +342,7 @@ export default function AdsPage() {
 
               /* Size → grid span classes (sm for mobile bento, lg for desktop) */
               const spanClass =
-                zone.size === 'large'  ? 'col-span-2 row-span-2' :
+                zone.size === 'large'  ? 'col-span-2 row-span-1' :
                 zone.size === 'medium' ? 'row-span-2' :
                 ''
 
@@ -521,7 +373,7 @@ export default function AdsPage() {
                           src={zone.mediaUrl ?? ''}
                           alt={zone.advertiser}
                           loading="lazy"
-                          className="ads-media absolute inset-0 w-full h-full object-cover"
+                          className={`ads-media absolute inset-0 w-full h-full object-${zone.objectFit ?? 'cover'}`}
                         />
                       )}
 
@@ -659,7 +511,7 @@ export default function AdsPage() {
           className="px-4 md:px-8 lg:px-12 py-8 text-center bg-white dark:bg-card"
           style={{ borderTop: '3px solid var(--color-lemon)' }}
         >
-          <p className="text-[var(--color-black)] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.0625rem', marginBottom: 6 }}>
+          <p className="text-[var(--color-black)] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem', marginBottom: 6 }}>
             Ready to reach Australia&apos;s first home buyers?
           </p>
           <p className="text-[var(--color-grey-dark)] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', lineHeight: 1.7 }}>
@@ -682,6 +534,13 @@ export default function AdsPage() {
           </p>
           <p className="text-[var(--color-grey-mid)] dark:text-muted-foreground/70" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', marginTop: 8 }}>
             All bookings confirmed within 1 business day. No automated checkout.
+          </p>
+        </div>
+
+        {/* ── DISCLAIMER ─────────────────────────────────────────────────── */}
+        <div className="px-4 md:px-8 lg:px-12 py-6 bg-[#FAFAFA] dark:bg-background border-t border-[#EEEEEE] dark:border-border text-center">
+          <p className="text-[var(--color-grey-mid)] dark:text-muted-foreground/70 text-xs leading-relaxed max-w-5xl mx-auto">
+            <strong>Disclaimer:</strong> While every precaution has been taken to establish the accuracy of the material herein, prospective purchasers should not rely solely on this information as a substitute for personal or legal inspection, inquiries, or verification. All information provided has been gathered from sources we consider to be reliable, but we cannot guarantee or give any warranty about the information provided. Measurements, distances, floor plans, and landscaping are approximate and for illustrative purposes only. Interested parties are encouraged to make their own inquiries to satisfy themselves in all respects.
           </p>
         </div>
 
@@ -716,7 +575,7 @@ export default function AdsPage() {
                 {modal.id}
               </p>
 
-              <p className="text-[var(--color-black)] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.125rem', textAlign: 'center', marginBottom: 4 }}>
+              <p className="text-[var(--color-black)] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.125rem', textAlign: 'center', marginBottom: 4 }}>
                 Space Selected
               </p>
               <p className="text-[var(--color-grey-mid)] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', textAlign: 'center', marginBottom: 20 }}>

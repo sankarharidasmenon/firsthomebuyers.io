@@ -11,18 +11,20 @@ import AskAISection from '@/components/home/AskAISection'
 import { FinalCTAStrip } from '@/components/home/FinalCTAStrip'
 import { useFormSession } from '@/hooks/useFormSession'
 import { GrantCards } from '@/components/home/GrantCards'
+import { useAuth } from '@/lib/auth/AuthProvider'
 
 export default function HomePage() {
   const { hasSession, isExpired, progress, isLoaded } = useFormSession()
+  const { user, loading: authLoading } = useAuth()
   const [sessionDismissed, setSessionDismissed] = useState(false)
 
-  const showBanner = isLoaded && hasSession && !isExpired && !sessionDismissed
+  const showBanner = isLoaded && hasSession && !isExpired && !sessionDismissed && !authLoading && !user
 
-  /* Navbar height: 56px mobile / 64px (3.5rem lg) desktop.
-     Banner height: ~40px mobile (single row compact) / ~40px desktop. */
+  /* Navbar height: 56px mobile / 72px desktop.
+     Banner height: ~44px mobile / ~44px desktop. */
   const heroOffset = showBanner
-    ? 'pt-[calc(56px+40px)] lg:pt-[calc(64px+40px)]'
-    : 'pt-14 lg:pt-16'
+    ? 'pt-[100px] lg:pt-[116px]'
+    : 'pt-14 lg:pt-[72px]'
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -36,7 +38,7 @@ export default function HomePage() {
 
       {/* ── Session resume banner — fixed below navbar ── */}
       {showBanner && progress && (
-        <div className="fixed top-14 lg:top-16 left-0 right-0 z-40">
+        <div className="fixed top-14 lg:top-[72px] left-0 right-0 z-40">
           <SessionResumeBanner
             progress={progress}
             onDismiss={() => setSessionDismissed(true)}
@@ -71,12 +73,15 @@ export default function HomePage() {
           </div>
         </section> */}
 
+
+            <GrantCards />
+
         <AskAISection />
 
-<GrantCards />
+        {/* <GrantCards /> */}
 
         {/* SECTION 3 — How It Works (white) */}
-        <HowItWorks />
+        {/* <HowItWorks /> */}
 
         {/* SECTION 4 — Social Proof (off-white)
         <SocialProof /> */}

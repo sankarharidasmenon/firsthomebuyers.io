@@ -22,7 +22,7 @@ export function Step2_FinancialDetails({ step1, data, onChange, onNext, onBack, 
   return (
     <div className="flex flex-col gap-6 pt-4">
       <h2
-        style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}
+        style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}
       >
         {firstName.charAt(0).toUpperCase() + firstName.slice(1)}, tell us about your income
       </h2>

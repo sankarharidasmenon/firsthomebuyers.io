@@ -26,6 +26,7 @@ import {
   type Step3Data,
   type Step4Data,
 } from '@/lib/localStorage'
+import { dummyAvatarUrl } from '@/lib/avatar'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -261,6 +262,7 @@ export default function ProfilePageContent() {
   const [step4, setStep4State] = useState<Step4Data | null>(null)
   const [mounted, setMounted] = useState(false)
   const [editing, setEditing] = useState<EditingSection>(null)
+  const [avatarBroken, setAvatarBroken] = useState(false)
   const [showToast, setShowToast] = useState(false)
 
   // Draft state for editing
@@ -278,6 +280,7 @@ export default function ProfilePageContent() {
   }, [])
 
   const firstName = step1?.firstName || 'there'
+  const avatarUrl = dummyAvatarUrl(step1?.firstName)
   const { pct, missing } = computeCompletion(step1, step2, step3, step4)
 
   const triggerToast = useCallback(() => {
@@ -374,10 +377,30 @@ export default function ProfilePageContent() {
 
         {/* ── Page header ── */}
         <div className="mb-10 flex flex-col items-center text-center sm:items-start sm:text-left">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#FFF8D6] to-[#F5E642] flex items-center justify-center text-4xl mb-6 shadow-xl shadow-fn-yellow/20 border-4 border-white dark:border-card text-fn-navy">
-            {step1?.firstName ? step1.firstName.charAt(0).toUpperCase() : '👤'}
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-gradient-to-br from-[#FFF8D6] to-[#F5E642] flex items-center justify-center mb-6 shadow-xl shadow-fn-yellow/20 border-4 border-white dark:border-card text-fn-navy">
+            {/* Dummy avatar: gender-appropriate portrait inferred from the name;
+                neutral silhouette when the name's gender is unknown or the image
+                fails to load. TODO: replace with a real user-uploaded avatar. */}
+            {avatarUrl && !avatarBroken ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl}
+                alt={firstName ? `${firstName}'s profile photo` : 'Profile photo'}
+                width={96}
+                height={96}
+                className="w-full h-full object-cover"
+                onError={() => setAvatarBroken(true)}
+              />
+            ) : (
+              <User
+                size={44}
+                strokeWidth={1.75}
+                className="text-fn-navy/80"
+                aria-label={firstName ? `${firstName}'s profile` : 'Profile'}
+              />
+            )}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight mb-3" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
             Welcome back, {firstName}
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">

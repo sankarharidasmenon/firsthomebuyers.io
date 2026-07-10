@@ -38,7 +38,7 @@ export function AITeaser() {
         {/* Heading */}
         <h2
           style={{
-            fontFamily: '"Plus Jakarta Sans", sans-serif',
+            fontFamily: 'Inter, sans-serif',
             fontWeight: 700,
             fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
             color: 'var(--foreground)',

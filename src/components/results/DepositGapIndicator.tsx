@@ -40,7 +40,7 @@ export function DepositGapIndicator({ depositAmount, targetPropertyPrice }: Depo
       <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--secondary-foreground)', marginBottom: 8 }}>
         To avoid Lenders Mortgage Insurance (LMI), you&apos;d need an extra:
       </p>
-      <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.25rem', color: '#F59E0B', marginBottom: 8 }}>
+      <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: '#F59E0B', marginBottom: 8 }}>
         ${gap.toLocaleString('en-AU')}
       </p>
       <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--secondary-foreground)', marginBottom: 8 }}>

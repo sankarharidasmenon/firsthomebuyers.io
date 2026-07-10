@@ -100,28 +100,19 @@ export function HowItWorks() {
 
         /* ── Section heading — editorial, tight tracking ── */
         .fn-hiw-heading {
-          font-family: "Plus Jakarta Sans", sans-serif;
-          font-weight: 800;
-          font-size: clamp(1.75rem, 4vw, 2.5rem);
-          line-height: 1.12;
-          letter-spacing: -0.02em;
+          font-family: Inter, sans-serif;
+          font-weight: 700;
+          font-size: 1.875rem;
+          line-height: 2.25rem;
+          letter-spacing: normal;
           color: var(--foreground);
           text-align: center;
         }
         .fn-hiw-heading em {
-          font-style: italic;
-          color: #C9A227;
+          font-style: normal;
+          color: #111111;
         }
-        .dark .fn-hiw-heading em { color: var(--brand-gold); }
-        @media (min-width: 1024px) {
-          .fn-hiw-heading {
-            font-family: var(--font-serif), Georgia, serif;
-            font-size: 44px;
-            font-weight: 700;
-            line-height: 1.08;
-            letter-spacing: -0.02em;
-          }
-        }
+        .dark .fn-hiw-heading em { color: #111111; }
 
         .fn-hiw-subtitle {
           font-family: Inter, sans-serif;
@@ -260,7 +251,7 @@ export function HowItWorks() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: var(--font-serif), Georgia, serif;
+          font-family: Inter, sans-serif;
           font-weight: 500;
           font-size: 1.25rem;
           line-height: 1;
@@ -290,16 +281,15 @@ export function HowItWorks() {
         /* ── Content ── */
         .fn-hiw-content { min-width: 0; }
         .fn-hiw-title {
-          font-family: "Plus Jakarta Sans", sans-serif;
+          font-family: Inter, sans-serif;
           font-weight: 600;
           font-size: 1.0625rem;
           line-height: 1.35;
-          color: var(--foreground);
+          color:var(--foreground);
           margin-bottom: 5px;
         }
         @media (min-width: 1024px) {
           .fn-hiw-title {
-            font-family: var(--font-serif), Georgia, serif;
             font-size: 22px;
             font-weight: 600;
             line-height: 1.25;
@@ -378,12 +368,12 @@ export function HowItWorks() {
 
       <div className="mx-auto" style={{ maxWidth: 1360 }}>
         {/* ── Eyebrow + heading ── */}
-        <div className="flex w-fit mx-auto items-center justify-center gap-2 bg-fn-yellow-light text-fn-navy text-xs font-bold px-4 py-1.5 rounded-full mb-2 mt-3 uppercase tracking-widest">
+        {/* <div className="flex w-fit mx-auto items-center justify-center gap-2 bg-fn-yellow-light text-fn-navy text-xs font-bold px-4 py-1.5 rounded-full mb-2 mt-3 uppercase tracking-widest">
           <Sparkles className="w-3.5 h-3.5" />
           How it works
-        </div>
+        </div> */}
         <h2 className="fn-hiw-heading mb-3 lg:mb-3">
-          Four steps to <em>your</em> first home
+          Four steps to <em style={{ fontStyle: 'normal', color: "var(--foreground)" }}>your</em> first home
         </h2>
         <p className="fn-hiw-subtitle mb-6 lg:mb-5">
           A clear, personalised roadmap from today to owning your first home.
