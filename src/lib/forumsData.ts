@@ -1140,6 +1140,103 @@ export const RECENT_ACTIVITY: Activity[] = [
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
+// ── Filler replies ───────────────────────────────────────────────────────────
+// Generic-but-on-topic replies so every thread reads like an active
+// conversation instead of an empty stub. They're appended deterministically per
+// discussion (seeded by id) so the content, counts and like numbers are stable
+// across renders and never contradict a thread's specific subject matter.
+const FILLER_POOL: { author: Author; body: string[] }[] = [
+  {
+    author: A.priya,
+    body: [
+      "Following this closely — we're in almost the exact same situation and this is the clearest explanation I've come across. Thanks for laying it all out so plainly.",
+    ],
+  },
+  {
+    author: A.marcus,
+    body: [
+      "Broker's tip: get whatever the lender tells you confirmed in writing before you commit to anything. So much of the confusion in these threads comes from people relying on what they were told over the phone, and phone advice has a way of changing.",
+    ],
+  },
+  {
+    author: A.hannah,
+    body: [
+      "Went through this a few weeks ago and can confirm it played out pretty much as described above. The paperwork side was the slow part for us — lodge everything earlier than you think you need to.",
+    ],
+  },
+  {
+    author: A.jack,
+    body: [
+      "Bumping this because I've been wondering the exact same thing. The official pages are written like tax law and half of them contradict each other, so a real-world answer like this is gold.",
+    ],
+  },
+  {
+    author: A.daniel,
+    body: [
+      "Buyers advocate here — worth adding that everyone's circumstances differ, so treat the above as a solid starting point rather than a guarantee. Happy to point people to the right official source if you tell me your state.",
+    ],
+  },
+  {
+    author: A.grace,
+    body: [
+      "Saving this thread. Genuinely more useful than the hour I spent on hold last week trying to get a straight answer out of anyone.",
+    ],
+  },
+  {
+    author: A.noah,
+    body: [
+      "Can vouch for the advice about getting your documents in early. We nearly missed a cut-off because one form took far longer to process than we were warned, and it would have set us back weeks.",
+    ],
+  },
+  {
+    author: A.olivia,
+    body: [
+      "Thanks everyone — feeling a lot less overwhelmed after reading through this. It's reassuring to see other first home buyers who've been through the same maze and come out the other side.",
+    ],
+  },
+  {
+    author: A.isla,
+    body: [
+      "Just to add a data point: we did this last quarter and it went smoothly once we had the right people involved. Don't be afraid to ask what feel like 'dumb' questions — nobody expects you to know this stuff first time round.",
+    ],
+  },
+]
+
+const FILLER_TIMES = ['5h ago', '3h ago', '2h ago', '1h ago', '46m ago', '18m ago']
+
+/**
+ * The full reply thread for a discussion — the curated replies, padded with
+ * deterministic filler so each thread shows 4–5 top-level replies and never
+ * looks empty. Filler skips the original poster so it reads naturally.
+ */
+export function getThread(d: Discussion): Reply[] {
+  const base = d.thread ?? []
+  const seed = parseInt(d.id.replace(/\D/g, ''), 10) || 1
+  const target = 4 + (seed % 4) // 4–7 top-level replies, varied per thread
+  const need = Math.max(0, target - base.length)
+  const extras: Reply[] = []
+
+  for (let i = 0, added = 0; added < need && i < FILLER_POOL.length * 2; i++) {
+    const f = FILLER_POOL[(seed + i) % FILLER_POOL.length]
+    if (f.author.name === d.author.name) continue // don't have the OP answer themselves
+    extras.push({
+      id: `${d.id}f${added + 1}`,
+      author: f.author,
+      timeAgo: FILLER_TIMES[(seed + added) % FILLER_TIMES.length],
+      likes: 2 + ((seed * (added + 3)) % 13), // 2–14, believable
+      body: f.body,
+    })
+    added++
+  }
+
+  return [...base, ...extras]
+}
+
+/** Total replies actually rendered for a discussion (top-level + one nesting level). */
+export function getReplyCount(d: Discussion): number {
+  return getThread(d).reduce((n, r) => n + 1 + (r.replies?.length ?? 0), 0)
+}
+
 export function getFeaturedDiscussion(): Discussion {
   return DISCUSSIONS.find((d) => d.pinned) ?? DISCUSSIONS[0]
 }

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -444,89 +444,27 @@ export function Navbar() {
             </div>
 
             <div className="flex items-center gap-6">
-              {/* Social Icons & Badges Group */}
-              <div
-                className="flex flex-col items-center justify-center"
-                style={{
-                  width: 'max-content',
-                  gap: '6px'
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  {SOCIAL.map(({ path, icon: Icon, label, color, ring }) => (
-                    <a
-                      key={label}
-                      href="#" // TODO: Replace with official Instagram URL
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                      className="flex items-center justify-center rounded-full transition-transform hover:scale-110"
-                      style={{
-                        width: 24,
-                        height: 24,
-                        background: color,
-                        color: '#fff',
-                        ...(ring ? { border: `1px solid ${ring}` } : {})
-                      }}
-                    >
-                      {Icon ? <Icon size={14} /> : (path && <SvgIcon path={path} />)}
-                    </a>
-                  ))}
-                </div>
-
-                {/* Download Badges (Bottom Row) */}
-                <div className="flex items-center gap-[6px]">
-                  {/* App Store */}
+              {/* Social Icons */}
+              <div className="flex items-center gap-2">
+                {SOCIAL.map(({ path, icon: Icon, label, color, ring }) => (
                   <a
-                    href="#"
-                    aria-label="Download on the App Store"
-                    className="flex items-center justify-center hover:opacity-80 transition-opacity"
+                    key={label}
+                    href="#" // TODO: Replace with official Instagram URL
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="flex items-center justify-center rounded-full transition-transform hover:scale-110"
                     style={{
-                      width: 104,
-                      background: '#111111',
-                      borderRadius: 8,
-                      padding: '4px 8px',
-                      height: 28,
-                      gap: '6px',
-                      textDecoration: 'none',
+                      width: 24,
+                      height: 24,
+                      background: color,
+                      color: '#fff',
+                      ...(ring ? { border: `1px solid ${ring}` } : {})
                     }}
                   >
-                    <svg viewBox="0 0 384 512" style={{ width: 12, height: 12, fill: '#ffffff', flexShrink: 0 }} aria-hidden="true">
-                      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
-                    </svg>
-                    <div style={{ lineHeight: 1 }}>
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.45rem', color: 'rgba(255,255,255,0.65)', fontWeight: 400, marginBottom: 1 }}>Download on the</div>
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: '#ffffff', fontWeight: 600, letterSpacing: '-0.01em' }}>App Store</div>
-                    </div>
+                    {Icon ? <Icon size={14} /> : (path && <SvgIcon path={path} />)}
                   </a>
-
-                  {/* Google Play */}
-                  <a
-                    href="#"
-                    aria-label="Get it on Google Play"
-                    className="flex items-center justify-center hover:opacity-80 transition-opacity"
-                    style={{
-                      width: 104,
-                      background: '#111111',
-                      borderRadius: 8,
-                      padding: '4px 8px',
-                      height: 28,
-                      gap: '6px',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <svg viewBox="0 0 512 512" style={{ width: 12, height: 12, flexShrink: 0 }} aria-hidden="true">
-                      <path fill="#4CAF50" d="M35.6 34.1l235.1 235L35.6 477.9c-8.9-8.8-13.6-21.2-13.6-34.1V68.2c0-12.9 4.7-25.3 13.6-34.1z" />
-                      <path fill="#FFC107" d="M35.6 34.1l321.4 185.6L270.7 269l-235.1-235z" />
-                      <path fill="#F44336" d="M35.6 477.9l235.1-235 86.3 49.3L35.6 477.9z" />
-                      <path fill="#2196F3" d="M357 219.7l115.1 66.5c17.5 10.1 17.5 35.5 0 45.6L357 398.2l-86.3-49.3L357 219.7z" />
-                    </svg>
-                    <div style={{ lineHeight: 1 }}>
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.45rem', color: 'rgba(255,255,255,0.65)', fontWeight: 400, marginBottom: 1 }}>Get it on</div>
-                      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: '#ffffff', fontWeight: 600, letterSpacing: '-0.01em' }}>Google Play</div>
-                    </div>
-                  </a>
-                </div>
+                ))}
               </div>
 
               {/* Login / Logout Pill */}
@@ -573,6 +511,62 @@ export function Navbar() {
                   Login
                 </button>
               )}
+
+              {/* Download Badges — right of the Login button, stacked vertically */}
+              <div className="flex flex-col gap-0.5">
+                {/* Google Play */}
+                <a
+                  href="#"
+                  aria-label="Get it on Google Play"
+                  className="flex items-center justify-center hover:opacity-80 transition-opacity"
+                  style={{
+                    width: 99,
+                    background: '#111111',
+                    border: '1px solid #FFFFFF',
+                    borderRadius: 8,
+                    padding: '4px 8px',
+                    height: 28,
+                    gap: '6px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <svg viewBox="0 0 512 512" style={{ width: 12, height: 12, flexShrink: 0 }} aria-hidden="true">
+                    <path fill="#4CAF50" d="M35.6 34.1l235.1 235L35.6 477.9c-8.9-8.8-13.6-21.2-13.6-34.1V68.2c0-12.9 4.7-25.3 13.6-34.1z" />
+                    <path fill="#FFC107" d="M35.6 34.1l321.4 185.6L270.7 269l-235.1-235z" />
+                    <path fill="#F44336" d="M35.6 477.9l235.1-235 86.3 49.3L35.6 477.9z" />
+                    <path fill="#2196F3" d="M357 219.7l115.1 66.5c17.5 10.1 17.5 35.5 0 45.6L357 398.2l-86.3-49.3L357 219.7z" />
+                  </svg>
+                  <div style={{ lineHeight: 1 }}>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.45rem', color: 'rgba(255,255,255,0.65)', fontWeight: 400, marginBottom: 1 }}>Get it on</div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: '#ffffff', fontWeight: 600, letterSpacing: '-0.01em' }}>Google Play</div>
+                  </div>
+                </a>
+
+                {/* App Store */}
+                <a
+                  href="#"
+                  aria-label="Download on the App Store"
+                  className="flex items-center justify-center hover:opacity-80 transition-opacity"
+                  style={{
+                    width: 99,
+                    background: '#111111',
+                    border: '1px solid #FFFFFF',
+                    borderRadius: 8,
+                    padding: '4px 8px',
+                    height: 28,
+                    gap: '6px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <svg viewBox="0 0 384 512" style={{ width: 12, height: 12, fill: '#ffffff', flexShrink: 0 }} aria-hidden="true">
+                    <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+                  </svg>
+                  <div style={{ lineHeight: 1 }}>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.45rem', color: 'rgba(255,255,255,0.65)', fontWeight: 400, marginBottom: 1 }}>Download on the</div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: '#ffffff', fontWeight: 600, letterSpacing: '-0.01em' }}>App Store</div>
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
         </div>

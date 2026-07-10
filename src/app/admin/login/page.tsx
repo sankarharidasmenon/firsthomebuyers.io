@@ -7,7 +7,6 @@
  * 403 message is shown and the session is signed back out.
  */
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Lock, ShieldCheck, Loader2, ShieldAlert } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -15,7 +14,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const supabase = getBrowserClient();
 
   const [email, setEmail] = useState('');
@@ -47,8 +45,12 @@ export default function AdminLoginPage() {
       .single();
 
     if (profile?.role === 'super_admin') {
-      router.push('/admin/master-data');
-      router.refresh();
+      // Full-page navigation (not a client-side router.push): guarantees the
+      // freshly-set Supabase auth cookie is sent with the request so the proxy's
+      // admin gate (src/proxy.ts) sees the session. A soft navigation can race
+      // the cookie write, get bounced back to /admin/login, and leave this page
+      // stuck on "Signing in…" because the component never unmounts.
+      window.location.assign('/admin/master-data');
     } else {
       await supabase.auth.signOut();
       setPending(false);
