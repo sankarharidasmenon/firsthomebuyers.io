@@ -98,7 +98,7 @@ export function SampleResultsCard() {
           </p>
           <p
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              fontFamily: 'Inter, sans-serif',
               fontWeight: 700,
               fontSize: '1.875rem',
               color: 'var(--foreground)',
@@ -140,7 +140,7 @@ export function SampleResultsCard() {
           </p>
           <p
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              fontFamily: 'Inter, sans-serif',
               fontWeight: 700,
               fontSize: '2.25rem',
               color: 'var(--foreground)',
@@ -180,7 +180,7 @@ export function SampleResultsCard() {
               </div>
               <span
                 style={{
-                  fontFamily: '"JetBrains Mono", monospace',
+                  fontFamily: 'Inter, sans-serif',
                   fontSize: '0.8125rem',
                   color: 'var(--color-green-600)',
                   fontWeight: 600,

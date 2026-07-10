@@ -2,14 +2,7 @@
 
 import React, { useState } from 'react'
 import { ChevronDown, Check, X, ExternalLink } from 'lucide-react'
-import type { EvaluatedGrant } from '@/lib/grantEligibility'
-
-// Human-readable benefit descriptions for scheme-type grants (not cash payments)
-const SCHEME_BENEFITS: Record<string, string> = {
-  fhss: 'Save through your super with tax advantages — up to $50k',
-  fhbg: 'Buy with as little as a 5% deposit — no LMI required',
-  'shared-equity': 'Government co-buys up to 40% of your home',
-}
+import type { EvaluatedGrant } from '@/lib/schemes/types'
 
 const STATUS_COLOURS: Record<string, string> = {
   eligible: '#22C55E',
@@ -40,7 +33,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
   const { grant, status, value, criteria, reason, alternative } = evaluatedGrant
 
   const isScheme = variant === 'scheme'
-  const schemeBenefit = SCHEME_BENEFITS[grant.id]
+  const schemeBenefit = grant.benefitLine
 
   const valueDisplay =
     typeof value === 'number'
@@ -96,7 +89,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
                 color: status === 'eligible' ? '#16A34A' : '#888888',
                 lineHeight: 1.4,
               }}
-              // In dark mode: eligible stays green, ineligible gets lighter
+            // In dark mode: eligible stays green, ineligible gets lighter
             >
               {status === 'eligible' ? '✓ ' : ''}{schemeBenefit}
             </span>
@@ -108,7 +101,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
           {!isScheme && (
             <span
               style={{
-                fontFamily: '"JetBrains Mono", monospace',
+                fontFamily: 'Inter, sans-serif',
                 fontWeight: 700,
                 fontSize: '0.9375rem',
                 color: status === 'eligible' ? '#16A34A' : '#9CA3AF',

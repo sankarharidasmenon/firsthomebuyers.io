@@ -175,11 +175,10 @@ function BlockRenderer({ block, index }: { block: ContentBlock; index: number })
               {block.status === 'eligible' ? 'Eligible Scheme' : 'Conditional Eligibility'}
             </p>
             <span
-              className={`text-xs font-bold px-3 py-1 rounded-full ${
-                block.status === 'eligible'
+              className={`text-xs font-bold px-3 py-1 rounded-full ${block.status === 'eligible'
                   ? 'bg-fn-success-light text-fn-success'
                   : 'bg-fn-warning-light text-fn-warning'
-              }`}
+                }`}
             >
               {block.status === 'eligible' ? 'Eligible' : 'Conditional'}
             </span>
@@ -222,11 +221,10 @@ function TableOfContents({
           <button
             key={id}
             onClick={() => handleClick(text)}
-            className={`text-left text-sm px-3 py-2 rounded-lg transition-all duration-200 leading-snug ${
-              active
+            className={`text-left text-sm px-3 py-2 rounded-lg transition-all duration-200 leading-snug ${active
                 ? 'bg-fn-yellow-light text-fn-navy font-semibold border-l-2 border-fn-yellow'
                 : 'text-fn-grey-500 dark:text-muted-foreground hover:text-fn-navy dark:hover:text-foreground hover:bg-fn-grey-50 dark:hover:bg-surface'
-            }`}
+              }`}
           >
             {text}
           </button>

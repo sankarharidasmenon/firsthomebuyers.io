@@ -51,7 +51,7 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div>
-        <h2 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}>
+        <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}>
           {greetingText}
         </h2>
       </div>
@@ -79,7 +79,7 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
               transition: 'opacity 300ms ease',
             }}
           >
-            Nice to meet you, {data.firstName}! 👋 This takes about 3 minutes.
+            Nice to meet you, {data.firstName}! 👋 This takes about few minutes.
           </p>
         )}
       </div>

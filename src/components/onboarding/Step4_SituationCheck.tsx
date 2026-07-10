@@ -35,7 +35,7 @@ export function Step4_SituationCheck({ step1, data, onChange, onSubmit, onBack, 
   return (
     <div className="flex flex-col gap-5 pt-4">
       <h2
-        style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}
+        style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}
       >
         Almost there, {firstName}! Just a couple more things.
       </h2>

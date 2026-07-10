@@ -6,7 +6,9 @@ import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
 import { InputField } from '@/components/ui/InputField'
 import { Button } from '@/components/ui/button'
 import { calculateBorrowingCapacity, type BorrowingInputs } from '@/lib/calculations'
-import { addSavedScenario } from '@/lib/localStorage'
+import { useAuth } from '@/lib/auth/AuthProvider'
+import { saveScenario } from '@/lib/scenarios/actions'
+import { toast } from 'sonner'
 
 interface ScenarioSlidersProps {
   baseInputs: BorrowingInputs
@@ -15,6 +17,7 @@ interface ScenarioSlidersProps {
 }
 
 export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: ScenarioSlidersProps) {
+  const { requireAuth } = useAuth()
   const [extraSavings, setExtraSavings] = useState(0)
   const [incomeIncrease, setIncomeIncrease] = useState(0)
   const [hasPartner, setHasPartner] = useState(false)
@@ -55,9 +58,20 @@ export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: Scen
 
   const handleSave = () => {
     const current = recalculate(extraSavings, incomeIncrease, hasPartner, partnerIncome)
-    addSavedScenario({ sliders: { extraSavings, incomeIncrease, hasPartner, partnerIncome }, result: current })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    const sliders = { extraSavings, incomeIncrease, hasPartner, partnerIncome }
+    requireAuth(
+      async () => {
+        const res = await saveScenario({ sliders, result: current })
+        if (res.ok) {
+          setSaved(true)
+          setTimeout(() => setSaved(false), 2000)
+          toast.success('Scenario saved successfully.')
+        } else {
+          toast.error(res.error)
+        }
+      },
+      { reason: 'Sign in to save this scenario and compare your plans anytime.' }
+    )
   }
 
   const currentResult = calculateBorrowingCapacity({
@@ -72,7 +86,7 @@ export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: Scen
     <div className="px-5 pt-5 pb-5">
       {/* Section header */}
       <div className="mb-4">
-        <h2 style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--foreground)' }}>
+        <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem', color: 'var(--foreground)' }}>
           What if I...?
         </h2>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: 'var(--muted-foreground)', marginTop: 2 }}>

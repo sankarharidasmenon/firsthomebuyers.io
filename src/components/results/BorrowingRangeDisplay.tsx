@@ -48,7 +48,7 @@ export function BorrowingRangeDisplay({
   const avgLoan = (min + max) / 2
   const monthly = avgLoan > 0
     ? Math.round((avgLoan * monthlyRate * Math.pow(1 + monthlyRate, termMonths)) /
-        (Math.pow(1 + monthlyRate, termMonths) - 1))
+      (Math.pow(1 + monthlyRate, termMonths) - 1))
     : 0
   const fortnightly = Math.round((monthly * 12) / 26)
 
@@ -73,7 +73,7 @@ export function BorrowingRangeDisplay({
 
       {/* Personalised heading */}
       <p suppressHydrationWarning className="text-[#111111] dark:text-foreground" style={{
-        fontFamily: '"Plus Jakarta Sans", sans-serif',
+        fontFamily: 'Inter, sans-serif',
         fontWeight: 700,
         fontSize: '0.9375rem',
         textAlign: 'center',
@@ -84,7 +84,7 @@ export function BorrowingRangeDisplay({
 
       {/* Hero range */}
       <p className="text-[#111111] dark:text-foreground" style={{
-        fontFamily: '"JetBrains Mono", monospace',
+        fontFamily: 'Inter, sans-serif',
         fontWeight: 700,
         fontSize: 'clamp(1.5rem, 6vw, 2.125rem)',
         textAlign: 'center',
@@ -114,7 +114,7 @@ export function BorrowingRangeDisplay({
         <p className="text-[#999999] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>
           Recommended property search range
         </p>
-        <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}>
+        <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}>
           ${recommendedMin.toLocaleString('en-AU')} – ${recommendedMax.toLocaleString('en-AU')}
         </p>
         <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>
@@ -131,7 +131,7 @@ export function BorrowingRangeDisplay({
           <div
             className="rounded-[10px] px-4 py-3 bg-[#FAFAFA] dark:bg-surface border border-[#EEEEEE] dark:border-border"
           >
-            <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.125rem', letterSpacing: '-0.01em' }}>
+            <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.125rem', letterSpacing: '-0.01em' }}>
               ${monthly.toLocaleString('en-AU')}
             </p>
             <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>
@@ -141,7 +141,7 @@ export function BorrowingRangeDisplay({
           <div
             className="rounded-[10px] px-4 py-3 bg-[#FAFAFA] dark:bg-surface border border-[#EEEEEE] dark:border-border"
           >
-            <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: '1.125rem', letterSpacing: '-0.01em' }}>
+            <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.125rem', letterSpacing: '-0.01em' }}>
               ${fortnightly.toLocaleString('en-AU')}
             </p>
             <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>

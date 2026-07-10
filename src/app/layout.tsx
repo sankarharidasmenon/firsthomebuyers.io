@@ -1,36 +1,28 @@
 import type { Metadata, Viewport } from 'next'
-import { Plus_Jakarta_Sans, Inter, JetBrains_Mono, Fraunces } from 'next/font/google'
+import { Inter, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
 import { BottomNav } from '@/components/navigation/BottomNav'
 import { Footer } from '@/components/layout/Footer'
 import { GlobalBackButton } from '@/components/navigation/GlobalBackButton'
 import { Navbar } from '@/components/home/Navbar'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import { AuthProvider } from '@/lib/auth/AuthProvider'
+import { Toaster } from 'sonner'
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['700', '800'],
-  variable: '--font-display',
-  display: 'swap',
-})
+
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-body',
   display: 'swap',
 })
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['700'],
-  variable: '--font-mono',
-  display: 'swap',
-})
 
-const fraunces = Fraunces({
+
+const cormorantGaramond = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-serif',
   display: 'swap',
 })
@@ -50,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable}`}
+      className={`${inter.variable} ${cormorantGaramond.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -59,13 +51,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="text-foreground antialiased flex flex-col min-h-screen" style={{ background: 'var(--color-brand-dark-surface)' }}>
         <ThemeProvider>
-          <div className="flex-1 flex flex-col bg-background">
-            <Navbar />
-            <GlobalBackButton />
-            {children}
-          </div>
-          <Footer />
-          <BottomNav />
+          <AuthProvider>
+            <div className="flex-1 flex flex-col bg-background">
+              <Navbar />
+              <GlobalBackButton />
+              {children}
+            </div>
+            <Footer />
+            <BottomNav />
+            <Toaster
+              position="bottom-center"
+              toastOptions={{
+                style: {
+                  background: '#111111',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  fontFamily: 'Inter, sans-serif',
+                  borderRadius: '9999px',
+                },
+              }}
+            />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

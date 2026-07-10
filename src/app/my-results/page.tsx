@@ -1,15 +1,31 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Navbar } from '@/components/home/Navbar'
 import { Button } from '@/components/ui/button'
-import { Trash2, TrendingUp, ArrowRight } from 'lucide-react'
-import {
-  getMyResults, clearMyResults,
-  getSavedScenarios, removeSavedScenario,
-  type SavedResults, type SavedScenario,
-} from '@/lib/localStorage'
+import { Trash2, TrendingUp, ArrowRight, Pencil, ArrowUpDown, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { useAuth } from '@/lib/auth/AuthProvider'
+import { listScenarios, deleteScenario, renameScenario } from '@/lib/scenarios/actions'
+
+// View models mapped from Supabase `saved_scenarios` rows.
+interface SavedResults {
+  id: string
+  savedAt: string
+  borrowing: { min: number; max: number }
+  grantsTotal: number
+  eligibleGrants: string[]
+  state: string
+  firstName: string
+}
+interface SavedScenario {
+  id: string
+  name: string | null
+  savedAt: string
+  sliders: { extraSavings: number; incomeIncrease: number; hasPartner: boolean; partnerIncome: number }
+  result: { min: number; max: number }
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -86,25 +102,78 @@ const microLabel: React.CSSProperties = {
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function MyResultsPage() {
   const router = useRouter()
+  const { user, loading: authLoading, openAuth } = useAuth()
   const [savedResults, setSavedResults] = useState<SavedResults | null>(null)
   const [scenarios, setScenarios] = useState<SavedScenario[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [sortBy, setSortBy] = useState<'newest' | 'improvement'>('newest')
 
-  useEffect(() => {
-    setSavedResults(getMyResults())
-    setScenarios(getSavedScenarios())
+  const refresh = useCallback(async () => {
+    const res = await listScenarios()
+    if (!res.ok) {
+      setLoaded(true)
+      return
+    }
+    const resultRow = res.data.find((r) => r.kind === 'result')
+    setSavedResults(
+      resultRow
+        ? {
+            id: resultRow.id,
+            savedAt: resultRow.created_at,
+            borrowing: resultRow.borrowing_results,
+            grantsTotal: Number((resultRow.answers as { grantsTotal?: number }).grantsTotal ?? 0),
+            eligibleGrants: resultRow.eligible_schemes,
+            state: String((resultRow.answers as { state?: string }).state ?? ''),
+            firstName: String((resultRow.answers as { firstName?: string }).firstName ?? ''),
+          }
+        : null
+    )
+    setScenarios(
+      res.data
+        .filter((r) => r.kind === 'scenario')
+        .map((r) => ({
+          id: r.id,
+          name: r.scenario_name,
+          savedAt: r.created_at,
+          sliders: (r.answers as { sliders: SavedScenario['sliders'] }).sliders,
+          result: r.borrowing_results,
+        }))
+    )
     setLoaded(true)
   }, [])
 
-  const handleDeleteResults = () => {
+  useEffect(() => {
+    if (authLoading) return
+    if (!user) {
+      // Proxy normally redirects here, but guard the direct-render case too.
+      // The signed-out branch renders its own prompt (see below); no fetch.
+      openAuth({ next: '/my-results', reason: 'Sign in to view your saved results.' })
+      return
+    }
+    refresh()
+  }, [authLoading, user, refresh, openAuth])
+
+  const signedOut = !authLoading && !user
+
+  const handleDeleteResults = async () => {
+    if (!savedResults) return
     if (confirm('Delete your home buying snapshot?')) {
-      clearMyResults()
-      setSavedResults(null)
+      const res = await deleteScenario(savedResults.id)
+      if (res.ok) { setSavedResults(null); toast.success('Snapshot deleted.') }
+      else toast.error(res.error)
     }
   }
-  const handleDeleteScenario = (id: string) => {
-    removeSavedScenario(id)
-    setScenarios(getSavedScenarios())
+  const handleDeleteScenario = async (id: string) => {
+    const res = await deleteScenario(id)
+    if (res.ok) { setScenarios((prev) => prev.filter((s) => s.id !== id)); toast.success('Plan deleted.') }
+    else toast.error(res.error)
+  }
+  const handleRenameScenario = async (id: string, currentName: string | null) => {
+    const name = prompt('Rename this plan', currentName ?? '')
+    if (name === null) return
+    const res = await renameScenario(id, name.trim())
+    if (res.ok) { setScenarios((prev) => prev.map((s) => (s.id === id ? { ...s, name: name.trim() } : s))); toast.success('Plan renamed.') }
+    else toast.error(res.error)
   }
 
   const isEmpty = !savedResults && scenarios.length === 0
@@ -113,8 +182,14 @@ export default function MyResultsPage() {
     : null
 
   const baselineMax = savedResults?.borrowing.max ?? 0
-  const sortedScenarios = [...scenarios].sort((a, b) => b.result.max - a.result.max)
-  const bestScenario = sortedScenarios[0] ?? null
+  // `bestScenario` is always computed from the highest-capacity plan, regardless
+  // of the display sort chosen by the user.
+  const byImprovement = [...scenarios].sort((a, b) => b.result.max - a.result.max)
+  const sortedScenarios =
+    sortBy === 'improvement'
+      ? byImprovement
+      : [...scenarios].sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime())
+  const bestScenario = byImprovement[0] ?? null
   const bestScenarioId =
     bestScenario && bestScenario.result.max > baselineMax ? bestScenario.id : null
   const bestImprovement =
@@ -133,8 +208,33 @@ export default function MyResultsPage() {
 
       <main className="flex-1 w-full max-w-190 mx-auto pt-24 pb-28 px-4 lg:px-0">
 
+        {/* ── Signed-out prompt ── */}
+        {signedOut && (
+          <div className="flex flex-col items-center justify-center pt-24 text-center px-4">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 bg-[#FDFCF0] dark:bg-surface" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+              <span style={{ fontSize: '2rem' }}>🔒</span>
+            </div>
+            <h1 className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '1.5rem', marginBottom: 10 }}>
+              Sign in to see your saved results
+            </h1>
+            <p className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', maxWidth: 360, marginBottom: 24, lineHeight: 1.65 }}>
+              Your saved plans and scenarios are stored securely to your account.
+            </p>
+            <Button onClick={() => openAuth({ next: '/my-results', reason: 'Sign in to view your saved results.' })} variant="primary" className="px-8" fullWidth={false}>
+              Sign in
+            </Button>
+          </div>
+        )}
+
+        {/* ── Loading state ── */}
+        {user && !loaded && (
+          <div className="flex items-center justify-center pt-28">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
         {/* ── Empty state ── */}
-        {loaded && isEmpty && (
+        {user && loaded && isEmpty && (
           <div className="flex flex-col items-center justify-center pt-20 text-center px-4">
             <div
               className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 bg-[#FDFCF0] dark:bg-surface"
@@ -142,7 +242,7 @@ export default function MyResultsPage() {
             >
               <span style={{ fontSize: '2rem' }}>🏡</span>
             </div>
-            <h1 className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: '1.5rem', marginBottom: 10, letterSpacing: '-0.01em' }}>
+            <h1 className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '1.5rem', marginBottom: 10, letterSpacing: '-0.01em' }}>
               Your home buying plans will live here
             </h1>
             <p className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', maxWidth: 360, marginBottom: 32, lineHeight: 1.65 }}>
@@ -152,14 +252,14 @@ export default function MyResultsPage() {
               Get Started <ArrowRight size={16} className="ml-2 inline" />
             </Button>
             <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', marginTop: 12 }}>
-              Takes about 3 minutes 
+              Takes about few minutes
               {/* No sign-up needed */}
             </p>
           </div>
         )}
 
         {/* ── Main content ── */}
-        {loaded && !isEmpty && (
+        {user && loaded && !isEmpty && (
           <div className="flex flex-col gap-7">
 
             {/* ── PRIORITY #2: Personalised hero ── */}
@@ -167,7 +267,7 @@ export default function MyResultsPage() {
               <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.6875rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
                 Your home buying journey
               </p>
-              <h1 className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 'clamp(1.625rem, 4vw, 2rem)', letterSpacing: '-0.015em', lineHeight: 1.1, marginBottom: 10 }}>
+              <h1 className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: 'clamp(1.625rem, 4vw, 2rem)', letterSpacing: '-0.015em', lineHeight: 1.1, marginBottom: 10 }}>
                 {displayName ? `Welcome back, ${displayName} 👋` : 'Your saved plans 🏡'}
               </h1>
               <div className="text-[#555555] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', lineHeight: 1.65, maxWidth: 500 }}>
@@ -206,7 +306,7 @@ export default function MyResultsPage() {
                       className={`px-4 py-4 text-center ${i > 0 ? 'border-l border-[rgba(0,0,0,0.06)] dark:border-border' : ''}`}
                     >
                       <p style={microLabel}>{label}</p>
-                      <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700,fontSize: i === 2 ? '0.875rem' : '1.25rem', color, lineHeight: 1.1 }}>
+                      <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, fontSize: i === 2 ? '0.875rem' : '1.25rem', color, lineHeight: 1.1 }}>
                         {value}
                       </p>
                     </div>
@@ -226,7 +326,7 @@ export default function MyResultsPage() {
                         <span style={{ fontSize: '1.125rem' }}>🏡</span>
                       </div>
                       <div>
-                        <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem' }}>Current Position</p>
+                        <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem' }}>Current Position</p>
                         <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: 2 }}>
                           Saved {formatDate(savedResults.savedAt)} · {savedResults.state}
                         </p>
@@ -241,7 +341,7 @@ export default function MyResultsPage() {
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <p style={microLabel}>Homes you could afford</p>
-                        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 800, fontSize: '1.375rem', color: '#111111', letterSpacing: '-0.02em', lineHeight: 1}} className="dark:text-foreground">
+                        <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 800, fontSize: '1.375rem', color: '#111111', letterSpacing: '-0.02em', lineHeight: 1 }} className="dark:text-foreground">
                           {fmtMoney(savedResults.borrowing.min)}
                           <span className="text-[#DDDDDD] dark:text-border" style={{ fontWeight: 300 }}> – </span>
                           {fmtMoney(savedResults.borrowing.max)}
@@ -278,9 +378,20 @@ export default function MyResultsPage() {
             {/* ── Saved plans ── */}
             {sortedScenarios.length > 0 && (
               <div>
-                <p style={{ ...microLabel, marginBottom: 12 }}>
-                  {sortedScenarios.length === 1 ? 'Plan explored' : `${sortedScenarios.length} plans explored`}
-                </p>
+                <div className="flex items-center justify-between mb-3">
+                  <p style={{ ...microLabel, marginBottom: 0 }}>
+                    {sortedScenarios.length === 1 ? 'Plan explored' : `${sortedScenarios.length} plans explored`}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSortBy((s) => (s === 'newest' ? 'improvement' : 'newest'))}
+                    className="inline-flex items-center gap-1.5 text-[#666666] dark:text-muted-foreground hover:text-foreground transition-colors"
+                    style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.75rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    <ArrowUpDown size={13} />
+                    {sortBy === 'newest' ? 'Newest first' : 'Best improvement'}
+                  </button>
+                </div>
 
                 <div className="flex flex-col gap-4">
                   {sortedScenarios.map((scenario) => {
@@ -291,7 +402,7 @@ export default function MyResultsPage() {
                     const insight = getInsight(scenario, isBest, diff)
 
                     return (
-                      <div className={`${isBest ? bestCardClass : cardClass} transition-transform duration-200 hover:-translate-y-px`}>
+                      <div key={scenario.id} className={`${isBest ? bestCardClass : cardClass} transition-transform duration-200 hover:-translate-y-px`}>
                         {/* Card header — PRIORITY #4: badge inline, no green background fill */}
                         <div className="flex items-start justify-between px-6 py-5 border-b border-[rgba(0,0,0,0.04)] dark:border-border">
                           <div className="flex items-center gap-3">
@@ -302,8 +413,8 @@ export default function MyResultsPage() {
                             </div>
                             <div>
                               <div className="flex items-center gap-2 flex-wrap">
-                                <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem' }}>
-                                  {planName}
+                                <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem' }}>
+                                  {scenario.name || planName}
                                 </p>
                                 {/* PRIORITY #4: small premium badge — no background flood */}
                                 {isBest && (
@@ -331,9 +442,14 @@ export default function MyResultsPage() {
                               </p>
                             </div>
                           </div>
-                          <button type="button" onClick={() => handleDeleteScenario(scenario.id)} className="text-[#DDDDDD] hover:text-[#E53E3E] transition-colors p-1 mt-1" aria-label="Delete plan">
-                            <Trash2 size={15} />
-                          </button>
+                          <div className="flex items-center gap-1 mt-1">
+                            <button type="button" onClick={() => handleRenameScenario(scenario.id, scenario.name)} className="text-[#DDDDDD] hover:text-foreground transition-colors p-1" aria-label="Rename plan">
+                              <Pencil size={14} />
+                            </button>
+                            <button type="button" onClick={() => handleDeleteScenario(scenario.id)} className="text-[#DDDDDD] hover:text-[#E53E3E] transition-colors p-1" aria-label="Delete plan">
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </div>
 
                         {/* Card body — same height for all plans, best gets stronger improvement chip */}
@@ -449,7 +565,7 @@ export default function MyResultsPage() {
               style={{ background: '#111111' }}
             >
               <div>
-                <p style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1rem', color: '#FFFFFF', marginBottom: 4 }}>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem', color: '#FFFFFF', marginBottom: 4 }}>
                   Want to explore more options?
                 </p>
                 <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>

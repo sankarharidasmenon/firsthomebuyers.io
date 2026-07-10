@@ -33,7 +33,7 @@ export function Step3_PropertyGoals({ data, onChange, onNext, onBack, errors }: 
   return (
     <div className="flex flex-col gap-6 pt-4">
       <h2
-        style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}
+        style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.25rem', color: 'var(--foreground)' }}
       >
         Now, let&apos;s talk savings and goals
       </h2>
