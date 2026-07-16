@@ -27,10 +27,6 @@ import {
   type Step4Data,
 } from '@/lib/localStorage'
 import { dummyAvatarUrl } from '@/lib/avatar'
-import { useAuth } from '@/lib/auth/AuthProvider'
-import { saveOnboardingAnswers } from '@/lib/scenarios/actions'
-import { toast } from 'sonner'
-import { dispatchOnboardingUpdated } from '@/lib/onboardingChannel'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -259,7 +255,6 @@ type EditingSection = 'personal' | 'financial' | 'property' | null
 
 export default function ProfilePageContent() {
   const router = useRouter()
-  const { user, onboardingReady } = useAuth()
 
   const [step1, setStep1State] = useState<Step1Data | null>(null)
   const [step2, setStep2State] = useState<Step2Data | null>(null)
@@ -276,12 +271,7 @@ export default function ProfilePageContent() {
   const [draftS3, setDraftS3] = useState<Step3Data | null>(null)
   const [draftS4, setDraftS4] = useState<Step4Data | null>(null)
 
-  // RC-2 fix: read localStorage only after Supabase hydration is complete.
-  // onboardingReady is set to true by AuthProvider once resolveOnboardingAnswers()
-  // has finished writing Supabase data into localStorage. For guest users
-  // onboardingReady is true immediately (no Supabase call needed).
   useEffect(() => {
-    if (!onboardingReady) return
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setStep1State(getStep1())
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -292,7 +282,7 @@ export default function ProfilePageContent() {
     setStep4State(getStep4())
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
-  }, [onboardingReady])
+  }, [])
 
   const firstName = step1?.firstName || 'there'
   const avatarUrl = dummyAvatarUrl(step1?.firstName)
@@ -320,87 +310,34 @@ export default function ProfilePageContent() {
 
   const cancelEdit = () => setEditing(null)
 
-  /**
-   * Persist onboarding answers for a profile save.
-   *
-   * Architecture contract (authenticated users):
-   *   1. Validate (caller responsibility)
-   *   2. Persist COMPLETE object to Supabase (canonical store)
-   *   3. On success → update localStorage (working cache)
-   *   4. Update React state
-   *   5. Dispatch invalidation event so other pages/tabs re-read
-   *
-   * Guest users skip the Supabase step — localStorage is their sole store.
-   * We always pass ALL FOUR complete step objects to saveOnboardingAnswers so
-   * we never partially overwrite the Supabase record.
-   */
+  // Persist onboarding answers for a profile save — localStorage is the sole
+  // store (POC: no accounts, no backend sync).
   const savePersonal = async () => {
     if (!draftS1 || !draftS4) return
-    if (user) {
-        const res = await saveOnboardingAnswers({
-          step1: draftS1 as unknown as Record<string, unknown>,
-          step2: (step2 ?? {}) as unknown as Record<string, unknown>,
-          step3: (step3 ?? {}) as unknown as Record<string, unknown>,
-          step4: draftS4 as unknown as Record<string, unknown>,
-        })
-        if (!res.ok) {
-          toast.error('Could not save changes. Please try again.')
-          return
-        }
-      }
-      // localStorage update (primary for guest; cache sync for auth)
-      setStep1(draftS1)
-      setStep4(draftS4)
-      // React state
-      setStep1State(draftS1)
-      setStep4State(draftS4)
-      setEditing(null)
-      triggerToast()
-      if (user) dispatchOnboardingUpdated()
+    setStep1(draftS1)
+    setStep4(draftS4)
+    setStep1State(draftS1)
+    setStep4State(draftS4)
+    setEditing(null)
+    triggerToast()
   }
 
   const saveFinancial = async () => {
     if (!draftS2 || !draftS4) return
-    if (user) {
-        const res = await saveOnboardingAnswers({
-          step1: (step1 ?? {}) as unknown as Record<string, unknown>,
-          step2: draftS2 as unknown as Record<string, unknown>,
-          step3: (step3 ?? {}) as unknown as Record<string, unknown>,
-          step4: draftS4 as unknown as Record<string, unknown>,
-        })
-        if (!res.ok) {
-          toast.error('Could not save changes. Please try again.')
-          return
-        }
-      }
-      setStep2(draftS2)
-      setStep4(draftS4)
-      setStep2State(draftS2)
-      setStep4State(draftS4)
-      setEditing(null)
-      triggerToast()
-      if (user) dispatchOnboardingUpdated()
+    setStep2(draftS2)
+    setStep4(draftS4)
+    setStep2State(draftS2)
+    setStep4State(draftS4)
+    setEditing(null)
+    triggerToast()
   }
 
   const saveProperty = async () => {
     if (!draftS3) return
-    if (user) {
-        const res = await saveOnboardingAnswers({
-          step1: (step1 ?? {}) as unknown as Record<string, unknown>,
-          step2: (step2 ?? {}) as unknown as Record<string, unknown>,
-          step3: draftS3 as unknown as Record<string, unknown>,
-          step4: (step4 ?? {}) as unknown as Record<string, unknown>,
-        })
-        if (!res.ok) {
-          toast.error('Could not save changes. Please try again.')
-          return
-        }
-      }
-      setStep3(draftS3)
-      setStep3State(draftS3)
-      setEditing(null)
-      triggerToast()
-      if (user) dispatchOnboardingUpdated()
+    setStep3(draftS3)
+    setStep3State(draftS3)
+    setEditing(null)
+    triggerToast()
   }
 
   if (!mounted) {

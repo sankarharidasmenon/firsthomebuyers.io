@@ -11,10 +11,10 @@
  * crawler does the finding, the registry keeps the Excel provably complete.
  */
 export const EXPECTED_SCHEMES: Record<string, string[]> = {
+  // Three separate guarantees consolidated into the 5% Deposit Scheme (Oct 2025).
+  // Help to Buy launched December 2025.
   'housing-australia': [
-    'First Home Guarantee',
-    'Family Home Guarantee',
-    'Regional First Home Buyer Guarantee',
+    'Australian Government 5% Deposit Scheme',
     'Help to Buy',
   ],
   ato: ['First Home Super Saver Scheme'],
