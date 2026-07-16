@@ -13,35 +13,17 @@
 import type { Source } from '../types';
 
 export const SOURCES: Source[] = [
-  // ── Federal — Housing Australia ────────────────────────────────────────────
+  // ── Federal — firsthomebuyers.gov.au (was Housing Australia) ─────────────
+  // The three separate guarantee programs (First Home Guarantee, Family Home
+  // Guarantee, Regional First Home Buyer Guarantee) were consolidated into a
+  // single "5% Deposit Scheme" as of October 2025. No income caps, no waitlist.
   {
-    id: 'fed-first-home-guarantee',
-    programName: 'First Home Guarantee',
+    id: 'fed-5-percent-deposit-scheme',
+    programName: 'Australian Government 5% Deposit Scheme',
     administeringBody: 'Housing Australia',
     level: 'Federal',
     jurisdiction: 'FED',
-    // The three guarantees are documented on the consolidated Home Guarantee
-    // Scheme page (per-program pages were retired). Each source keeps its own
-    // program name/type; the extractor differentiates by config.
-    url: 'https://www.housingaustralia.gov.au/home-guarantee-scheme',
-    typeHint: 'Guarantee',
-  },
-  {
-    id: 'fed-family-home-guarantee',
-    programName: 'Family Home Guarantee',
-    administeringBody: 'Housing Australia',
-    level: 'Federal',
-    jurisdiction: 'FED',
-    url: 'https://www.housingaustralia.gov.au/home-guarantee-scheme',
-    typeHint: 'Guarantee',
-  },
-  {
-    id: 'fed-regional-first-home-buyer-guarantee',
-    programName: 'Regional First Home Buyer Guarantee',
-    administeringBody: 'Housing Australia',
-    level: 'Federal',
-    jurisdiction: 'FED',
-    url: 'https://www.housingaustralia.gov.au/home-guarantee-scheme',
+    url: 'https://firsthomebuyers.gov.au/australian-government-5-percent-deposit-scheme',
     typeHint: 'Guarantee',
   },
   {
@@ -50,18 +32,19 @@ export const SOURCES: Source[] = [
     administeringBody: 'Housing Australia',
     level: 'Federal',
     jurisdiction: 'FED',
-    url: 'https://www.housingaustralia.gov.au/home-guarantee-scheme/help-buy',
+    // Applications opened 5 December 2025. 10,000 places/year.
+    url: 'https://firsthomebuyers.gov.au/australian-government-help-buy-scheme',
     typeHint: 'Shared Equity',
   },
 
-  // ── Federal — ATO ──────────────────────────────────────────────────────────
+  // ── Federal — ATO (via firsthomebuyers.gov.au — ATO blocks crawlers) ──────
   {
     id: 'fed-first-home-super-saver',
     programName: 'First Home Super Saver Scheme',
     administeringBody: 'Australian Taxation Office',
     level: 'Federal',
     jurisdiction: 'FED',
-    url: 'https://www.ato.gov.au/individuals-and-families/super-for-individuals-and-families/super/withdrawing-and-using-your-super/early-access-to-super/first-home-super-saver-scheme',
+    url: 'https://firsthomebuyers.gov.au/first-home-super-saver-scheme',
     typeHint: 'Tax Benefit',
   },
 
@@ -194,7 +177,7 @@ export const SOURCES: Source[] = [
 ];
 
 /** Allowed host suffixes. Anything else is refused by the downloader. */
-export const ALLOWED_HOST_SUFFIXES = ['.gov.au', 'housingaustralia.gov.au'];
+export const ALLOWED_HOST_SUFFIXES = ['.gov.au', 'firsthomebuyers.gov.au'];
 
 export function isOfficialHost(hostname: string): boolean {
   const h = hostname.toLowerCase();

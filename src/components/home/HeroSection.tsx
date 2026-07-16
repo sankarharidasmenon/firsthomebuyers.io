@@ -2,27 +2,25 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { clearAllData } from '@/lib/localStorage'
 
 export function HeroSection() {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(true)
+  const [firstName, setFirstName] = useState<string | null>(null)
+  const [currentStep, setCurrentStep] = useState<number | null>(null)
+  const [flow, setFlow] = useState<'grants' | 'borrowing'>('grants')
+  const [isLoaded, setIsLoaded] = useState(false)
 
   const toggleMute = () => {
     const v = videoRef.current
     if (!v) return
     const next = !v.muted
     v.muted = next
-    if (!next) {
-      // ensure playback continues after unmuting
-      v.play().catch(() => { })
-    }
+    if (!next) v.play().catch(() => {})
     setMuted(next)
   }
-  const [firstName, setFirstName] = useState<string | null>(null)
-  const [currentStep, setCurrentStep] = useState<number | null>(null)
-  const [flow, setFlow] = useState<'grants' | 'borrowing'>('grants')
-  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
     try {
@@ -41,7 +39,7 @@ export function HeroSection() {
           setCurrentStep(null)
         }
       }
-    } catch { }
+    } catch {}
     setIsLoaded(true)
   }, [])
 
@@ -52,294 +50,317 @@ export function HeroSection() {
   return (
     <>
       <style>{`
-        /* ── Unified hero background ── */
         .fn-hero {
-          background:
-            radial-gradient(ellipse at 12% 65%, rgba(245,230,66,0.10) 0%, transparent 52%),
-            radial-gradient(ellipse at 78% 22%, rgba(245,230,66,0.08) 0%, transparent 48%),
-            linear-gradient(165deg, #FDF8F0 0%, #FAF5EB 45%, #F7F2E6 100%);
+          background: #FAF7F2;
+          border-bottom: 1px solid rgba(17,17,17,0.08);
         }
-        .dark .fn-hero {
-          background: var(--background);
+        .dark .fn-hero { background: var(--background); border-bottom-color: var(--border); }
+
+        .fn-hero-inner {
+          width: 100%;
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 48px 20px 56px;
+        }
+        @media (min-width: 1024px) {
+          .fn-hero-inner { padding: 88px 24px 96px; }
         }
 
-        /* Floating animation on the video frame */
-        @keyframes fn-float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          40%       { transform: translateY(-7px) rotate(-0.2deg); }
-          70%       { transform: translateY(-3px) rotate(0.15deg); }
+        .fn-hero-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 40px;
         }
-        .fn-float-animate {
-          animation: fn-float 7s ease-in-out infinite;
-          will-change: transform;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .fn-float-animate { animation: none; }
-        }
-
-        /* ─── Mobile-only heading size ───
-           Inline styles can't be overridden by classes, so font-size and
-           line-height are moved here where a media-query can override them.
-           Desktop (≥768px) restores the original clamp + line-height. */
-        .fn-hero-span { font-size: 2.125rem; }
-        @media (min-width: 768px) {
-          .fn-hero-span { font-size: clamp(2.25rem, 4vw, 4.25rem); }
-        }
-
-        .fn-hero-h1 { line-height: 0.98; }
-        @media (min-width: 768px) {
-          .fn-hero-h1 { line-height: 1.04; }
-        }
-
-        /* ─── Mobile-only paragraph ─── */
-        .fn-hero-para {
-          font-size: 0.9375rem;
-          line-height: 1.6;
-          max-width: 34ch;
-          margin-left: auto;
-          margin-right: auto;
-        }
-        @media (min-width: 768px) {
-          .fn-hero-para {
-            font-size: 1.0625rem;
-            line-height: 1.65;
-            max-width: 560px;
-            margin-left: 0;
-            margin-right: 0;
+        @media (min-width: 1024px) {
+          .fn-hero-grid {
+            display: grid;
+            grid-template-columns: 55fr 45fr;
+            gap: 72px;
+            align-items: center;
           }
+        }
+
+        /* ── Eyebrow ── */
+        .fn-hero-eyebrow {
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #C4A000;
+          margin-bottom: 20px;
+        }
+
+        /* ── Title ── */
+        .fn-hero-title {
+          font-family: var(--font-display, 'Fraunces'), serif;
+          font-weight: 500;
+          font-size: clamp(34px, 4.8vw, 58px);
+          line-height: 1.1;
+          letter-spacing: -1.2px;
+          color: #111111;
+          margin-bottom: 18px;
+        }
+        .dark .fn-hero-title { color: var(--foreground); }
+        .fn-hero-title em {
+          font-style: italic;
+          color: #C4A000;
+        }
+
+        /* ── Sub ── */
+        .fn-hero-sub {
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-size: 16px;
+          font-weight: 300;
+          line-height: 1.7;
+          color: #444444;
+          max-width: 460px;
+          margin-bottom: 36px;
+        }
+        .dark .fn-hero-sub { color: var(--muted-foreground); }
+
+        /* ── Product pillar cards ── */
+        .fn-hero-paths {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+        @media (min-width: 560px) {
+          .fn-hero-paths { grid-template-columns: 1fr 1fr; }
+        }
+
+        .fn-path {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+          text-align: left;
+          padding: 22px 20px;
+          border-radius: 14px;
+          cursor: pointer;
+          transition: border-color 0.2s, background 0.2s, transform 0.15s;
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+        }
+        .fn-path:active { transform: scale(0.99); }
+
+        .fn-path-primary {
+          background: #111111;
+          border: 1px solid #111111;
+        }
+        .fn-path-primary:hover { background: #262626; border-color: #262626; }
+
+        .fn-path-secondary {
+          background: transparent;
+          border: 1px solid rgba(17,17,17,0.18);
+        }
+        .fn-path-secondary:hover { border-color: #111111; background: #FEFCE8; }
+        .dark .fn-path-secondary { border-color: var(--border); }
+        .dark .fn-path-secondary:hover { border-color: var(--foreground); background: transparent; }
+
+        .fn-path-kicker {
+          font-size: 10.5px;
+          font-weight: 600;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+        .fn-path-primary .fn-path-kicker { color: #F5E642; }
+        .fn-path-secondary .fn-path-kicker { color: #C4A000; }
+
+        .fn-path-title {
+          font-family: var(--font-display, 'Fraunces'), serif;
+          font-weight: 500;
+          font-size: 19px;
+          letter-spacing: -0.3px;
+          line-height: 1.2;
+        }
+        .fn-path-primary .fn-path-title { color: #FFFFFF; }
+        .fn-path-secondary .fn-path-title { color: #111111; }
+        .dark .fn-path-secondary .fn-path-title { color: var(--foreground); }
+
+        .fn-path-desc {
+          font-size: 13px;
+          font-weight: 300;
+          line-height: 1.55;
+        }
+        .fn-path-primary .fn-path-desc { color: rgba(255,255,255,0.6); }
+        .fn-path-secondary .fn-path-desc { color: #444444; }
+        .dark .fn-path-secondary .fn-path-desc { color: var(--muted-foreground); }
+
+        .fn-path-arrow {
+          margin-top: 8px;
+          font-size: 13.5px;
+          font-weight: 500;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .fn-path-primary .fn-path-arrow { color: #FFFFFF; }
+        .fn-path-secondary .fn-path-arrow { color: #C4A000; }
+        .fn-path-arrow svg { transition: transform 0.2s; }
+        .fn-path:hover .fn-path-arrow svg { transform: translateX(4px); }
+
+        /* ── Trust line ── */
+        .fn-hero-trust {
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-size: 12.5px;
+          color: #888888;
+        }
+
+        /* ── Returning user ── */
+        .fn-hero-chip {
+          display: inline-block;
+          border: 1px solid rgba(17,17,17,0.15);
+          border-radius: 9999px;
+          padding: 7px 16px;
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-weight: 400;
+          font-size: 0.8125rem;
+          color: #444444;
+        }
+        .dark .fn-hero-chip { border-color: var(--border); color: var(--muted-foreground); }
+
+        .fn-btn-primary {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: #111111; color: #FFFFFF;
+          padding: 15px 28px; border-radius: 50px;
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-size: 15px; font-weight: 500;
+          border: none; cursor: pointer;
+          transition: background 0.25s, transform 0.15s;
+          white-space: nowrap; text-decoration: none;
+        }
+        .fn-btn-primary:hover { background: #262626; }
+        .fn-btn-primary:active { transform: scale(0.98); }
+
+        .fn-btn-secondary {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: transparent; color: #111111;
+          padding: 15px 24px; border-radius: 50px;
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-size: 15px; font-weight: 500;
+          border: 1px solid rgba(17,17,17,0.22); cursor: pointer;
+          transition: border-color 0.2s, background 0.2s;
+          white-space: nowrap;
+        }
+        .fn-btn-secondary:hover { border-color: #111111; background: #FEFCE8; }
+        .fn-btn-secondary:active { transform: scale(0.98); }
+        .dark .fn-btn-secondary { color: var(--foreground); border-color: var(--border); }
+        .dark .fn-btn-secondary:hover { background: transparent; }
+
+        /* ── Video panel ── */
+        .fn-hero-video-panel { display: none; }
+        @media (min-width: 1024px) {
+          .fn-hero-video-panel { display: block; }
         }
       `}</style>
 
-      {/* ════════════════════════════════════════════════════════════════
-          UNIFIED HERO — one responsive implementation
-          Mobile  : flex-col → [text] [video] [CTAs] stacked
-          Desktop : 2-col CSS grid → text+CTAs left, video right
-      ════════════════════════════════════════════════════════════════ */}
-      <section
-        className="fn-hero flex flex-col justify-center sm:min-h-[70vh] lg:flex-row lg:items-center lg:min-h-[75vh]"
-        style={{ position: 'relative', overflow: 'hidden' }}
-      >
-        {/* ── Decorative: radial glow — top right ── */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute', top: '-18%', right: '-6%',
-            width: 580, height: 580,
-            background: 'radial-gradient(circle, rgba(245,230,66,0.14) 0%, transparent 68%)',
-            borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
-          }}
-        />
+      <section className="fn-hero">
+        <div className="fn-hero-inner">
+          <div className="fn-hero-grid">
 
-        {/* ── Content ── */}
-        <div className="relative w-full max-w-[1150px] mx-auto px-4 pt-4 pb-2 sm:pt-5 sm:pb-5 lg:px-4 lg:py-7" style={{ zIndex: 1 }}>
-          {/*
-            Layout engine:
-              Mobile  → flex-col with order-1/2/3 controlling position
-              Desktop → CSS grid with explicit col/row placement
-
-            DOM order:      A (text-top)  B (video)  C (cta-bottom)
-            Mobile stack:   1st           2nd        3rd
-            Desktop grid:   col-1 row-1   col-2 r1-2 col-1 row-2
-          */}
-          <div
-            className="flex flex-col lg:grid lg:gap-y-6 lg:gap-x-16"
-            style={{
-              gridTemplateColumns: '58fr 42fr',
-              gridTemplateRows: 'auto auto',
-            }}
-          >
-
-            {/* ── A: Heading + paragraph ── */}
-            {/* Mobile: first  |  Desktop: col-1 row-1 */}
-            <div className="order-1 mb-4 sm:mb-5 lg:mb-0 text-center lg:text-left lg:col-start-1 lg:row-start-1">
+            {/* ── LEFT: Content ── */}
+            <div>
               {isReturning ? (
                 <div>
-                  <h1
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 800,
-                      fontSize: 'clamp(2.25rem, 4vw, 3.75rem)',
-                      lineHeight: 1.08,
-                      letterSpacing: '-0.035em',
-                      color: 'var(--foreground)',
-                      marginBottom: 16,
-                    }}
-                  >
-                    Welcome back,<br />{firstName} 👋
+                  <div className="fn-hero-eyebrow">Welcome back, {firstName}</div>
+                  <h1 className="fn-hero-title">
+                    Pick up where<br />you <em>left off</em>
                   </h1>
-                  <p
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '1.0625rem',
-                      color: 'var(--muted-foreground)',
-                      lineHeight: 1.6,
-                      marginBottom: 16,
-                    }}
-                  >
-                    Let&apos;s pick up where you left off.
-                  </p>
-                  <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
                     {[
                       `Step ${currentStep} of 4 complete`,
-                      `⏱ ~${remainingMins} min left`,
-                      flow === 'grants' ? '🏛️ Checking grants' : '💰 Checking borrowing',
+                      `~${remainingMins} min left`,
+                      flow === 'grants' ? 'Checking grants' : 'Checking borrowing',
                     ].map(chip => (
-                      <span
-                        key={chip}
-                        style={{
-                          background: 'var(--card)',
-                          border: '1px solid var(--border)',
-                          borderRadius: 9999,
-                          padding: '7px 16px',
-                          fontFamily: 'Inter, sans-serif',
-                          fontWeight: 500,
-                          fontSize: '0.8125rem',
-                          color: 'var(--secondary-foreground)',
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {chip}
-                      </span>
+                      <span key={chip} className="fn-hero-chip">{chip}</span>
                     ))}
                   </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 20 }}>
+                    <button type="button" className="fn-btn-primary"
+                      onClick={() => router.push(`/onboarding?flow=${flow}&step=${currentStep}`)}>
+                      Continue →
+                    </button>
+                    <button type="button" className="fn-btn-secondary"
+                      onClick={() => { clearAllData(); window.location.href = '/' }}>
+                      Start fresh
+                    </button>
+                  </div>
+                  <p style={{ fontFamily: 'var(--font-sans, "DM Sans"), sans-serif', fontSize: 12.5, color: '#AAAAAA' }}>
+                    or{' '}
+                    <button type="button"
+                      onClick={() => { clearAllData(); window.location.href = '/' }}
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#888888', textDecoration: 'underline', fontSize: 12.5, fontFamily: 'inherit' }}>
+                      go back to Discover
+                    </button>
+                  </p>
                 </div>
               ) : (
                 <div>
-                  <h1
-                    className="fn-hero-h1"
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 800,
-                      letterSpacing: '-0.04em',
-                      marginBottom: 16,
-                    }}
-                  >
-                    <span className="fn-hero-span" style={{ display: 'block', color: 'var(--foreground)' }}>
-                      Unlock every grants & schemes
-                    </span>
-                    {/* <span className="fn-hero-span" style={{ display: 'block', color: 'var(--foreground)', fontFamily: 'Inter, sans-serif' }}>
-                      Enter the market
-                    </span>
-                    <span className="fn-hero-span" style={{ display: 'block', color: 'var(--foreground)' }}>
-                      sooner.
-                    </span> */}
-                  </h1>
-                  <p
-                    className="fn-hero-para"
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 400,
-                      color: 'var(--muted-foreground)',
-                      marginBottom: 0,
-                    }}
-                  >
-                    {/* FirstNest identifies every Australian government grant and scheme you
-                    qualify for — federal and state — then builds your personalised roadmap
-                    to homeownership. */}
-                    FirstNest matches you with all Australian government schemes and grants , <span className="font-bold">building a customised roadmap to buying your first home </span>.
-                  </p>
+                  <div className="fn-hero-eyebrow">For Australian first home buyers</div>
+                  <h1 className="fn-hero-title"></h1>
+                  {/* The two things the product does — as the primary CTAs */}
+                  <div className="fn-hero-paths">
+                    <button type="button" className="fn-path fn-path-primary"
+                      onClick={() => router.push('/onboarding?flow=grants')}>
+                      <span className="fn-path-kicker">Eligibility</span>
+                      <span className="fn-path-arrow">
+                        Check your eligibility & next steps
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </span>
+                    </button>
+
+                    <button type="button" className="fn-path fn-path-primary"
+                      onClick={() => router.push('/grant-calculator')}>
+                      <span className="fn-path-kicker">Government support</span>
+                      <span className="fn-path-arrow">
+                        Research about Grants/Schemes
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+
+                  <p className="fn-hero-eyebrow">Free · No sign-up · No credit check</p>
                 </div>
               )}
             </div>
 
-            {/* ── B: Browser-frame video ── */}
-            {/* Mobile: hidden (video is below-fold on mobile — keeps hero compact)  |  Desktop: col-2 rows 1–2 */}
-            <div className="hidden fn-float-animate lg:block lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:self-center">
-              <div
-                style={{
-                  borderRadius: 20,
-                  overflow: 'hidden',
-                  boxShadow:
-                    '0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06)',
-                }}
-              >
-                {/* Chrome bar */}
-                {/* <div
-                  style={{
-                    background: '#1C1C1E',
-                    padding: '6px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                  }}
-                >
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                    {[
-                      { bg: '#FF5F57', glow: 'rgba(255,95,87,0.5)' },
-                      { bg: '#FEBC2E', glow: 'rgba(254,188,46,0.5)' },
-                      { bg: '#28C840', glow: 'rgba(40,200,64,0.5)' },
-                    ].map(({ bg, glow }) => (
-                      <div key={bg} style={{ width: 11, height: 11, borderRadius: '50%', background: bg, boxShadow: `0 0 4px ${glow}` }} />
-                    ))}
-                  </div>
-                  <div
-                    style={{
-                      flex: 1, background: '#2C2C2E', borderRadius: 7,
-                      padding: '3px 12px', display: 'flex', alignItems: 'center', gap: 8,
-                    }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
-                      <circle cx="6" cy="6" r="5" stroke="#6B7280" strokeWidth="1" />
-                      <path d="M6 1C4.3 3.2 4 4.5 4 6s.3 2.8 2 5M6 1c1.7 2.2 2 3.5 2 5s-.3 2.8-2 5M1.5 6h9" stroke="#6B7280" strokeWidth="1" strokeLinecap="round" />
-                    </svg>
-                    <span
-                      style={{
-                        fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem',
-                        color: '#9CA3AF', letterSpacing: '0.01em', flex: 1, userSelect: 'none',
-                      }}
-                    >
-                      firstnest.com.au
-                    </span>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                      <rect x="2.5" y="5.5" width="7" height="5" rx="1.2" stroke="#22C55E" strokeWidth="1" />
-                      <path d="M4.2 5.5V4.2a1.8 1.8 0 013.6 0V5.5" stroke="#22C55E" strokeWidth="1" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                </div> */}
-
-                {/* Hero video — viewport clips the composited video to the rounded frame */}
-                <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#000', display: 'block', overflow: 'hidden', borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}>
+            {/* ── RIGHT: Video ── */}
+            <div className="fn-hero-video-panel">
+              <div style={{
+                borderRadius: 16,
+                overflow: 'hidden',
+                border: '1px solid rgba(17,17,17,0.12)',
+              }}>
+                <div style={{ position: 'relative', aspectRatio: '16 / 9', background: '#111111', overflow: 'hidden' }}>
                   <video
                     ref={videoRef}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
+                    autoPlay muted loop playsInline preload="auto"
                     aria-label="FirstNest intro video"
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', border: 'none', display: 'block' }}
                   >
                     <source src="/videos/final_complete.mp4" type="video/mp4" />
                   </video>
-
-                  {/* Unmute / mute toggle */}
                   <button
                     type="button"
                     onClick={toggleMute}
                     aria-label={muted ? 'Unmute video' : 'Mute video'}
                     style={{
-                      position: 'absolute',
-                      bottom: 12,
-                      right: 12,
-                      width: 40,
-                      height: 40,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: 9999,
-                      border: '1px solid rgba(255,255,255,0.25)',
-                      background: 'rgba(0,0,0,0.55)',
-                      color: '#FFFFFF',
-                      cursor: 'pointer',
-                      backdropFilter: 'blur(4px)',
+                      position: 'absolute', bottom: 12, right: 12,
+                      width: 40, height: 40,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: 9999, border: '1px solid rgba(255,255,255,0.25)',
+                      background: 'rgba(0,0,0,0.55)', color: '#FFFFFF',
+                      cursor: 'pointer', backdropFilter: 'blur(4px)',
                     }}
                   >
                     {muted ? (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M11 5 6 9H2v6h4l5 4V5z" />
-                        <line x1="23" y1="9" x2="17" y2="15" />
-                        <line x1="17" y1="9" x2="23" y2="15" />
+                        <path d="M11 5 6 9H2v6h4l5 4V5z" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" />
                       </svg>
                     ) : (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -351,120 +372,6 @@ export function HeroSection() {
                   </button>
                 </div>
               </div>
-            </div>
-
-            {/* ── C: CTAs + trust ── */}
-            {/* Mobile: third (below video)  |  Desktop: col-1 row-2 */}
-            <div className="order-2 mb-0 lg:col-start-1 lg:row-start-2 lg:self-start">
-              {isReturning ? (
-                <div className="flex flex-col lg:flex-row gap-3 lg:gap-3">
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/onboarding?flow=${flow}&step=${currentStep}`)}
-                    className="w-full lg:flex-1 hover:-translate-y-px hover:shadow-[0_8px_32px_rgba(0,0,0,0.22)] transition-all duration-200"
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: '#111111', color: '#F5E642',
-                      fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem',
-                      border: 'none', borderRadius: 9999, padding: '16px 24px',
-                      cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    Continue →
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push('/onboarding?flow=grants')}
-                    className="w-full lg:flex-1 hover:border-foreground transition-all duration-200"
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'var(--card)', color: 'var(--foreground)',
-                      fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem',
-                      border: '1.5px solid var(--border)', borderRadius: 9999, padding: '16px 24px',
-                      cursor: 'pointer', whiteSpace: 'nowrap',
-                    }}
-                  >
-                    Start fresh
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  {/* Two CTA buttons — stacked on mobile, side-by-side on desktop */}
-                  <div
-                    className="flex flex-col lg:flex-row gap-3 lg:gap-5 mb-2 sm:mb-3 items-end"
-                  >
-                    {/* Primary CTA + Trust Text Column */}
-                    <div className="flex flex-col w-full lg:flex-1 min-w-0 relative">
-                      <div className="w-full flex justify-center mb-2.5">
-                        <p
-                          className="text-center mx-auto"
-                          style={{
-                            width: 'fit-content',
-                            maxWidth: 'none',
-                            fontFamily: 'Inter, sans-serif',
-                            fontSize: '12.5px',
-                            color: 'var(--muted-foreground)',
-                            fontWeight: 400,
-                            lineHeight: 1.3,
-                            letterSpacing: '0',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          No credit check<span className="mx-1">&middot;</span>100% free<span className="mx-1">&middot;</span>Takes a few minutes
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => router.push('/onboarding?flow=grants')}
-                        className="w-full bg-[#F5E642] border-2 border-[#F5E642] hover:bg-white hover:border-white active:scale-[0.98] shadow-sm hover:shadow-md transition-colors duration-300 ease-out text-[#111111] flex items-center justify-center gap-2 rounded-full px-[14px] py-[14px] z-10"
-                        style={{
-                          fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem',
-                          letterSpacing: '0.01em',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        Grants & Schemes
-                      </button>
-                    </div>
-
-                    {/* Secondary CTA Column */}
-                    <div className="flex flex-col w-full lg:flex-1 min-w-0">
-                      <button
-                        type="button"
-                        onClick={() => router.push('/onboarding?flow=borrowing')}
-                        className="w-full bg-white border-2 border-[#F5E642] hover:bg-[#F5E642] active:scale-[0.98] shadow-sm hover:shadow-md transition-colors duration-300 ease-out text-[#111111] flex items-center justify-center gap-2 rounded-full px-6 py-[14px]"
-                        style={{
-                          fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        Borrowing Capacity
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Trust line */}
-                  {/* <p
-                    className="text-center lg:text-left"
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '0.8125rem',
-                      color: 'var(--muted-foreground)',
-                      fontWeight: 400,
-                      marginBottom: 18,
-                    }}
-                  >
-                    No credit check · 100% free · Takes around few minutes
-                  </p> */}
-
-                  {/* ── Download badges ── */}
-
-
-
-
-                </div>
-              )}
             </div>
 
           </div>

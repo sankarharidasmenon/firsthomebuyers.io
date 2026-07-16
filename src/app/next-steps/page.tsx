@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import { Navbar } from '@/components/home/Navbar'
 import { getStep1, getStep2, getStep3, getStep4, type Step1Data, type Step3Data } from '@/lib/localStorage'
-import { useAuth } from '@/lib/auth/AuthProvider'
-import { saveResult } from '@/lib/scenarios/actions'
 import { toast } from 'sonner'
 import { calculateBorrowingCapacity } from '@/lib/calculations'
 import { fetchEligibility } from '@/lib/schemes/eligibilityClient'
@@ -51,7 +49,6 @@ const sectionTag: React.CSSProperties = {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function NextStepsPage() {
-  const { requireAuth } = useAuth()
   const [mounted, setMounted] = useState(false)
   const [contactMode, setContactMode] = useState<ContactMode>(null)
   const [submitted, setSubmitted] = useState(false)
@@ -122,21 +119,25 @@ export default function NextStepsPage() {
   // Save: idle → saving (500ms) → saved (2.5s) → idle
   const handleSave = () => {
     if (saveState !== 'idle') return
-    requireAuth(
-      async () => {
-        setSaveState('saving')
-        const res = await saveResult({ borrowing, grantsTotal, eligibleGrants: [], state, firstName })
-        if (res.ok) {
-          setSaveState('saved')
-          toast.success('Saved to My Results.')
-          setTimeout(() => setSaveState('idle'), 2500)
-        } else {
-          setSaveState('idle')
-          toast.error(res.error)
-        }
-      },
-      { reason: 'Sign in to save your snapshot and pick up where you left off.' }
-    )
+    setSaveState('saving')
+    try {
+      const data = {
+        savedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        borrowing,
+        grantsTotal,
+        eligibleGrants: [],
+        state,
+        firstName,
+      }
+      localStorage.setItem('firstnest_my_results', JSON.stringify(data))
+      setSaveState('saved')
+      toast.success('Saved to My Results.')
+      setTimeout(() => setSaveState('idle'), 2500)
+    } catch {
+      setSaveState('idle')
+      toast.error('Failed to save results.')
+    }
   }
   const handleCopyLink = () => {
     const hash = Math.random().toString(36).slice(2, 9)
