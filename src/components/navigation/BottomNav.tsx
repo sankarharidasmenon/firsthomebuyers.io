@@ -1,61 +1,26 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { Home, BookmarkCheck, Megaphone, Sparkles, BookOpen, UserCircle } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Home, Megaphone, BookOpen, Library, MessageSquare } from 'lucide-react'
 
 /* ─── Tab definitions ────────────────────────────────────────────────────── */
 const TABS = [
-  { href: '/',             label: 'Home',       Icon: Home },
-  { href: '/my-results',   label: 'My Results', Icon: BookmarkCheck },
-    { href: '/#ai-guidance', label: 'AI',         Icon: Sparkles },
-  { href: '/articles',     label: 'Articles',   Icon: BookOpen },
-   { href: '/ads',          label: 'Ads', Icon: Megaphone },
-  { href: '/profile',   label: 'My Profile', Icon: UserCircle },
-  // { href: '/ads',          label: 'Ads', Icon: Megaphone },
-  // { href: '/#ai-guidance', label: 'AI',         Icon: Sparkles },
+  { href: '/',          label: 'Home',     Icon: Home },
+  { href: '/schemes',   label: 'Grants/Schemes', Icon: Library },
+  { href: '/articles',  label: 'Articles', Icon: BookOpen },
+  { href: '/forums',    label: 'Forums',   Icon: MessageSquare },
+  { href: '/ads',       label: 'Ads',      Icon: Megaphone },
 ] as const
 
 /* ─── Component ─────────────────────────────────────────────────────────── */
 export function BottomNav() {
   const pathname = usePathname()
-  const router = useRouter()
-  const [activeHash, setActiveHash] = useState('')
   const [pressed, setPressed] = useState<string | null>(null)
 
-  /* Track URL hash for AI-section detection */
-  useEffect(() => {
-    setActiveHash(window.location.hash)
-    const handler = () => setActiveHash(window.location.hash)
-    window.addEventListener('hashchange', handler)
-    return () => window.removeEventListener('hashchange', handler)
-  }, [])
-
-  useEffect(() => {
-    if (pathname !== '/') setActiveHash('')
-    else setActiveHash(window.location.hash)
-  }, [pathname])
-
-  /* Smooth-scroll to the AI section, handling cross-page navigation */
-  const handleAIClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setActiveHash('#ai-guidance')
-    if (pathname === '/') {
-      window.history.pushState(null, '', '#ai-guidance')
-      document.getElementById('ai-guidance')?.scrollIntoView({ behavior: 'smooth' })
-    } else {
-      router.push('/#ai-guidance')
-      setTimeout(
-        () => document.getElementById('ai-guidance')?.scrollIntoView({ behavior: 'smooth' }),
-        450
-      )
-    }
-  }
-
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/' && activeHash !== '#ai-guidance'
-    if (href === '/#ai-guidance') return pathname === '/' && activeHash === '#ai-guidance'
+    if (href === '/') return pathname === '/'
     return pathname === href || pathname.startsWith(href + '/')
   }
 
@@ -77,14 +42,13 @@ export function BottomNav() {
         style={{
           height: 68,
           display: 'grid',
-          gridTemplateColumns: 'repeat(6, 1fr)',
+          gridTemplateColumns: 'repeat(5, 1fr)',
           maxWidth: 480,
           margin: '0 auto',
         }}
       >
         {TABS.map((tab) => {
           const active = isActive(tab.href)
-          const isAI = tab.href === '/#ai-guidance'
           const isPressed = pressed === tab.href
           const { Icon } = tab
 
@@ -93,7 +57,6 @@ export function BottomNav() {
               key={tab.href}
               href={tab.href}
               role="listitem"
-              onClick={isAI ? handleAIClick : undefined}
               onPointerDown={() => setPressed(tab.href)}
               onPointerUp={() => setPressed(null)}
               onPointerLeave={() => setPressed(null)}
