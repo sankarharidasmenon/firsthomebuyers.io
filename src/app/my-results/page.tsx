@@ -4,12 +4,10 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Navbar } from '@/components/home/Navbar'
 import { Button } from '@/components/ui/button'
-import { Trash2, TrendingUp, ArrowRight, Pencil, ArrowUpDown, Loader2 } from 'lucide-react'
+import { Trash2, TrendingUp, ArrowRight, Pencil, ArrowUpDown } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuth } from '@/lib/auth/AuthProvider'
-import { listScenarios, deleteScenario, renameScenario } from '@/lib/scenarios/actions'
 
-// View models mapped from Supabase `saved_scenarios` rows.
+// View models mapped from localStorage keys
 interface SavedResults {
   id: string
   savedAt: string
@@ -33,7 +31,6 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-// Smart money formatter — handles k and M so numbers never look broken
 function fmtMoney(n: number): string {
   if (n >= 1_000_000) {
     const m = n / 1_000_000
@@ -42,7 +39,6 @@ function fmtMoney(n: number): string {
   return `$${Math.round(n / 1000)}k`
 }
 
-// Human plan names
 function getPlanMeta(s: SavedScenario): { name: string; icon: string } {
   const { extraSavings, incomeIncrease, hasPartner } = s.sliders
   const n = [extraSavings > 0, incomeIncrease > 0, hasPartner].filter(Boolean).length
@@ -55,7 +51,6 @@ function getPlanMeta(s: SavedScenario): { name: string; icon: string } {
   return { name: 'Explored Plan', icon: '🎯' }
 }
 
-// Plain-English insight with emoji
 function getInsight(s: SavedScenario, isBest: boolean, diff: number): { emoji: string; text: string } {
   const { extraSavings, incomeIncrease, hasPartner } = s.sliders
   if (isBest && diff > 0) {
@@ -85,8 +80,6 @@ function getInsight(s: SavedScenario, isBest: boolean, diff: number): { emoji: s
 // ── Design tokens ──────────────────────────────────────────────────────────────
 
 const cardClass = "bg-[#FFFFFF] dark:bg-card border border-[rgba(0,0,0,0.07)] dark:border-border rounded-[20px] shadow-[0_2px_4px_rgba(0,0,0,0.04),0_10px_32px_rgba(0,0,0,0.07),inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-none overflow-hidden"
-
-// Best plan: white card with subtle left accent only — no green tint everywhere
 const bestCardClass = "bg-[#FFFFFF] dark:bg-card border border-[rgba(0,0,0,0.07)] dark:border-border border-l-[3px] border-l-[#22C55E] rounded-[20px] shadow-[0_2px_4px_rgba(0,0,0,0.04),0_10px_32px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-none overflow-hidden"
 
 const microLabel: React.CSSProperties = {
@@ -102,78 +95,69 @@ const microLabel: React.CSSProperties = {
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function MyResultsPage() {
   const router = useRouter()
-  const { user, loading: authLoading, openAuth } = useAuth()
   const [savedResults, setSavedResults] = useState<SavedResults | null>(null)
   const [scenarios, setScenarios] = useState<SavedScenario[]>([])
   const [loaded, setLoaded] = useState(false)
   const [sortBy, setSortBy] = useState<'newest' | 'improvement'>('newest')
 
-  const refresh = useCallback(async () => {
-    const res = await listScenarios()
-    if (!res.ok) {
-      setLoaded(true)
-      return
+  const refresh = useCallback(() => {
+    try {
+      const resultsRaw = localStorage.getItem('firstnest_my_results')
+      if (resultsRaw) {
+        const r = JSON.parse(resultsRaw)
+        setSavedResults({
+          id: 'local-result',
+          savedAt: r.savedAt ?? new Date().toISOString(),
+          borrowing: r.borrowing ?? { min: 0, max: 0 },
+          grantsTotal: Number(r.grantsTotal ?? 0),
+          eligibleGrants: r.eligibleGrants ?? [],
+          state: String(r.state ?? ''),
+          firstName: String(r.firstName ?? ''),
+        })
+      } else {
+        setSavedResults(null)
+      }
+      const scenariosRaw = localStorage.getItem('firstnest_saved_scenarios')
+      if (scenariosRaw) {
+        const arr = JSON.parse(scenariosRaw) as Array<{
+          id: string; savedAt: string;
+          sliders: SavedScenario['sliders']; result: SavedScenario['result']
+        }>
+        setScenarios(arr.map(s => ({ ...s, name: null })))
+      } else {
+        setScenarios([])
+      }
+    } catch {
+      // Silently ignore parse errors
     }
-    const resultRow = res.data.find((r) => r.kind === 'result')
-    setSavedResults(
-      resultRow
-        ? {
-            id: resultRow.id,
-            savedAt: resultRow.created_at,
-            borrowing: resultRow.borrowing_results,
-            grantsTotal: Number((resultRow.answers as { grantsTotal?: number }).grantsTotal ?? 0),
-            eligibleGrants: resultRow.eligible_schemes,
-            state: String((resultRow.answers as { state?: string }).state ?? ''),
-            firstName: String((resultRow.answers as { firstName?: string }).firstName ?? ''),
-          }
-        : null
-    )
-    setScenarios(
-      res.data
-        .filter((r) => r.kind === 'scenario')
-        .map((r) => ({
-          id: r.id,
-          name: r.scenario_name,
-          savedAt: r.created_at,
-          sliders: (r.answers as { sliders: SavedScenario['sliders'] }).sliders,
-          result: r.borrowing_results,
-        }))
-    )
     setLoaded(true)
   }, [])
 
-  useEffect(() => {
-    if (authLoading) return
-    if (!user) {
-      // Proxy normally redirects here, but guard the direct-render case too.
-      // The signed-out branch renders its own prompt (see below); no fetch.
-      openAuth({ next: '/my-results', reason: 'Sign in to view your saved results.' })
-      return
-    }
-    refresh()
-  }, [authLoading, user, refresh, openAuth])
+  useEffect(() => { refresh() }, [refresh])
 
-  const signedOut = !authLoading && !user
-
-  const handleDeleteResults = async () => {
+  const handleDeleteResults = () => {
     if (!savedResults) return
     if (confirm('Delete your home buying snapshot?')) {
-      const res = await deleteScenario(savedResults.id)
-      if (res.ok) { setSavedResults(null); toast.success('Snapshot deleted.') }
-      else toast.error(res.error)
+      localStorage.removeItem('firstnest_my_results')
+      setSavedResults(null)
+      toast.success('Snapshot deleted.')
     }
   }
-  const handleDeleteScenario = async (id: string) => {
-    const res = await deleteScenario(id)
-    if (res.ok) { setScenarios((prev) => prev.filter((s) => s.id !== id)); toast.success('Plan deleted.') }
-    else toast.error(res.error)
+
+  const handleDeleteScenario = (id: string) => {
+    const updated = scenarios.filter((s) => s.id !== id)
+    setScenarios(updated)
+    localStorage.setItem('firstnest_saved_scenarios', JSON.stringify(updated))
+    toast.success('Plan deleted.')
   }
-  const handleRenameScenario = async (id: string, currentName: string | null) => {
+
+  const handleRenameScenario = (id: string, currentName: string | null) => {
     const name = prompt('Rename this plan', currentName ?? '')
     if (name === null) return
-    const res = await renameScenario(id, name.trim())
-    if (res.ok) { setScenarios((prev) => prev.map((s) => (s.id === id ? { ...s, name: name.trim() } : s))); toast.success('Plan renamed.') }
-    else toast.error(res.error)
+    const updated = scenarios.map((s) => s.id === id ? { ...s, name: name.trim() } : s)
+    setScenarios(updated)
+    localStorage.setItem('firstnest_saved_scenarios', JSON.stringify(updated))
+    toast.success('Plan renamed.')
   }
 
   const isEmpty = !savedResults && scenarios.length === 0
@@ -182,8 +166,6 @@ export default function MyResultsPage() {
     : null
 
   const baselineMax = savedResults?.borrowing.max ?? 0
-  // `bestScenario` is always computed from the highest-capacity plan, regardless
-  // of the display sort chosen by the user.
   const byImprovement = [...scenarios].sort((a, b) => b.result.max - a.result.max)
   const sortedScenarios =
     sortBy === 'improvement'
@@ -208,33 +190,15 @@ export default function MyResultsPage() {
 
       <main className="flex-1 w-full max-w-190 mx-auto pt-24 pb-28 px-4 lg:px-0">
 
-        {/* ── Signed-out prompt ── */}
-        {signedOut && (
-          <div className="flex flex-col items-center justify-center pt-24 text-center px-4">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 bg-[#FDFCF0] dark:bg-surface" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
-              <span style={{ fontSize: '2rem' }}>🔒</span>
-            </div>
-            <h1 className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '1.5rem', marginBottom: 10 }}>
-              Sign in to see your saved results
-            </h1>
-            <p className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', maxWidth: 360, marginBottom: 24, lineHeight: 1.65 }}>
-              Your saved plans and scenarios are stored securely to your account.
-            </p>
-            <Button onClick={() => openAuth({ next: '/my-results', reason: 'Sign in to view your saved results.' })} variant="primary" className="px-8" fullWidth={false}>
-              Sign in
-            </Button>
-          </div>
-        )}
-
         {/* ── Loading state ── */}
-        {user && !loaded && (
+        {!loaded && (
           <div className="flex items-center justify-center pt-28">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            <div className="w-6 h-6 rounded-full border-2 border-foreground/20 border-t-foreground animate-spin" />
           </div>
         )}
 
         {/* ── Empty state ── */}
-        {user && loaded && isEmpty && (
+        {loaded && isEmpty && (
           <div className="flex flex-col items-center justify-center pt-20 text-center px-4">
             <div
               className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 bg-[#FDFCF0] dark:bg-surface"
@@ -252,17 +216,15 @@ export default function MyResultsPage() {
               Get Started <ArrowRight size={16} className="ml-2 inline" />
             </Button>
             <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', marginTop: 12 }}>
-              Takes about few minutes
-              {/* No sign-up needed */}
+              Takes about a few minutes
             </p>
           </div>
         )}
 
         {/* ── Main content ── */}
-        {user && loaded && !isEmpty && (
+        {loaded && !isEmpty && (
           <div className="flex flex-col gap-7">
 
-            {/* ── PRIORITY #2: Personalised hero ── */}
             <div style={{ marginBottom: 2 }}>
               <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.6875rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
                 Your home buying journey
@@ -274,23 +236,18 @@ export default function MyResultsPage() {
                 {totalPlans === 1 ? (
                   <p>You&apos;ve saved your starting point. Use the sliders on your results page to explore what different changes could unlock — then save each plan to compare here.</p>
                 ) : (
-                  <>
-                    <p>
-                      You&apos;ve explored <strong className="text-[#111111] dark:text-foreground" style={{ fontWeight: 700 }}>{totalPlans} different ways</strong> to get into your first home.
-                      {bestImprovement > 0 && (
-                        <> One of your plans could unlock <strong style={{ color: '#16A34A' }}>{fmtMoney(bestImprovement)} more</strong> in homes you can afford.</>
-                      )}
-                    </p>
-                  </>
+                  <p>
+                    You&apos;ve explored <strong className="text-[#111111] dark:text-foreground" style={{ fontWeight: 700 }}>{totalPlans} different ways</strong> to get into your first home.
+                    {bestImprovement > 0 && (
+                      <> One of your plans could unlock <strong style={{ color: '#16A34A' }}>{fmtMoney(bestImprovement)} more</strong> in homes you can afford.</>
+                    )}
+                  </p>
                 )}
               </div>
             </div>
 
-            {/* ── PRIORITY #3: Quick summary strip ── */}
             {showSummaryStrip && (
-              <div
-                className="bg-[rgba(255,255,255,0.75)] dark:bg-card border border-[rgba(0,0,0,0.07)] dark:border-border rounded-[14px] shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-none"
-              >
+              <div className="bg-[rgba(255,255,255,0.75)] dark:bg-card border border-[rgba(0,0,0,0.07)] dark:border-border rounded-[14px] shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-none">
                 <div className="grid grid-cols-3">
                   {[
                     { label: 'Plans saved', value: String(totalPlans), color: '#111111' },
@@ -403,12 +360,9 @@ export default function MyResultsPage() {
 
                     return (
                       <div key={scenario.id} className={`${isBest ? bestCardClass : cardClass} transition-transform duration-200 hover:-translate-y-px`}>
-                        {/* Card header — PRIORITY #4: badge inline, no green background fill */}
                         <div className="flex items-start justify-between px-6 py-5 border-b border-[rgba(0,0,0,0.04)] dark:border-border">
                           <div className="flex items-center gap-3">
-                            <div
-                              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#F8F8F5] dark:bg-surface border border-[rgba(0,0,0,0.06)] dark:border-border"
-                            >
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#F8F8F5] dark:bg-surface border border-[rgba(0,0,0,0.06)] dark:border-border">
                               <span style={{ fontSize: '1.125rem' }}>{planIcon}</span>
                             </div>
                             <div>
@@ -416,7 +370,6 @@ export default function MyResultsPage() {
                                 <p className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem' }}>
                                   {scenario.name || planName}
                                 </p>
-                                {/* PRIORITY #4: small premium badge — no background flood */}
                                 {isBest && (
                                   <span
                                     className="inline-flex items-center gap-1"
@@ -452,10 +405,8 @@ export default function MyResultsPage() {
                           </div>
                         </div>
 
-                        {/* Card body — same height for all plans, best gets stronger improvement chip */}
                         <div className="px-6 py-5">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            {/* Price range — best plan shows improvement first, then range below */}
                             <div>
                               {isBest && diff > 0 ? (
                                 <>
@@ -502,7 +453,6 @@ export default function MyResultsPage() {
                               )}
                             </div>
 
-                            {/* What changed */}
                             <div className="rounded-xl p-4 bg-[#FAFAF8] dark:bg-surface border border-[rgba(0,0,0,0.05)] dark:border-border">
                               <p style={{ ...microLabel, marginBottom: 8 }}>What you changed</p>
                               <ul className="flex flex-col gap-2">
@@ -543,10 +493,7 @@ export default function MyResultsPage() {
                           </div>
                         </div>
 
-                        {/* PRIORITY #6: insight strip with emoji, feels like coaching not helper text */}
-                        <div
-                          className="px-6 py-4 bg-[#FAFAF8] dark:bg-surface border-t border-[rgba(0,0,0,0.04)] dark:border-border"
-                        >
+                        <div className="px-6 py-4 bg-[#FAFAF8] dark:bg-surface border-t border-[rgba(0,0,0,0.04)] dark:border-border">
                           <p className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', lineHeight: 1.6 }}>
                             <span style={{ marginRight: 6 }}>{insight.emoji}</span>
                             {insight.text}

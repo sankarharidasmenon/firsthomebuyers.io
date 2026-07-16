@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { RotateCcw } from 'lucide-react'
 import { TotalSavingsHero } from '@/components/results/TotalSavingsHero'
 import { ResultsTabSwitcher } from '@/components/results/ResultsTabSwitcher'
@@ -10,12 +11,9 @@ import { HideIneligibleToggle } from '@/components/results/HideIneligibleToggle'
 import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/home/Navbar'
 import { getStep1, getStep2, getStep3 } from '@/lib/localStorage'
-import { useAuth } from '@/lib/auth/AuthProvider'
-import { saveResult } from '@/lib/scenarios/actions'
 import { toast } from 'sonner'
 import { DUMMY_USER } from '@/lib/dummyData'
 import { fetchEligibility, type EligibilityResult, type EligibilityItem, type DisplayCategory } from '@/lib/schemes/eligibilityClient'
-import { subscribeOnboardingUpdated } from '@/lib/onboardingChannel'
 
 // Section header — airy, not heavy
 function SectionHeader({ icon, title, description }: { icon: string; title: string; description: string }) {
@@ -44,7 +42,6 @@ const CATEGORY_META = {
 
 export default function GrantsResultsPage() {
   const router = useRouter()
-  const { requireAuth, onboardingReady } = useAuth()
   const [showIneligible, setShowIneligible] = useState(true)
   const [saved, setSaved] = useState(false)
 
@@ -83,34 +80,27 @@ export default function GrantsResultsPage() {
     }
   }, [])
 
-  useEffect(() => { 
-    if (!onboardingReady) return
-    load() 
-    return subscribeOnboardingUpdated(load)
-  }, [load, onboardingReady])
+  useEffect(() => { load() }, [load])
 
   const handleSave = () => {
     if (!result) return
-    const payload = {
-      firstName: display.firstName,
-      state: display.state,
-      grantsTotal: result.cashGrantsTotal + result.taxSavingsTotal,
-      eligibleGrants: result.items.filter((i) => i.eg.status === 'eligible').map((i) => i.eg.grant.id),
-      borrowing: { min: 0, max: 0 },
+    try {
+      const data = {
+        savedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        borrowing: { min: 0, max: 0 },
+        grantsTotal: result.cashGrantsTotal + result.taxSavingsTotal,
+        eligibleGrants: result.items.filter((i) => i.eg.status === 'eligible').map((i) => i.eg.grant.id),
+        state: display.state,
+        firstName: display.firstName,
+      }
+      localStorage.setItem('firstnest_my_results', JSON.stringify(data))
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+      toast.success('Saved to My Results.')
+    } catch {
+      toast.error('Failed to save results.')
     }
-    requireAuth(
-      async () => {
-        const res = await saveResult(payload)
-        if (res.ok) {
-          setSaved(true)
-          setTimeout(() => setSaved(false), 2000)
-          toast.success('Saved to My Results.')
-        } else {
-          toast.error(res.error)
-        }
-      },
-      { reason: 'Sign in to save your results and revisit them anytime.' }
-    )
   }
 
   const CardList = () => {
@@ -199,6 +189,14 @@ export default function GrantsResultsPage() {
       >
         {saved ? '✓ Saved to My Results' : '💾 Save to My Results'}
       </button>
+      <Link
+        href="/"
+        style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: '#BBBBBB', textAlign: 'center', padding: '4px 0', textDecoration: 'none', display: 'block', transition: 'color 150ms' }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#444444')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#BBBBBB')}
+      >
+        ← Back to Discover
+      </Link>
     </div>
   )
 

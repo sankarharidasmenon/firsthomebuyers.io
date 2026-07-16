@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { BorrowingRangeDisplay } from '@/components/results/BorrowingRangeDisplay'
 import { DepositGapIndicator } from '@/components/results/DepositGapIndicator'
 import { ScenarioSliders } from '@/components/results/ScenarioSliders'
@@ -11,8 +12,6 @@ import { Navbar } from '@/components/home/Navbar'
 import { getStep1, getStep2, getStep3, getStep4 } from '@/lib/localStorage'
 import { calculateBorrowingCapacity, type BorrowingInputs } from '@/lib/calculations'
 import { DUMMY_USER } from '@/lib/dummyData'
-import { useAuth } from '@/lib/auth/AuthProvider'
-import { subscribeOnboardingUpdated } from '@/lib/onboardingChannel'
 
 // Derive all inputs + results from whatever is in localStorage at read time.
 function resolveFromLocalStorage() {
@@ -56,18 +55,12 @@ function resolveFromLocalStorage() {
 
 export default function BorrowingResultsPage() {
   const router = useRouter()
-  const { onboardingReady } = useAuth()
 
-  // `resolved` is null until onboardingReady flips to true, preventing a read
-  // of empty localStorage before Supabase hydration has completed.
   const [resolved, setResolved] = useState<ReturnType<typeof resolveFromLocalStorage> | null>(null)
 
   useEffect(() => {
-    if (!onboardingReady) return
-    const load = () => setResolved(resolveFromLocalStorage())
-    load()
-    return subscribeOnboardingUpdated(load)
-  }, [onboardingReady])
+    setResolved(resolveFromLocalStorage())
+  }, [])
 
   const [currentResult, setCurrentResult] = useState(() =>
     resolved ? resolved.baseResult : { min: 0, max: 0 }
@@ -147,6 +140,14 @@ export default function BorrowingResultsPage() {
             <Button onClick={() => router.push('/next-steps')} variant="primary" fullWidth>
               NEXT STEPS →
             </Button>
+            <Link
+              href="/"
+              style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: '#BBBBBB', textAlign: 'center', padding: '4px 0', textDecoration: 'none', display: 'block', transition: 'color 150ms' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#444444')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#BBBBBB')}
+            >
+              ← Back to Discover
+            </Link>
           </div>
         </div>
 

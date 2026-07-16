@@ -19,7 +19,7 @@ export function ReplyComposer() {
           <div className="mt-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <p className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Lock className="size-3.5" aria-hidden />
-              Sign in to reply — it&apos;s free and takes seconds.
+              Replies are coming soon — no account needed.
             </p>
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <button

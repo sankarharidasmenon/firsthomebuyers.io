@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
 import { Navbar } from '@/components/home/Navbar'
+import { clearAllData } from '@/lib/localStorage'
 
 interface StepWrapperProps {
   currentStep: number
@@ -30,7 +31,10 @@ export function StepWrapper({
   const percent = Math.round((currentStep / totalSteps) * 100)
 
   const handleBack = onBack ?? (() => router.back())
-  const handleSaveExit = () => router.push('/')
+  const handleSaveExit = () => {
+    clearAllData()
+    window.location.href = '/'
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -79,7 +83,7 @@ export function StepWrapper({
               className="hover:text-foreground transition-colors"
               style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: 'var(--muted-foreground)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
-              Save &amp; Exit
+              Exit
             </button>
           ) : (
             <div className="w-16" />
@@ -151,7 +155,7 @@ export function StepWrapper({
               className="hover:text-foreground transition-colors"
               style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: 'var(--muted-foreground)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
-              Save &amp; Exit
+              Exit
             </button>
           ) : (
             <div className="w-16" />

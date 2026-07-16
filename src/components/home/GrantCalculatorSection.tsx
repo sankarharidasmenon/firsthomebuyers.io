@@ -81,11 +81,11 @@ export function GrantCalculatorSection() {
   const eligibleGrants = result ? result.items.filter((i) => i.eg.status === 'eligible').map((i) => i.eg) : []
 
   return (
-    <section id="grant-calculator" className="relative w-full overflow-hidden scroll-mt-20 lg:scroll-mt-24 bg-[#FDF8F0] dark:bg-background py-10 lg:py-12 border-y border-border/40">
+    <section id="grant-calculator" className="relative w-full overflow-hidden scroll-mt-20 lg:scroll-mt-24 bg-[#FEFCE8] dark:bg-background py-10 lg:py-12 border-y border-border/40">
       {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--color-fn-yellow-pale)_0%,_transparent_60%)] dark:bg-[radial-gradient(ellipse_at_top_left,_rgba(245,230,66,0.05)_0%,_transparent_60%)] opacity-80" />
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_#FFF9EA_0%,_transparent_60%)] dark:bg-[radial-gradient(ellipse_at_bottom_right,_rgba(245,230,66,0.03)_0%,_transparent_60%)] opacity-80" />
+        <div className="absolute top-0 left-0 w-full h-full opacity-60" style={{ background: 'radial-gradient(ellipse at top left, rgba(245,230,66,0.20) 0%, transparent 60%)' }} />
+        <div className="absolute bottom-0 right-0 w-full h-full opacity-60" style={{ background: 'radial-gradient(ellipse at bottom right, rgba(245,230,66,0.14) 0%, transparent 60%)' }} />
       </div>
 
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 lg:px-8 xl:px-12">
@@ -100,8 +100,8 @@ export function GrantCalculatorSection() {
                   Grant Calculator
                 </div> */}
 
-                <h2 className="text-3xl font-bold text-foreground mb-4 max-w-[320px] lg:max-w-none" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Grant Calculator
+                <h2 className="text-3xl mb-4 max-w-[320px] lg:max-w-none" style={{ fontFamily: "var(--font-display, 'Fraunces'), serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>
+                  Grant <em style={{ fontStyle: 'italic', color: '#C4A000' }}>Calculator</em>
                   {/* <br className="hidden lg:inline" /> could <span className="pr-1">unlock,</span> <br className="hidden lg:inline" /> right now */}
                 </h2>
 
@@ -117,7 +117,7 @@ export function GrantCalculatorSection() {
                   { title: 'Government Verified', sub: 'Based on official scheme information.', icon: <CheckCircle2 className="w-4 h-4 lg:w-5 lg:h-5" /> }
                 ].map((item, i) => (
                   <li key={i} className="flex gap-3 lg:gap-4 items-start">
-                    <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-primary/20 text-primary-hover shrink-0 mt-0.5">
+                    <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full shrink-0 mt-0.5" style={{ background: 'rgba(245,230,66,0.4)', color: '#111111' }}>
                       {item.icon}
                     </div>
                     <div className="flex flex-col gap-0.5 lg:gap-1">
@@ -129,8 +129,8 @@ export function GrantCalculatorSection() {
               </ul>
 
               {/* Desktop Disclaimer */}
-              <div className="hidden lg:flex p-3 rounded-xl bg-primary/10 border border-primary/20 gap-3 text-[0.8125rem] text-secondary-foreground max-w-[380px] mt-6">
-                <div className="mt-0.5 text-primary-hover"><Sparkles size={16} fill="currentColor" /></div>
+              <div className="hidden lg:flex p-3 rounded-xl gap-3 text-[0.8125rem] text-secondary-foreground max-w-[380px] mt-6" style={{ background: 'rgba(245,230,66,0.20)', border: '1px solid rgba(212,196,0,0.35)' }}>
+                <div className="mt-0.5" style={{ color: '#C4A000' }}><Sparkles size={16} fill="currentColor" /></div>
                 <p><strong>Results are estimates only.</strong> Final eligibility is subject to government rules.</p>
               </div>
             </div>
@@ -141,7 +141,7 @@ export function GrantCalculatorSection() {
             <div className="relative flex flex-col bg-white/40 backdrop-blur-3xl border border-white/70 dark:from-surface dark:to-surface/50 dark:border-border rounded-[24px] p-4 sm:p-6 lg:p-7 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ring-1 ring-inset ring-white/60">
               
               <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#FFFCE8] text-[#D4B952] dark:bg-primary/20 dark:text-primary">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: '#FBF6A8', color: '#111111' }}>
                   <Home size={18} />
                 </div>
                 <h3 className="text-[1.125rem] font-bold text-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Your Grant Snapshot</h3>
@@ -155,11 +155,11 @@ export function GrantCalculatorSection() {
                   </label>
                   <Select value={state} onValueChange={setState}>
                     <SelectTrigger
-                      className="w-full h-11 px-3.5 bg-transparent border border-[#E4DFD2] dark:border-border/50 rounded-xl text-[0.875rem] font-medium text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none hover:border-border transition-colors shadow-sm"
+                      className="w-full h-11 px-3.5 bg-transparent border border-[#DDDDDD] dark:border-border/50 rounded-xl text-[0.875rem] font-medium text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none hover:border-border transition-colors shadow-sm"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                       <div className="flex items-center gap-2.5 w-full text-left">
-                        <MapPin size={16} className="text-[#D4B952] shrink-0 opacity-80" />
+                        <MapPin size={16} className="shrink-0 opacity-80" style={{ color: '#C4A000' }} />
                         <span className="truncate"><SelectValue placeholder="Select state" /></span>
                       </div>
                     </SelectTrigger>
@@ -182,11 +182,11 @@ export function GrantCalculatorSection() {
                   </label>
                   <Select value={propertyType} onValueChange={(value) => setPropertyType(value as 'house' | 'townhouse' | 'apartment' | 'offplan')}>
                     <SelectTrigger
-                      className="w-full h-11 px-3.5 bg-transparent border border-[#E4DFD2] dark:border-border/50 rounded-xl text-[0.875rem] font-medium text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none hover:border-border transition-colors shadow-sm"
+                      className="w-full h-11 px-3.5 bg-transparent border border-[#DDDDDD] dark:border-border/50 rounded-xl text-[0.875rem] font-medium text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none hover:border-border transition-colors shadow-sm"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                       <div className="flex items-center gap-2.5 w-full text-left">
-                        <Building size={16} className="text-[#D4B952] shrink-0 opacity-80" />
+                        <Building size={16} className="shrink-0 opacity-80" style={{ color: '#C4A000' }} />
                         <span className="truncate"><SelectValue placeholder="Select property type" /></span>
                       </div>
                     </SelectTrigger>
@@ -214,11 +214,12 @@ export function GrantCalculatorSection() {
                   step={10000}
                   onValueChange={(val) => setPropertyPrice(val[0])}
                 >
-                  <Slider.Track className="relative grow rounded-full h-[4px]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #E4DFD2, #E4DFD2 3px, transparent 3px, transparent 6px)' }}>
-                    <Slider.Range className="absolute bg-[#D4B952] rounded-full h-full" />
+                  <Slider.Track className="relative grow rounded-full h-[4px]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #EEEEEE, #EEEEEE 3px, transparent 3px, transparent 6px)' }}>
+                    <Slider.Range className="absolute rounded-full h-full" style={{ background: '#F5E642' }} />
                   </Slider.Track>
                   <Slider.Thumb
-                    className="block w-[18px] h-[18px] bg-[#D4B952] border-[3px] border-white dark:border-background rounded-full shadow-md focus:outline-none focus:ring-4 focus:ring-primary/20 transition-transform hover:scale-110 cursor-grab active:cursor-grabbing"
+                    className="block w-[18px] h-[18px] border-[3px] border-white dark:border-background rounded-full shadow-md focus:outline-none focus:ring-4 transition-transform hover:scale-110 cursor-grab active:cursor-grabbing"
+                    style={{ background: '#111111' }}
                     aria-label="Property Price"
                   />
                 </Slider.Root>
@@ -233,9 +234,9 @@ export function GrantCalculatorSection() {
               </div>
 
               {/* Inner Grants Card */}
-              <div className="bg-[#FCFAF5] dark:bg-card/50 border border-[#F1ECD9] dark:border-border/50 rounded-2xl p-4 sm:p-5 mb-4 mt-4">
+              <div className="dark:bg-card/50 dark:border-border/50 rounded-2xl p-4 sm:p-5 mb-4 mt-4" style={{ background: '#FEFCE8', border: '1px solid rgba(212,196,0,0.35)' }}>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#FCEEA4]/40 text-[#C9A227] dark:bg-primary/20 dark:text-primary">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full" style={{ background: 'rgba(245,230,66,0.5)', color: '#111111' }}>
                     <Wallet size={16} strokeWidth={2.5} />
                   </div>
                   <span className="font-bold text-[0.9375rem] text-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Estimated Grants & Savings</span>
@@ -245,7 +246,7 @@ export function GrantCalculatorSection() {
                   {eligibleGrants.map((eg, i) => (
                     <div key={i} className="flex items-start sm:items-center justify-between gap-3 sm:gap-4" style={{ fontFamily: 'Inter, sans-serif' }}>
                       <span className="font-medium text-[0.875rem] text-foreground leading-snug">{eg.grant.name}</span>
-                      <span className={`text-[#C9A227] font-bold tracking-tight mt-0.5 sm:mt-0 tabular-nums ${typeof eg.value === 'number' ? 'text-[0.9375rem] shrink-0' : 'text-right text-[0.75rem] sm:text-[0.8125rem] max-w-[55%] sm:max-w-none leading-tight'}`}>
+                      <span className={`text-[#16A34A] font-bold tracking-tight mt-0.5 sm:mt-0 tabular-nums ${typeof eg.value === 'number' ? 'text-[0.9375rem] shrink-0' : 'text-right text-[0.75rem] sm:text-[0.8125rem] max-w-[55%] sm:max-w-none leading-tight'}`}>
                         {typeof eg.value === 'number' ? <AnimatedNumber value={eg.value} /> : eg.value}
                       </span>
                     </div>
@@ -258,11 +259,11 @@ export function GrantCalculatorSection() {
                 </div>
 
                 {/* Footer Total */}
-                <div className="mt-4 pt-4 border-t border-[#F1ECD9] dark:border-border/40 flex justify-between items-center gap-2">
+                <div className="mt-4 pt-4 dark:border-border/40 flex justify-between items-center gap-2" style={{ borderTop: '1px solid rgba(212,196,0,0.35)' }}>
                   <span className="font-bold text-[0.875rem] sm:text-[0.9375rem] text-foreground leading-tight" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Total Estimated Value
                   </span>
-                  <span className="text-[1.5rem] sm:text-[1.75rem] font-bold text-[#C9A227] tracking-tight shrink-0 tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <span className="text-[1.5rem] sm:text-[1.75rem] font-bold text-[#16A34A] tracking-tight shrink-0 tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>
                     <AnimatedNumber value={totalSavings} />
                   </span>
                 </div>
@@ -274,9 +275,9 @@ export function GrantCalculatorSection() {
               </div>
 
               {/* Bottom Sticky CTA inside the card */}
-              <div className="p-4 bg-white dark:bg-input border border-[#E4DFD2] dark:border-border/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+              <div className="p-4 bg-white dark:bg-input border border-[#EEEEEE] dark:border-border/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#FFFCE8] text-[#C9A227] dark:bg-primary/20 dark:text-primary shrink-0">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0" style={{ background: '#FBF6A8', color: '#111111' }}>
                     <Gift size={18} strokeWidth={2} />
                   </div>
                   <div className="flex flex-col">
@@ -286,8 +287,9 @@ export function GrantCalculatorSection() {
                     </span>
                   </div>
                 </div>
-                <Button 
-                  className="w-full sm:w-auto whitespace-nowrap h-10 px-5 rounded-lg bg-[#D4B952] hover:bg-[#C2A740] text-white font-bold text-[0.8125rem] transition-colors"
+                <Button
+                  className="w-full sm:w-auto whitespace-nowrap h-10 px-5 rounded-lg text-[#111111] font-bold text-[0.8125rem] transition-colors hover:brightness-95"
+                  style={{ background: '#F5E642' }}
                   onClick={() => window.location.href = '/onboarding'}
                 >
                   Get My Results <ArrowRight size={14} className="ml-1.5" />
