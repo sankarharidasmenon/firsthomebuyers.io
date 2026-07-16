@@ -119,18 +119,18 @@ export function Navbar() {
   }
 
   // Click handler for any nav link that points to a same-page hash section.
-  const handleHashClick = (e: React.MouseEvent, id: string) => {
-    e.preventDefault()
-    setMenuOpen(false)
-    setActiveHash(`#${id}`)
-    if (pathname === '/') {
-      window.history.pushState(null, '', `#${id}`)
-      scrollToSection(id)
-    } else {
-      router.push('/')
-      setTimeout(() => scrollToSection(id), 450)
-    }
-  }
+  // const handleHashClick = (e: React.MouseEvent, id: string) => {
+  //   e.preventDefault()
+  //   setMenuOpen(false)
+  //   setActiveHash(`#${id}`)
+  //   if (pathname === '/') {
+  //     window.history.pushState(null, '', `#${id}`)
+  //     scrollToSection(id)
+  //   } else {
+  //     router.push('/')
+  //     setTimeout(() => scrollToSection(id), 450)
+  //   }
+  // }
 
 
 
