@@ -6,8 +6,6 @@ import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
 import { InputField } from '@/components/ui/InputField'
 import { Button } from '@/components/ui/button'
 import { calculateBorrowingCapacity, type BorrowingInputs } from '@/lib/calculations'
-import { useAuth } from '@/lib/auth/AuthProvider'
-import { saveScenario } from '@/lib/scenarios/actions'
 import { toast } from 'sonner'
 
 interface ScenarioSlidersProps {
@@ -17,7 +15,6 @@ interface ScenarioSlidersProps {
 }
 
 export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: ScenarioSlidersProps) {
-  const { requireAuth } = useAuth()
   const [extraSavings, setExtraSavings] = useState(0)
   const [incomeIncrease, setIncomeIncrease] = useState(0)
   const [hasPartner, setHasPartner] = useState(false)
@@ -59,19 +56,21 @@ export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: Scen
   const handleSave = () => {
     const current = recalculate(extraSavings, incomeIncrease, hasPartner, partnerIncome)
     const sliders = { extraSavings, incomeIncrease, hasPartner, partnerIncome }
-    requireAuth(
-      async () => {
-        const res = await saveScenario({ sliders, result: current })
-        if (res.ok) {
-          setSaved(true)
-          setTimeout(() => setSaved(false), 2000)
-          toast.success('Scenario saved successfully.')
-        } else {
-          toast.error(res.error)
-        }
-      },
-      { reason: 'Sign in to save this scenario and compare your plans anytime.' }
-    )
+    try {
+      const existing: unknown[] = JSON.parse(localStorage.getItem('firstnest_saved_scenarios') || '[]')
+      const scenario = {
+        id: Math.random().toString(36).slice(2, 9),
+        savedAt: new Date().toISOString(),
+        sliders,
+        result: current,
+      }
+      localStorage.setItem('firstnest_saved_scenarios', JSON.stringify([...existing, scenario]))
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+      toast.success('Scenario saved successfully.')
+    } catch {
+      toast.error('Failed to save scenario.')
+    }
   }
 
   const currentResult = calculateBorrowingCapacity({

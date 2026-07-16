@@ -15,9 +15,6 @@ import {
   setProgress,
   type Step1Data, type Step2Data, type Step3Data, type Step4Data, type Flow,
 } from '@/lib/localStorage'
-import { useAuth } from '@/lib/auth/AuthProvider'
-import { saveOnboardingAnswers } from '@/lib/scenarios/actions'
-import { subscribeOnboardingUpdated } from '@/lib/onboardingChannel'
 
 const DEFAULT_STEP1: Step1Data = { firstName: '', state: '', buyingWith: 'solo' }
 const DEFAULT_STEP2: Step2Data = { annualIncome: 0, partnerIncome: 0, monthlyExpenses: 0 }
@@ -61,8 +58,6 @@ function OnboardingContent() {
   const params = useSearchParams()
   const flow = (params.get('flow') ?? 'grants') as Flow
   const initialStep = parseInt(params.get('step') ?? '1', 10)
-  const { user, onboardingReady } = useAuth()
-
   const [mounted, setMounted] = useState(false)
   const [currentStep, setCurrentStep] = useState(initialStep)
   const [direction, setDirection] = useState<1 | -1>(1)
@@ -75,22 +70,12 @@ function OnboardingContent() {
 
   // Hydrate from localStorage on client only — avoids SSR/client mismatch
   useEffect(() => {
-    if (!onboardingReady) return
-    const load = () => {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStep1State(getStep1() ?? DEFAULT_STEP1)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStep2State(getStep2() ?? DEFAULT_STEP2)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStep3State(getStep3() ?? DEFAULT_STEP3)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStep4State(getStep4() ?? DEFAULT_STEP4)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setMounted(true)
-    }
-    load()
-    return subscribeOnboardingUpdated(load)
-  }, [onboardingReady])
+    setStep1State(getStep1() ?? DEFAULT_STEP1)
+    setStep2State(getStep2() ?? DEFAULT_STEP2)
+    setStep3State(getStep3() ?? DEFAULT_STEP3)
+    setStep4State(getStep4() ?? DEFAULT_STEP4)
+    setMounted(true)
+  }, [])
 
   // Auto-save for current step data
   const saveStep1 = useCallback((data: Step1Data) => setStep1(data), [])
@@ -104,25 +89,6 @@ function OnboardingContent() {
   const { showIndicator: save4Visible } = useAutoSave(step4, saveStep4)
 
   const autoSaveVisible = save1Visible || save2Visible || save3Visible || save4Visible
-
-  /**
-   * Persist all four steps to Supabase for authenticated users.
-   * Called on every validated step advance so any future edits are synced,
-   * not just the initial migration or final submission.
-   * Arguments are passed explicitly to avoid stale-closure issues.
-   */
-  const syncToSupabase = useCallback(
-    (s1: Step1Data, s2: Step2Data, s3: Step3Data, s4: Step4Data) => {
-      if (!user) return
-      saveOnboardingAnswers({
-        step1: s1 as unknown as Record<string, unknown>,
-        step2: s2 as unknown as Record<string, unknown>,
-        step3: s3 as unknown as Record<string, unknown>,
-        step4: s4 as unknown as Record<string, unknown>,
-      }).catch(() => {})
-    },
-    [user]
-  )
 
   // Persist progress on step change
   useEffect(() => {
@@ -149,7 +115,6 @@ function OnboardingContent() {
     const errs = validate1(step1)
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setStep1(step1)
-    syncToSupabase(step1, step2, step3, step4)
     goNext()
   }
 
@@ -157,7 +122,6 @@ function OnboardingContent() {
     const errs = validate2(step2, step1.buyingWith === 'partner')
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setStep2(step2)
-    syncToSupabase(step1, step2, step3, step4)
     goNext()
   }
 
@@ -165,7 +129,6 @@ function OnboardingContent() {
     const errs = validate3(step3)
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setStep3(step3)
-    syncToSupabase(step1, step2, step3, step4)
     goNext()
   }
 
@@ -173,7 +136,6 @@ function OnboardingContent() {
     const errs = validate4(step4)
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setStep4(step4)
-    syncToSupabase(step1, step2, step3, step4)
     router.push('/results/grants')
   }
 

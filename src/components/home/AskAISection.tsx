@@ -20,12 +20,12 @@ type PillTheme = 'yellow' | 'cream' | 'slate'
 
 const themeMap: Record<PillTheme, { pill: string; icon: string }> = {
   yellow: {
-    pill: 'bg-fn-yellow-light text-fn-navy hover:bg-fn-yellow hover:-translate-y-0.5 hover:shadow-[0_3px_14px_rgba(255,204,0,0.32)]',
-    icon: 'text-fn-yellow-deep',
+    pill: 'bg-[#FBF6A8] text-[#111111] hover:bg-[#F5E642] hover:text-[#111111] hover:-translate-y-0.5 hover:shadow-[0_3px_14px_rgba(245,230,66,0.45)]',
+    icon: 'text-[#C4A000]',
   },
   cream: {
-    pill: 'bg-fn-yellow-pale text-fn-navy border border-fn-yellow-deep/20 hover:bg-fn-yellow-light hover:border-fn-yellow-deep/40 hover:-translate-y-0.5 hover:shadow-sm',
-    icon: 'text-fn-yellow-deep',
+    pill: 'bg-[#FEFCE8] text-[#111111] border border-[#D4C400]/30 hover:bg-[#FBF6A8] hover:border-[#D4C400]/50 hover:-translate-y-0.5 hover:shadow-sm',
+    icon: 'text-[#C4A000]',
   },
   slate: {
     pill: 'bg-muted text-foreground hover:bg-accent hover:-translate-y-0.5 hover:shadow-sm',
@@ -108,7 +108,7 @@ export default function AskAISection() {
             <Sparkles className="w-3.5 h-3.5" />
             Sample Preview
           </div> */}
-          <h2 className="text-3xl font-bold text-foreground mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>Ask FirstNest AI</h2>
+          <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-display, 'Fraunces'), serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>Ask <em style={{ fontStyle: 'italic', color: '#C4A000' }}>FirstNest</em> AI</h2>
           {/* <p className="text-muted-foreground max-w-xl mx-auto text-base leading-relaxed">
             Get personalised guidance for grants, borrowing capacity, and buying readiness in plain English.
           </p> */}
@@ -122,14 +122,14 @@ export default function AskAISection() {
             className="relative rounded-3xl overflow-hidden"
             style={{
               padding: '1px',
-              boxShadow: '0 0 40px rgba(255, 204, 0, 0.08), 0 12px 40px rgba(0,0,0,0.04)',
+              boxShadow: '0 0 40px rgba(245,230,66,0.25), 0 12px 40px rgba(0,0,0,0.04)',
             }}
           >
-            {/* Rotating conic gradient — creates the travelling border shimmer */}
+            {/* Rotating conic gradient — sage travelling border shimmer */}
             <div
               className="absolute w-[200%] aspect-square top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
               style={{
-                background: 'conic-gradient(from 0deg at 50% 50%, transparent 0%, transparent 62%, rgba(255,204,0,0.9) 74%, rgba(255,204,0,0.45) 83%, transparent 90%, transparent 100%)',
+                background: 'conic-gradient(from 0deg at 50% 50%, transparent 0%, transparent 62%, rgba(212,196,0,0.9) 74%, rgba(245,230,66,0.45) 83%, transparent 90%, transparent 100%)',
                 animation: 'border-glow-spin 8s linear infinite',
               }}
             />
@@ -137,7 +137,7 @@ export default function AskAISection() {
             {/* Card surface — sits above the gradient */}
             <div className="relative bg-card rounded-[23px] h-full flex flex-col p-6 lg:p-8 z-10">
 
-              <h3 className="text-xl font-bold text-[#111111] mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>What do you want to know?</h3>
+              <h3 className="text-xl font-bold mb-1.5" style={{ fontFamily: "var(--font-display, 'Fraunces'), serif", fontWeight: 500, color: '#111111' }}>What do you want to know?</h3>
               <p className="text-sm text-muted-foreground mb-4">Choose a topic or type your own question below.</p>
 
               {/* Quick prompts — grid layout for balanced fill */}
@@ -169,7 +169,7 @@ export default function AskAISection() {
                     }
                   }}
                   rows={3}
-                  className="w-full bg-background border border-input rounded-2xl px-4 py-3.5 text-sm text-foreground placeholder:text-transparent focus:outline-none focus:border-fn-yellow focus:ring-2 focus:ring-fn-yellow/20 resize-none transition-all duration-150 leading-relaxed"
+                  className="w-full bg-background border border-input rounded-2xl px-4 py-3.5 text-sm text-foreground placeholder:text-transparent focus:outline-none focus:border-[#111111] focus:ring-2 focus:ring-[#F5E642]/40 resize-none transition-all duration-150 leading-relaxed"
                 />
                 {!query && (
                   <p
@@ -184,7 +184,8 @@ export default function AskAISection() {
               {/* Submit button */}
               <button
                 onClick={() => handleSubmit(query)}
-                className="w-full bg-fn-yellow text-fn-navy font-bold rounded-xl py-3.5 text-sm flex items-center justify-center gap-2 hover:bg-fn-yellow-dark transition-all duration-200 shadow-sm"
+                className="w-full font-bold rounded-xl py-3.5 text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:brightness-110"
+                style={{ background: '#F5E642', color: '#111111' }}
               >
                 Get AI guidance
                 <ArrowRight className="w-4 h-4" />
@@ -214,11 +215,11 @@ export default function AskAISection() {
           </div>
 
           {/* RIGHT — Live AI presence panel */}
-          <div className="bg-fn-yellow-pale border border-black/5 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.04)] p-6 lg:p-8 flex flex-col gap-4">
+          <div className="border border-black/5 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.04)] p-6 lg:p-8 flex flex-col gap-4" style={{ background: '#FEFCE8' }}>
 
             {/* Animated AI checklist */}
             <div className="bg-white/70 rounded-2xl p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-fn-yellow mb-3">Sample AI output</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#C4A000' }}>Sample AI output</p>
               <div className="flex flex-col gap-2.5">
                 {aiSteps.map((step, i) => {
                   const done = i < checkedCount
@@ -226,20 +227,20 @@ export default function AskAISection() {
                   return (
                     <div key={step} className="flex items-center gap-3">
                       <div className={`w-4 h-4 rounded-full shrink-0 flex items-center justify-center transition-all duration-500 ${done
-                        ? 'bg-fn-success'
+                        ? 'bg-[#F5E642]'
                         : active
-                          ? 'bg-fn-yellow animate-pulse'
+                          ? 'bg-[#FBF6A8] animate-pulse'
                           : 'bg-gray-200'
                         }`}>
                         {done && (
-                          <svg viewBox="0 0 10 10" className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg viewBox="0 0 10 10" className="w-2.5 h-2.5 text-[#111111]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="2,5 4,7.5 8,3" />
                           </svg>
                         )}
-                        {active && <div className="w-1.5 h-1.5 bg-fn-navy rounded-full" />}
+                        {active && <div className="w-1.5 h-1.5 bg-[#111111] rounded-full" />}
                       </div>
-                      <p className={`text-sm transition-colors duration-300 ${done ? 'text-fn-navy font-medium' : active ? 'text-fn-navy font-semibold' : 'text-gray-400'
-                        }`}>
+                      <p className={`text-sm transition-colors duration-300 ${done ? 'font-medium' : active ? 'font-semibold' : 'text-gray-400'
+                        }`} style={done || active ? { color: '#111111' } : {}}>
                         {step}
                       </p>
                     </div>
@@ -253,9 +254,9 @@ export default function AskAISection() {
               {miniConvo.map((msg: any, i: any) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[85%] text-xs leading-relaxed px-3.5 py-2.5 rounded-2xl ${msg.role === 'ai'
-                    ? 'bg-white border border-black/5 text-fn-navy rounded-tl-sm shadow-sm'
-                    : 'bg-fn-navy text-white rounded-tr-sm'
-                    }`}>
+                    ? 'bg-white border border-black/5 rounded-tl-sm shadow-sm'
+                    : 'rounded-tr-sm'
+                    }`} style={msg.role === 'ai' ? { color: '#111111' } : { background: '#111111', color: 'white' }}>
                     {msg.text}
                   </div>
                 </div>
@@ -263,13 +264,13 @@ export default function AskAISection() {
             </div>
 
             {/* Estimated benefit highlight */}
-            <div className="bg-fn-yellow-light border border-fn-yellow-deep/20 rounded-2xl px-5 py-4 flex items-center justify-between">
+            <div className="rounded-2xl px-5 py-4 flex items-center justify-between" style={{ background: '#FBF6A8', border: '1px solid rgba(212,196,0,0.5)' }}>
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-fn-navy/50 mb-0.5">Estimated eligible benefit</p>
-                <p className="text-2xl font-extrabold text-fn-navy leading-none">AUD $41,800</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(17,17,17,0.5)' }}>Estimated eligible benefit</p>
+                <p className="text-2xl font-extrabold leading-none" style={{ color: '#111111' }}>AUD $41,800</p>
               </div>
               <div className="flex items-center gap-1.5">
-                <p className="text-[9px] font-bold text-fn-navy/50 uppercase tracking-widest">Sample</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'rgba(17,17,17,0.5)' }}>Sample</p>
               </div>
             </div>
 
