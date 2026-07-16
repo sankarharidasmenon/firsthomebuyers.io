@@ -1,6 +1,5 @@
 'use client'
 
-import { Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation'
 
 const STEPS = [
@@ -71,311 +70,149 @@ export function HowItWorks() {
   return (
     <section className="fn-hiw px-4 py-10 lg:px-8 lg:pt-3 lg:pb-8">
       <style>{`
-        .fn-hiw { background: #FDF8F0; }
+        .fn-hiw { background: #FFFFFF; }
         .dark .fn-hiw { background: var(--background); }
 
-        /* ── Eyebrow ── */
-        .fn-hiw-eyebrow {
-          display: flex;
+        /* ── Section label — FirstKey style ── */
+        .fn-hiw-label {
+          display: inline-flex;
           align-items: center;
-          justify-content: center;
-          gap: 12px;
-          margin-bottom: 6px;
+          gap: 8px;
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-size: 11px; font-weight: 600; color: #C4A000;
+          text-transform: uppercase; letter-spacing: 1.5px;
+          margin-bottom: 14px;
         }
-        .fn-hiw-eyebrow span {
-          font-family: Inter, sans-serif;
-          font-weight: 700;
-          font-size: 0.6875rem;
-          letter-spacing: 0.16em;
-          color: #C9A227;
-        }
-        .dark .fn-hiw-eyebrow span { color: var(--brand-gold); }
-        .fn-hiw-eyebrow i {
+        .fn-hiw-label::before {
+          content: ''; width: 24px; height: 2px;
+          background: #D4C400; border-radius: 2px;
           display: block;
-          width: 28px;
-          height: 1px;
-          background: #C9A227;
-          opacity: 0.5;
         }
 
-        /* ── Section heading — editorial, tight tracking ── */
+        /* ── Section heading ── */
         .fn-hiw-heading {
-          font-family: Inter, sans-serif;
-          font-weight: 700;
-          font-size: 1.875rem;
-          line-height: 2.25rem;
-          letter-spacing: normal;
-          color: var(--foreground);
+          font-family: var(--font-display, 'Fraunces'), serif;
+          font-weight: 500;
+          font-size: clamp(28px, 4vw, 48px);
+          line-height: 1.1;
+          letter-spacing: -1px;
+          color: #111111;
           text-align: center;
+          max-width: 560px;
+          margin-left: auto; margin-right: auto;
         }
         .fn-hiw-heading em {
-          font-style: normal;
-          color: #111111;
+          font-style: italic;
+          color: #C4A000;
         }
-        .dark .fn-hiw-heading em { color: #111111; }
 
         .fn-hiw-subtitle {
-          font-family: Inter, sans-serif;
-          font-weight: 400;
-          font-size: 1rem;
-          color: var(--muted-foreground);
-          max-width: 540px;
-          line-height: 1.6;
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-weight: 300;
+          font-size: 16px;
+          color: #444444;
+          max-width: 520px;
+          line-height: 1.65;
           text-align: center;
-          margin-left: auto;
-          margin-right: auto;
-        }
-        @media (min-width: 1024px) {
-          .fn-hiw-subtitle { font-size: 17px; max-width: 640px; }
+          margin-left: auto; margin-right: auto;
         }
 
-        /* ── Card stack ── */
+        /* ── Card list ── */
         .fn-hiw-list {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          max-width: 920px;
+          gap: 0;
+          max-width: 760px;
           margin-left: auto;
           margin-right: auto;
         }
+        @media (min-width: 1024px) {
+          .fn-hiw-list { max-width: 1100px; }
+        }
 
-        /* ── Premium floating card ── */
+        /* ── Step item — FirstKey pattern ── */
         .fn-hiw-card {
+          display: flex;
+          gap: 24px;
+          padding: 28px 0;
+          border-bottom: 1px solid rgba(17,17,17,0.08);
+          cursor: default;
+          transition: all 0.2s;
           position: relative;
           z-index: 1;
-          display: grid;
-          grid-template-columns: 44px 1fr;
-          align-items: center;
-          column-gap: 20px;
-          padding: 20px 24px;
-          min-height: 110px;
-          border-radius: 28px;
-          background: #FFFFFF;
-          border: 1px solid #F1E4C4;
-          box-shadow:
-            0 1px 2px rgba(76,60,20,0.03),
-            0 10px 26px rgba(201,162,39,0.05);
-          transition:
-            transform 300ms cubic-bezier(0.22,1,0.36,1),
-            box-shadow 300ms ease-out,
-            border-color 300ms ease-out;
         }
+        .fn-hiw-card:last-child { border-bottom: none; }
         @media (min-width: 1024px) {
-          .fn-hiw-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-auto-rows: 1fr;
-            gap: 20px;
-            max-width: 1120px;
-          }
-          /* extremely subtle warm glow behind the grid — only adds warmth */
-          .fn-hiw-list::before {
-            content: '';
-            position: absolute;
-            inset: -70px 0;
-            background: radial-gradient(ellipse at center, rgba(245,230,66,0.09) 0%, rgba(245,230,66,0) 80%);
-            z-index: 0;
-            pointer-events: none;
-          }
-          .dark .fn-hiw-list::before { display: none; }
-          .fn-hiw-card {
-            display: block;
-            position: relative;
-            padding: 20px 28px;
-            min-height: 150px;
-            border-radius: 28px;
-            box-shadow:
-              inset 0 1px 0 rgba(255,255,255,0.9),
-              0 1px 2px rgba(76,60,20,0.03),
-              0 12px 30px rgba(201,162,39,0.06);
-            transition:
-              transform 250ms cubic-bezier(0.22,1,0.36,1),
-              box-shadow 250ms cubic-bezier(0.22,1,0.36,1),
-              border-color 250ms ease-out;
-          }
-          .fn-hiw-list .fn-hiw-card:hover {
-            transform: translateY(-4px) scale(1.01);
-            border-color: #E6C84D;
-            box-shadow:
-              inset 0 1px 0 rgba(255,255,255,0.9),
-              0 6px 16px rgba(201,162,39,0.12),
-              0 26px 56px rgba(201,162,39,0.18),
-              0 0 0 5px rgba(245,230,66,0.08);
-          }
-          .fn-hiw-list .fn-hiw-card:hover .fn-hiw-num {
-            box-shadow: inset 0 1px 2px rgba(201,162,39,0.14), 0 0 0 4px rgba(245,230,66,0.16);
-          }
-          .fn-hiw-content { padding-right: 92px; }
+          .fn-hiw-card { padding: 32px 0; }
         }
-        .dark .fn-hiw-card {
-          background: var(--card);
-          border-color: rgba(245,230,66,0.30);
-          box-shadow: 0 10px 26px rgba(0,0,0,0.25), 0 0 0 4px rgba(245,230,66,0.06);
-        }
-
-        /* dotted connector — only in the gap between number markers */
-        .fn-hiw-card:not(:last-child)::after {
-          content: '';
-          position: absolute;
-          left: 46px;
-          top: 100%;
-          height: 12px;
-          border-left: 2px dotted #E3CE8E;
-          z-index: 0;
-        }
-        @media (min-width: 1024px) {
-          .fn-hiw-card:not(:last-child)::after { display: none; }
-        }
-        .dark .fn-hiw-card:not(:last-child)::after { border-left-color: var(--border); }
-
-        /* Hover — luxurious lift */
-        .fn-hiw-card:hover {
-          transform: translateY(-3px);
-          border-color: #ECD35C;
-          box-shadow:
-            0 4px 12px rgba(201,162,39,0.10),
-            0 22px 48px rgba(201,162,39,0.16),
-            0 0 0 4px rgba(245,230,66,0.10);
-        }
-        .dark .fn-hiw-card:hover {
-          border-color: rgba(245,230,66,0.30);
-          box-shadow: 0 22px 48px rgba(0,0,0,0.4), 0 0 0 4px rgba(245,230,66,0.06);
-        }
-
-        /* ── Number marker ── */
-        .fn-hiw-num {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: Inter, sans-serif;
-          font-weight: 500;
-          font-size: 1.25rem;
-          line-height: 1;
-          background: #FFFDF7;
-          border: 1px solid #E7D6A6;
-          color: #2F4A3D;
-          transition: border-color 300ms ease-out, box-shadow 300ms ease-out, color 300ms ease-out;
-        }
-        @media (min-width: 1024px) {
-          .fn-hiw-num {
-            width: 42px;
-            height: 42px;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            background: #FDF6E1;
-            border-color: #E9D07E;
-            box-shadow: inset 0 1px 2px rgba(201,162,39,0.14);
-          }
-          .dark .fn-hiw-num { background: var(--card); border-color: #E6C84D; box-shadow: 0 0 0 4px rgba(245,230,66,0.14); }
-        }
-        .dark .fn-hiw-num { background: var(--card); border-color: #E6C84D; color: var(--foreground); box-shadow: 0 0 0 4px rgba(245,230,66,0.14); }
         .fn-hiw-card:hover .fn-hiw-num {
-          border-color: #E6C84D;
-          box-shadow: 0 0 0 4px rgba(245,230,66,0.14);
+          background: #F5E642;
+          color: #111111;
+          border-color: #F5E642;
         }
+
+        /* ── Number marker — sage circle ── */
+        .fn-hiw-num {
+          width: 44px; height: 44px;
+          border-radius: 50%;
+          border: 1.5px solid #D4C400;
+          display: flex; align-items: center; justify-content: center;
+          font-family: var(--font-display, 'Fraunces'), serif;
+          font-size: 18px; font-weight: 700; color: #C4A000;
+          flex-shrink: 0;
+          transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .dark .fn-hiw-num { border-color: #F5E642; color: #F5E642; }
 
         /* ── Content ── */
-        .fn-hiw-content { min-width: 0; }
+        .fn-hiw-content { min-width: 0; padding-top: 2px; }
         .fn-hiw-title {
-          font-family: Inter, sans-serif;
-          font-weight: 600;
-          font-size: 1.0625rem;
-          line-height: 1.35;
-          color:var(--foreground);
-          margin-bottom: 5px;
+          font-family: var(--font-display, 'Fraunces'), serif;
+          font-weight: 500;
+          font-size: 19px;
+          color: #111111;
+          margin-bottom: 6px;
+          line-height: 1.25;
         }
-        @media (min-width: 1024px) {
-          .fn-hiw-title {
-            font-size: 22px;
-            font-weight: 600;
-            line-height: 1.25;
-            margin-bottom: 8px;
-          }
-        }
+        .dark .fn-hiw-title { color: var(--foreground); }
+
         .fn-hiw-desc {
-          font-family: Inter, sans-serif;
-          font-weight: 400;
-          font-size: 0.9375rem;
-          color: var(--muted-foreground);
-          line-height: 1.55;
+          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-weight: 300;
+          font-size: 14.5px;
+          color: #444444;
+          line-height: 1.65;
           max-width: 540px;
         }
-        @media (min-width: 1024px) {
-          .fn-hiw-desc { font-size: 15px; line-height: 1.45; }
-        }
+        .dark .fn-hiw-desc { color: var(--muted-foreground); }
 
-        /* ── Illustration — the visual focal point ── */
-        .fn-hiw-art {
-          display: none;
-        }
+        /* ── Art icon (desktop) ── */
+        .fn-hiw-art { display: none; }
         @media (min-width: 1024px) {
           .fn-hiw-art {
-            position: absolute;
-            top: 50px;
-            right: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            overflow: hidden;
-            background: linear-gradient(155deg, #FFFEFA 0%, #FBF2D8 100%);
-            border: 1px solid #EFDCA0;
-            color: #2F4A3D;
-            box-shadow:
-              inset 0 1px 1px rgba(255,255,255,0.75),
-              inset 0 -2px 5px rgba(201,162,39,0.10),
-              0 6px 16px rgba(201,162,39,0.14);
-            transition: transform 250ms cubic-bezier(0.22,1,0.36,1), box-shadow 250ms ease-out, border-color 250ms ease-out;
+            display: flex; align-items: center; justify-content: center;
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            background: #FBF6A8;
+            border: 1px solid rgba(212,196,0,0.4);
+            color: #111111;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: background 0.2s;
           }
-          .fn-hiw-art::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 44px;
-            height: 44px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(245,230,66,0.22) 0%, rgba(245,230,66,0) 70%);
-          }
-          .fn-hiw-art svg { position: relative; z-index: 1; }
-          .dark .fn-hiw-art {
-            background: var(--card);
-            border-color: var(--border);
-            color: var(--foreground);
-          }
-          .fn-hiw-card:hover .fn-hiw-art {
-            transform: scale(1.03);
-            border-color: #ECD35C;
-            box-shadow:
-              inset 0 1px 1px rgba(255,255,255,0.75),
-              0 12px 30px rgba(201,162,39,0.22);
-          }
-          .fn-hiw-art .fn-hiw-sparkle {
-            position: absolute;
-            z-index: 1;
-            color: #D9BE6F;
-            opacity: 0.7;
-          }
+          .fn-hiw-card:hover .fn-hiw-art { background: #F5E642; color: #111111; }
         }
       `}</style>
 
-      <div className="mx-auto" style={{ maxWidth: 1360 }}>
-        {/* ── Eyebrow + heading ── */}
-        {/* <div className="flex w-fit mx-auto items-center justify-center gap-2 bg-fn-yellow-light text-fn-navy text-xs font-bold px-4 py-1.5 rounded-full mb-2 mt-3 uppercase tracking-widest">
-          <Sparkles className="w-3.5 h-3.5" />
-          How it works
-        </div> */}
-        <h2 className="fn-hiw-heading mb-3 lg:mb-3">
-          Four steps to <em style={{ fontStyle: 'normal', color: "var(--foreground)" }}>your</em> first home
+      <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <span className="fn-hiw-label">How it works</span>
+        </div>
+        <h2 className="fn-hiw-heading mb-3">
+          Four steps to <em>your</em> first home
         </h2>
-        <p className="fn-hiw-subtitle mb-6 lg:mb-5">
+        <p className="fn-hiw-subtitle mb-8 lg:mb-10">
           A clear, personalised roadmap from today to owning your first home.
         </p>
 

@@ -28,7 +28,7 @@ export function DiscussionSidebar() {
           <PenLine className="size-4" aria-hidden />
           Start a Discussion
         </button>
-        <p className="mt-2 text-center text-xs text-muted-foreground">Sign in to post — it&apos;s free.</p>
+        <p className="mt-2 text-center text-xs text-muted-foreground">Free to post — no account needed.</p>
       </section>
 
       <TrendingList title="Trending Discussions" discussions={trending} emphasis="medium" />
