@@ -84,11 +84,14 @@ export function Step2_FinancialDetails({ step1, data, onChange, onNext, onBack, 
         />
       </div>
 
-      <div className="flex gap-3">
+      {/* Action row — mobile keeps the thumb-friendly full-width CTA; from lg
+          (the desktop card) Next sizes to its content and the pair splits to
+          opposite edges as a balanced form footer. */}
+      <div className="flex gap-3 lg:justify-between">
         <Button variant="ghost" onClick={onBack} fullWidth={false} className="px-6">
           ← Back
         </Button>
-        <Button onClick={onNext} variant="primary" fullWidth>
+        <Button onClick={onNext} variant="primary" fullWidth className="lg:w-auto lg:px-12">
           NEXT →
         </Button>
       </div>

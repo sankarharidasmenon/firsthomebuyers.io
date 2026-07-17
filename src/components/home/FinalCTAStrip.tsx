@@ -34,14 +34,14 @@ export function FinalCTAStrip() {
 
         .fn-final-label {
           display: inline-flex; align-items: center; gap: 6px;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 11px; font-weight: 600; color: #F5E642;
           text-transform: uppercase; letter-spacing: 1.5px;
           margin-bottom: 20px;
         }
 
         .fn-final-heading {
-          font-family: var(--font-display, 'Fraunces'), serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 500;
           font-size: clamp(32px, 5vw, 56px);
           line-height: 1.08;
@@ -56,7 +56,7 @@ export function FinalCTAStrip() {
         }
 
         .fn-final-sub {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 15.5px; font-weight: 300;
           color: rgba(255,255,255,0.55);
           line-height: 1.65;
@@ -67,7 +67,7 @@ export function FinalCTAStrip() {
         .fn-final-btn {
           display: inline-flex; align-items: center; gap: 8px;
           background: #F5E642; color: #111111;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 15px; font-weight: 500;
           border: none; border-radius: 50px;
           padding: 16px 32px; cursor: pointer;
@@ -83,7 +83,7 @@ export function FinalCTAStrip() {
         .fn-final-btn:active { transform: scale(0.98); }
 
         .fn-final-trust {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 12.5px; color: rgba(255,255,255,0.35);
           margin-bottom: 40px;
         }
@@ -95,7 +95,7 @@ export function FinalCTAStrip() {
         }
         .fn-final-divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
         .fn-final-divider span {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.25);
           text-transform: uppercase; letter-spacing: 0.1em;
         }
@@ -111,17 +111,17 @@ export function FinalCTAStrip() {
         .fn-store-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
         .fn-store-btn-text small {
           display: block; font-size: 9.5px; color: rgba(255,255,255,0.5);
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           line-height: 1; margin-bottom: 2px;
         }
         .fn-store-btn-text strong {
           display: block; font-size: 13.5px; color: white; font-weight: 600;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           line-height: 1;
         }
 
         .fn-final-note {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 11.5px; color: rgba(255,255,255,0.25);
         }
       `}</style>
@@ -142,7 +142,7 @@ export function FinalCTAStrip() {
           Check my grant eligibility →
         </button>
 
-        <p className="fn-final-trust">✓ No credit check &nbsp;·&nbsp; ✓ 100% free &nbsp;·&nbsp; ✓ No sign-up needed</p>
+        <p className="fn-final-trust">✓ No credit check &nbsp;·&nbsp; ✓ 100% free &nbsp;</p>
 
         <div className="fn-final-divider">
           <div className="fn-final-divider-line" />

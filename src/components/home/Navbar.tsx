@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Share2, Mail, BookOpen, Newspaper, MessageSquare } from 'lucide-react'
+import { Home, Share2, Mail, BookOpen, Newspaper, MessageSquare, Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 // Icon-only links shown on the right side of the desktop navbar
@@ -82,14 +82,14 @@ const SOCIAL: { path?: string; icon?: React.ElementType; label: string; color: s
 
 /* Social items shown in the floating dropdown — dark square style matching design reference */
 type FloatingSocialItem =
-  | { type: 'svg'; path: string; label: string }
-  | { type: 'lucide'; icon: React.ElementType; label: string }
+  | { type: 'svg'; path: string; label: string; color: string; iconColor?: string }
+  | { type: 'lucide'; icon: React.ElementType; label: string; color: string; iconColor?: string }
 
 const FLOATING_SOCIAL: FloatingSocialItem[] = [
-  { type: 'svg', path: LINKEDIN_PATH, label: 'LinkedIn' },
-  { type: 'svg', path: X_PATH, label: 'X (Twitter)' },
-  { type: 'svg', path: FACEBOOK_PATH, label: 'Facebook' },
-  { type: 'lucide', icon: Mail, label: 'Email' },
+  { type: 'svg', path: LINKEDIN_PATH, label: 'LinkedIn', color: '#0A66C2', iconColor: '#ffffff' },
+  { type: 'svg', path: X_PATH, label: 'X (Twitter)', color: '#000000', iconColor: '#ffffff' },
+  { type: 'svg', path: FACEBOOK_PATH, label: 'Facebook', color: '#1877F2', iconColor: '#ffffff' },
+  { type: 'lucide', icon: Mail, label: 'Email', color: '#F5E642', iconColor: '#111111' },
 ]
 
 export function Navbar() {
@@ -97,6 +97,7 @@ export function Navbar() {
   const pathname = usePathname()
   const [activeHash, setActiveHash] = useState('')
   const [socialOpen, setSocialOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     setActiveHash(window.location.hash)
@@ -106,7 +107,10 @@ export function Navbar() {
   }, [])
 
   // Close on route change
-  useEffect(() => { setSocialOpen(false) }, [pathname])
+  useEffect(() => { 
+    setSocialOpen(false)
+    setMenuOpen(false)
+  }, [pathname])
 
   // Scroll to an in-page section, offset by the fixed navbar height so the
   // target heading isn't hidden underneath it. Used for all hash anchors.
@@ -139,10 +143,10 @@ export function Navbar() {
       <nav
         className="fixed top-0 left-0 right-0 z-50 h-14 lg:h-[72px]"
         style={{
-          background: 'rgba(255,255,255,0.90)',
+          backgroundColor: 'color-mix(in srgb, var(--background) 90%, transparent)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderBottom: '1px solid rgba(17,17,17,0.08)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <style>{`
@@ -158,11 +162,11 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2 no-underline" aria-label="FirstNest home">
             <div
               className="flex items-center justify-center rounded-sm shrink-0"
-              style={{ width: 32, height: 32, background: '#F5E642' }}
+              style={{ width: 32, height: 32, background: 'var(--primary)' }}
             >
-              <Home size={17} style={{ color: '#111111' }} strokeWidth={2.5} />
+              <Home size={17} style={{ color: 'var(--primary-foreground)' }} strokeWidth={2.5} />
             </div>
-            <span style={{ fontFamily: "var(--font-display, 'Fraunces'), serif", fontWeight: 600, fontSize: '1.0625rem', color: '#111111', letterSpacing: '-0.02em' }}>
+            <span style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 600, fontSize: '1.0625rem', color: 'var(--foreground)', letterSpacing: '-0.02em' }}>
               FirstNest
             </span>
           </Link>
@@ -198,7 +202,7 @@ export function Navbar() {
                       minWidth: 180,
                       background: 'var(--card)',
                       border: '1px solid var(--border)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                      boxShadow: 'var(--shadow-card, 0 8px 32px rgba(0,0,0,0.12))',
                     }}
                   >
                     <div style={{ padding: '6px 0' }}>
@@ -222,11 +226,11 @@ export function Navbar() {
                           <span
                             className="flex items-center justify-center flex-shrink-0"
                             style={{
-                              width: 30,
-                              height: 30,
-                              background: '#111111',
-                              color: '#fff',
-                              borderRadius: 8,
+                              width: 28,
+                              height: 28,
+                              background: item.color,
+                              color: item.iconColor,
+                              borderRadius: 7,
                             }}
                           >
                             {item.type === 'lucide'
@@ -243,7 +247,16 @@ export function Navbar() {
                 </>
               )}
             </div>
-
+            
+            <button
+              type="button"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="Toggle mobile menu"
+              className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150 ml-1"
+              style={{ width: 40, height: 40, color: 'var(--foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              {menuOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
+            </button>
           </div>
 
           {/* Right side - Desktop */}
@@ -260,7 +273,7 @@ export function Navbar() {
                   style={{
                     width: 36,
                     height: 36,
-                    color: pathname === href ? '#111111' : 'var(--secondary-foreground)',
+                    color: pathname === href ? 'var(--foreground)' : 'var(--secondary-foreground)',
                     background: pathname === href ? 'var(--secondary)' : 'none',
                     textDecoration: 'none',
                   }}
@@ -278,10 +291,10 @@ export function Navbar() {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: pathname === '/ads' && activeHash !== '#ai-guidance' ? 700 : 500,
                   fontSize: '0.9375rem',
-                  color: pathname === '/ads' && activeHash !== '#ai-guidance' ? '#111111' : 'var(--secondary-foreground)',
+                  color: pathname === '/ads' && activeHash !== '#ai-guidance' ? 'var(--foreground)' : 'var(--secondary-foreground)',
                   textDecoration: 'none',
                   paddingBottom: 2,
-                  borderBottom: pathname === '/ads' && activeHash !== '#ai-guidance' ? '2px solid #D4C400' : '2px solid transparent',
+                  borderBottom: pathname === '/ads' && activeHash !== '#ai-guidance' ? '2px solid var(--primary-hover)' : '2px solid transparent',
                   transition: 'color 150ms, border-color 150ms, opacity 150ms',
                   transform: 'translateX(8px)',
                 }}
@@ -340,7 +353,7 @@ export function Navbar() {
                           >
                             <span
                               className="flex items-center justify-center flex-shrink-0"
-                              style={{ width: 30, height: 30, background: '#111111', color: '#fff', borderRadius: 8 }}
+                              style={{ width: 28, height: 28, background: item.color, color: item.iconColor, borderRadius: 7 }}
                             >
                               {item.type === 'lucide'
                                 ? <item.icon size={15} />
@@ -361,6 +374,46 @@ export function Navbar() {
           </div>
         </div>
       </nav>
+
+      {/* Mobile Menu Dropdown */}
+      {menuOpen && (
+        <div 
+          className="fixed inset-0 z-40 lg:hidden flex flex-col"
+          style={{ top: '56px', background: 'var(--background)', borderTop: '1px solid var(--border)' }}
+        >
+          <div className="flex flex-col p-4 gap-2">
+            {NAV_LINKS.map(({ href, label, Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-lg transition-colors"
+                style={{
+                  background: pathname === href ? 'var(--secondary)' : 'transparent',
+                  color: pathname === href ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                  textDecoration: 'none'
+                }}
+              >
+                <Icon size={20} />
+                <span style={{ fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{label}</span>
+              </Link>
+            ))}
+            <Link
+              href="/ads"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-lg transition-colors"
+              style={{
+                background: pathname === '/ads' ? 'var(--secondary)' : 'transparent',
+                color: pathname === '/ads' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                textDecoration: 'none'
+              }}
+            >
+              <AdsIcon />
+              <span style={{ fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>Advertise</span>
+            </Link>
+          </div>
+        </div>
+      )}
 
     </>
   )
