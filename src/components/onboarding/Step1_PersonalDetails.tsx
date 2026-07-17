@@ -118,7 +118,7 @@ export function Step1_PersonalDetails({ flow, data, onChange, onNext, errors }: 
         )}
       </div>
 
-      <Button onClick={onNext} variant="primary" fullWidth>
+      <Button onClick={onNext} variant="primary" fullWidth size="sm">
         NEXT →
       </Button>
     </div>
