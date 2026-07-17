@@ -100,7 +100,7 @@ export function GrantCalculatorSection() {
                   Grant Calculator
                 </div> */}
 
-                <h2 className="text-3xl mb-4 max-w-[320px] lg:max-w-none" style={{ fontFamily: "var(--font-display, 'Fraunces'), serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>
+                <h2 className="text-3xl mb-4 max-w-[320px] lg:max-w-none" style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>
                   Grant <em style={{ fontStyle: 'italic', color: '#C4A000' }}>Calculator</em>
                   {/* <br className="hidden lg:inline" /> could <span className="pr-1">unlock,</span> <br className="hidden lg:inline" /> right now */}
                 </h2>

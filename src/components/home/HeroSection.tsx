@@ -56,14 +56,19 @@ export function HeroSection() {
         }
         .dark .fn-hero { background: var(--background); border-bottom-color: var(--border); }
 
+        /* Container mirrors the grants section + footer: max-w-[1150px] with
+           px-4 / sm:px-6 / lg:px-8 so every section shares one content edge. */
         .fn-hero-inner {
           width: 100%;
-          max-width: 1100px;
+          max-width: 1150px;
           margin: 0 auto;
-          padding: 48px 20px 56px;
+          padding: 48px 16px;
+        }
+        @media (min-width: 640px) {
+          .fn-hero-inner { padding-left: 24px; padding-right: 24px; }
         }
         @media (min-width: 1024px) {
-          .fn-hero-inner { padding: 88px 24px 96px; }
+          .fn-hero-inner { padding: 80px 32px 72px; }
         }
 
         .fn-hero-grid {
@@ -82,18 +87,23 @@ export function HeroSection() {
 
         /* ── Eyebrow ── */
         .fn-hero-eyebrow {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 11px;
           font-weight: 600;
-          letter-spacing: 0.18em;
+          line-height: 1.45;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
           color: #C4A000;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
+
+        /* Trailing trust note — same treatment, no bottom margin so it
+           doesn't add a phantom gap above the section divider. */
+        .fn-hero-note { margin-bottom: 0; }
 
         /* ── Title ── */
         .fn-hero-title {
-          font-family: var(--font-display, 'Fraunces'), serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 500;
           font-size: clamp(34px, 4.8vw, 58px);
           line-height: 1.1;
@@ -102,14 +112,17 @@ export function HeroSection() {
           margin-bottom: 18px;
         }
         .dark .fn-hero-title { color: var(--foreground); }
-        .fn-hero-title em {
-          font-style: italic;
-          color: #C4A000;
-        }
+        /* The default-flow h1 currently renders no copy; drop its trailing
+           margin so it doesn't leave dead space. Self-cancels once it has text. */
+        .fn-hero-title:empty { margin-bottom: 0; }
+        // .fn-hero-title em {
+        //   font-style: italic;
+        //   color: #C4A000;
+        // }
 
         /* ── Sub ── */
         .fn-hero-sub {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 16px;
           font-weight: 300;
           line-height: 1.7;
@@ -123,8 +136,8 @@ export function HeroSection() {
         .fn-hero-paths {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 12px;
-          margin-bottom: 20px;
+          gap: 14px;
+          margin-bottom: 24px;
         }
         @media (min-width: 560px) {
           .fn-hero-paths { grid-template-columns: 1fr 1fr; }
@@ -134,13 +147,13 @@ export function HeroSection() {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          gap: 6px;
+          gap: 10px;
           text-align: left;
-          padding: 22px 20px;
+          padding: 24px 22px;
           border-radius: 14px;
           cursor: pointer;
           transition: border-color 0.2s, background 0.2s, transform 0.15s;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
         }
         .fn-path:active { transform: scale(0.99); }
 
@@ -159,16 +172,17 @@ export function HeroSection() {
         .dark .fn-path-secondary:hover { border-color: var(--foreground); background: transparent; }
 
         .fn-path-kicker {
-          font-size: 10.5px;
+          font-size: 11px;
           font-weight: 600;
-          letter-spacing: 0.14em;
+          line-height: 1.2;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
         }
         .fn-path-primary .fn-path-kicker { color: #F5E642; }
         .fn-path-secondary .fn-path-kicker { color: #C4A000; }
 
         .fn-path-title {
-          font-family: var(--font-display, 'Fraunces'), serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 500;
           font-size: 19px;
           letter-spacing: -0.3px;
@@ -187,14 +201,21 @@ export function HeroSection() {
         .fn-path-secondary .fn-path-desc { color: #444444; }
         .dark .fn-path-secondary .fn-path-desc { color: var(--muted-foreground); }
 
+        /* Carries the card title text alongside the arrow glyph. */
         .fn-path-arrow {
-          margin-top: 8px;
-          font-size: 13.5px;
-          font-weight: 500;
+          margin-top: 2px;
+          font-size: 17px;
+          font-weight: 600;
+          line-height: 1.4;
+          letter-spacing: -0.01em;
           display: inline-flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
         }
+        @media (min-width: 1024px) {
+          .fn-path-arrow { font-size: 18px; }
+        }
+        .fn-path-arrow svg { flex-shrink: 0; }
         .fn-path-primary .fn-path-arrow { color: #FFFFFF; }
         .fn-path-secondary .fn-path-arrow { color: #C4A000; }
         .fn-path-arrow svg { transition: transform 0.2s; }
@@ -202,7 +223,7 @@ export function HeroSection() {
 
         /* ── Trust line ── */
         .fn-hero-trust {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 12.5px;
           color: #888888;
         }
@@ -213,7 +234,7 @@ export function HeroSection() {
           border: 1px solid rgba(17,17,17,0.15);
           border-radius: 9999px;
           padding: 7px 16px;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 400;
           font-size: 0.8125rem;
           color: #444444;
@@ -224,7 +245,7 @@ export function HeroSection() {
           display: inline-flex; align-items: center; gap: 8px;
           background: #111111; color: #FFFFFF;
           padding: 15px 28px; border-radius: 50px;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 15px; font-weight: 500;
           border: none; cursor: pointer;
           transition: background 0.25s, transform 0.15s;
@@ -237,7 +258,7 @@ export function HeroSection() {
           display: inline-flex; align-items: center; gap: 8px;
           background: transparent; color: #111111;
           padding: 15px 24px; border-radius: 50px;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 15px; font-weight: 500;
           border: 1px solid rgba(17,17,17,0.22); cursor: pointer;
           transition: border-color 0.2s, background 0.2s;
@@ -265,7 +286,7 @@ export function HeroSection() {
                 <div>
                   <div className="fn-hero-eyebrow">Welcome back, {firstName}</div>
                   <h1 className="fn-hero-title">
-                    Pick up where<br />you <em>left off</em>
+                    Pick up where<br />you left off
                   </h1>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
                     {[
@@ -286,7 +307,7 @@ export function HeroSection() {
                       Start fresh
                     </button>
                   </div>
-                  <p style={{ fontFamily: 'var(--font-sans, "DM Sans"), sans-serif', fontSize: 12.5, color: '#AAAAAA' }}>
+                  <p style={{ fontFamily: 'var(--font-body, "Inter"), sans-serif', fontSize: 12.5, color: '#AAAAAA' }}>
                     or{' '}
                     <button type="button"
                       onClick={() => { clearAllData(); window.location.href = '/' }}
@@ -324,7 +345,7 @@ export function HeroSection() {
                     </button>
                   </div>
 
-                  <p className="fn-hero-eyebrow">Free · No sign-up · No credit check</p>
+                  <p className="fn-hero-eyebrow fn-hero-note">Free · No credit check</p>
                 </div>
               )}
             </div>

@@ -11,6 +11,7 @@ import { ReplyComposer } from '@/components/forums/ReplyComposer'
 import { DiscussionCard } from '@/components/forums/DiscussionCard'
 import { SectionHeading } from '@/components/forums/SectionHeading'
 import { SingleDiscussionSidebar } from '@/components/forums/SingleDiscussionSidebar'
+import { CommunityDisclaimer } from '@/components/forums/CommunityDisclaimer'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -150,6 +151,9 @@ export default async function DiscussionPage({ params }: { params: Promise<{ slu
                 ))}
               </div>
             </section>
+
+            {/* Community disclaimer — closes out the user-generated content */}
+            <CommunityDisclaimer className="mt-16" />
           </div>
 
           {/* Sticky Right Sidebar (30%) */}

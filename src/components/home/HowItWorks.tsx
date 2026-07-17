@@ -78,7 +78,7 @@ export function HowItWorks() {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 11px; font-weight: 600; color: #C4A000;
           text-transform: uppercase; letter-spacing: 1.5px;
           margin-bottom: 14px;
@@ -91,7 +91,7 @@ export function HowItWorks() {
 
         /* ── Section heading ── */
         .fn-hiw-heading {
-          font-family: var(--font-display, 'Fraunces'), serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 500;
           font-size: clamp(28px, 4vw, 48px);
           line-height: 1.1;
@@ -107,7 +107,7 @@ export function HowItWorks() {
         }
 
         .fn-hiw-subtitle {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 300;
           font-size: 16px;
           color: #444444;
@@ -158,7 +158,7 @@ export function HowItWorks() {
           border-radius: 50%;
           border: 1.5px solid #D4C400;
           display: flex; align-items: center; justify-content: center;
-          font-family: var(--font-display, 'Fraunces'), serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 18px; font-weight: 700; color: #C4A000;
           flex-shrink: 0;
           transition: background 0.2s, color 0.2s, border-color 0.2s;
@@ -168,7 +168,7 @@ export function HowItWorks() {
         /* ── Content ── */
         .fn-hiw-content { min-width: 0; padding-top: 2px; }
         .fn-hiw-title {
-          font-family: var(--font-display, 'Fraunces'), serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 500;
           font-size: 19px;
           color: #111111;
@@ -178,7 +178,7 @@ export function HowItWorks() {
         .dark .fn-hiw-title { color: var(--foreground); }
 
         .fn-hiw-desc {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 300;
           font-size: 14.5px;
           color: #444444;

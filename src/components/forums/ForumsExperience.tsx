@@ -10,6 +10,7 @@ import { DiscussionFeed } from './DiscussionFeed'
 import { DiscussionSidebar } from './DiscussionSidebar'
 import { TopicCard } from './TopicCard'
 import { SectionHeading } from './SectionHeading'
+import { CommunityDisclaimer } from './CommunityDisclaimer'
 
 /**
  * Client shell that owns the selected category and lays out the 12-column grid:
@@ -72,6 +73,9 @@ export function ForumsExperience() {
               <DiscussionSidebar />
             </aside>
           </div>
+
+          {/* Community disclaimer — closes out the user-generated content */}
+          <CommunityDisclaimer className="mt-10" />
         </div>
       </section>
     </div>

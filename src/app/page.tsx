@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { SessionResumeBanner } from '@/components/home/SessionResumeBanner'
 import { HeroSection } from '@/components/home/HeroSection'
+import { GrantCardsPreview } from '@/components/home/GrantCardsPreview'
 import { useFormSession } from '@/hooks/useFormSession'
 
 export default function HomePage() {
@@ -41,6 +42,9 @@ export default function HomePage() {
       <main id="main" className={`flex flex-col flex-1 ${heroOffset}`}>
         {/* Cream hero */}
         <HeroSection />
+
+        {/* Grants & Schemes Preview */}
+        <GrantCardsPreview />
       </main>
     </div>
   )

@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Fraunces, DM_Sans } from 'next/font/google'
+import { Inter, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
 import { BottomNav } from '@/components/navigation/BottomNav'
 import { Footer } from '@/components/layout/Footer'
 import { GlobalBackButton } from '@/components/navigation/GlobalBackButton'
 import { Navbar } from '@/components/home/Navbar'
+import { FloatingSocialWidget } from '@/components/common/FloatingSocialWidget'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { Toaster } from 'sonner'
 
@@ -15,16 +16,10 @@ const inter = Inter({
   display: 'swap',
 })
 
-const fraunces = Fraunces({
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  variable: '--font-display',
-  display: 'swap',
-})
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-sans',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-heading',
   display: 'swap',
 })
 
@@ -43,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${fraunces.variable} ${dmSans.variable}`}
+      className={`${inter.variable} ${cormorant.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -59,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <Footer />
           <BottomNav />
+          <FloatingSocialWidget />
           <Toaster
             position="bottom-center"
             toastOptions={{
