@@ -115,7 +115,7 @@ export function Step4_SituationCheck({ step1, data, onChange, onSubmit, onBack, 
         <Button variant="ghost" onClick={onBack} fullWidth={false} className="px-6">
           ← Back
         </Button>
-        <Button onClick={onSubmit} variant="final" fullWidth>
+        <Button onClick={onSubmit} variant="final" fullWidth size="sm">
           SEE MY RESULTS →
         </Button>
       </div>

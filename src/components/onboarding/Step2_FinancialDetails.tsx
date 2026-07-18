@@ -91,7 +91,7 @@ export function Step2_FinancialDetails({ step1, data, onChange, onNext, onBack, 
         <Button variant="ghost" onClick={onBack} fullWidth={false} className="px-6">
           ← Back
         </Button>
-        <Button onClick={onNext} variant="primary" fullWidth className="lg:w-auto lg:px-12">
+        <Button onClick={onNext} variant="primary" fullWidth size="sm" className="lg:w-auto lg:px-12">
           NEXT →
         </Button>
       </div>

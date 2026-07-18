@@ -84,10 +84,10 @@ export const GrantCardsPreview = () => {
         {/* Header Layout */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 md:mb-12 gap-6 md:gap-10">
           <div className="max-w-2xl">
-            <h2 className="text-[32px] md:text-[40px] font-semibold text-foreground tracking-[-0.02em] leading-[1.1] mb-3 md:mb-4">
-              Government Grants &amp; Schemes
+            <h2 className="text-foreground tracking-[-0.02em] leading-[1.1] mb-3 md:mb-4" style={{ fontSize: 'clamp(24px, 3.2vw, 40px)', fontWeight: 500 }}>
+              Government Grants &amp; Schemes Directory
             </h2>
-            <p className="text-[15px] md:text-base font-light text-muted-foreground leading-relaxed max-w-[54ch]">
+            <p className="text-[15px] md:text-base font-light text-muted-foreground leading-relaxed">
               Explore the federal and state government grants, schemes, and concessions available to help you buy your first home sooner.
             </p>
           </div>

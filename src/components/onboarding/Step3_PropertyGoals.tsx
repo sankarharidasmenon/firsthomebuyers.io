@@ -119,7 +119,7 @@ export function Step3_PropertyGoals({ data, onChange, onNext, onBack, errors }: 
         <Button variant="ghost" onClick={onBack} fullWidth={false} className="px-6">
           ← Back
         </Button>
-        <Button onClick={onNext} variant="primary" fullWidth>
+        <Button onClick={onNext} variant="primary" fullWidth size="sm">
           NEXT →
         </Button>
       </div>

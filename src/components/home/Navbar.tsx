@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Share2, Mail, BookOpen, Newspaper, MessageSquare, Menu, X } from 'lucide-react'
+import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 // Icon-only links shown on the right side of the desktop navbar
 const ICON_LINKS = [
-  { href: '/schemes',  label: 'Grants/Schemes Directory', Icon: BookOpen },
+  { href: '/map',      label: 'Grants Map',        Icon: Map },
   { href: '/articles', label: 'Articles',          Icon: Newspaper },
   { href: '/forums',   label: 'Forums',            Icon: MessageSquare },
 ]
@@ -96,7 +96,6 @@ export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const [activeHash, setActiveHash] = useState('')
-  const [socialOpen, setSocialOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
@@ -107,8 +106,7 @@ export function Navbar() {
   }, [])
 
   // Close on route change
-  useEffect(() => { 
-    setSocialOpen(false)
+  useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
 
@@ -176,78 +174,6 @@ export function Navbar() {
           <div className="flex lg:hidden items-center gap-1 sm:gap-2">
             <ThemeToggle />
 
-            <div className="relative" style={{ position: 'relative' }}>
-              <button
-                type="button"
-                onClick={() => setSocialOpen(o => !o)}
-                aria-label="Follow us on social media"
-                aria-expanded={socialOpen}
-                className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150"
-                style={{ width: 40, height: 40, color: 'var(--foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                <Share2 size={18} strokeWidth={2} />
-              </button>
-
-              {socialOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    style={{ background: 'transparent' }}
-                    onClick={() => setSocialOpen(false)}
-                  />
-                  <div
-                    className="absolute right-0 z-50 rounded-xl overflow-hidden"
-                    style={{
-                      top: 46,
-                      minWidth: 180,
-                      background: 'var(--card)',
-                      border: '1px solid var(--border)',
-                      boxShadow: 'var(--shadow-card, 0 8px 32px rgba(0,0,0,0.12))',
-                    }}
-                  >
-                    <div style={{ padding: '6px 0' }}>
-                      {FLOATING_SOCIAL.map((item) => (
-                        <a
-                          key={item.label}
-                          href="#"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={item.label}
-                          onClick={() => setSocialOpen(false)}
-                          className="flex items-center gap-3 transition-colors"
-                          style={{
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: 'var(--foreground)',
-                          }}
-                          onMouseEnter={e => (e.currentTarget.style.background = 'var(--secondary)')}
-                          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                        >
-                          <span
-                            className="flex items-center justify-center flex-shrink-0"
-                            style={{
-                              width: 28,
-                              height: 28,
-                              background: item.color,
-                              color: item.iconColor,
-                              borderRadius: 7,
-                            }}
-                          >
-                            {item.type === 'lucide'
-                              ? <item.icon size={15} />
-                              : <SvgIcon path={item.path} />}
-                          </span>
-                          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9rem' }}>
-                            {item.label}
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-            
             <button
               type="button"
               onClick={() => setMenuOpen(o => !o)}
@@ -306,71 +232,6 @@ export function Navbar() {
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
-              {/* Social floating panel trigger — desktop */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setSocialOpen(o => !o)}
-                  aria-label="Follow us on social media"
-                  aria-expanded={socialOpen}
-                  className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150"
-                  style={{ width: 40, height: 40, color: 'var(--foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  <Share2 size={18} strokeWidth={2} />
-                </button>
-
-                {socialOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      style={{ background: 'transparent' }}
-                      onClick={() => setSocialOpen(false)}
-                    />
-                    <div
-                      className="absolute right-0 z-50 rounded-xl overflow-hidden"
-                      style={{
-                        top: 46,
-                        minWidth: 180,
-                        background: 'var(--card)',
-                        border: '1px solid var(--border)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                      }}
-                    >
-                      <div style={{ padding: '6px 0' }}>
-                        {FLOATING_SOCIAL.map((item) => (
-                          <a
-                            key={item.label}
-                            href="#"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={item.label}
-                            onClick={() => setSocialOpen(false)}
-                            className="flex items-center gap-3 transition-colors"
-                            style={{ padding: '10px 16px', textDecoration: 'none', color: 'var(--foreground)' }}
-                            onMouseEnter={e => (e.currentTarget.style.background = 'var(--secondary)')}
-                            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                          >
-                            <span
-                              className="flex items-center justify-center flex-shrink-0"
-                              style={{ width: 28, height: 28, background: item.color, color: item.iconColor, borderRadius: 7 }}
-                            >
-                              {item.type === 'lucide'
-                                ? <item.icon size={15} />
-                                : <SvgIcon path={item.path} />}
-                            </span>
-                            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9rem' }}>
-                              {item.label}
-                            </span>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-            </div>
           </div>
         </div>
       </nav>

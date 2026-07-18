@@ -319,25 +319,44 @@ export function HeroSection() {
               ) : (
                 <div>
                   <div className="fn-hero-eyebrow">For Australian first home buyers</div>
-                  <h1 className="fn-hero-title"></h1>
-                  {/* The two things the product does — as the primary CTAs */}
+                  <h1 className="fn-hero-title" style={{ fontSize: 'clamp(24px, 3.2vw, 40px)' }}>
+                    Australia's Smarter<br />First Home Buyer Guide
+                  </h1>
+                  <p className="fn-hero-sub">
+                    Your first home, made easier — in about 3 minutes.
+                  </p>
+                  {/* Primary: grants (black card), Secondary: borrowing (outline card) */}
                   <div className="fn-hero-paths">
                     <button type="button" className="fn-path fn-path-primary"
-                      onClick={() => router.push('/onboarding?flow=grants')}>
-                      <span className="fn-path-kicker">Eligibility</span>
-                      <span className="fn-path-arrow">
-                        Check your eligibility & next steps
+                      onClick={() => router.push('/onboarding?flow=grants')}
+                      style={{ alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%' }}>
+                        <span className="fn-path-kicker">Eligibility</span>
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                          background: '#F5E642', color: '#111111', borderRadius: 9999, padding: '3px 8px',
+                        }}>Most popular</span>
+                      </div>
+                      <span className="fn-path-title" style={{ fontSize: 13, textAlign: 'center', width: '100%' }}>Grants & Schemes Eligibility</span>
+                      <span className="fn-path-desc" style={{ fontSize: 13, textAlign: 'center', width: '100%' }}>Borrowing Capacity</span>
+                      <span className="fn-path-arrow" style={{ color: '#F5E642', justifyContent: 'center', width: '100%' }}>
+                        Know Your Budget
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                         </svg>
                       </span>
                     </button>
 
-                    <button type="button" className="fn-path fn-path-primary"
-                      onClick={() => router.push('/grant-calculator')}>
-                      <span className="fn-path-kicker">Government support</span>
-                      <span className="fn-path-arrow">
-                        Research about Grants/Schemes
+                    <button type="button" className="fn-path fn-path-secondary"
+                      onClick={() => router.push('/grant-calculator')}
+                      style={{ alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                        <span className="fn-path-kicker">Government support</span>
+                      </div>
+                      <span className="fn-path-title" style={{ fontSize: 13, textAlign: 'center', width: '100%' }}>Grant Calculator</span>
+                      <span className="fn-path-desc" style={{ fontSize: 13, textAlign: 'center', width: '100%' }}>State-by-State Grants</span>
+                      <span className="fn-path-arrow" style={{ justifyContent: 'center', width: '100%', color: '#C4A000' }}>
+                        Know Your Savings
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                         </svg>
@@ -345,7 +364,7 @@ export function HeroSection() {
                     </button>
                   </div>
 
-                  <p className="fn-hero-eyebrow fn-hero-note">Free · No credit check</p>
+                  <p className="fn-hero-trust">Free · No sign-up · No credit check</p>
                 </div>
               )}
             </div>
