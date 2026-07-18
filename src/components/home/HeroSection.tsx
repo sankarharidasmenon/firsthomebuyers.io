@@ -143,25 +143,41 @@ export function HeroSection() {
           .fn-hero-paths { grid-template-columns: 1fr 1fr; }
         }
 
+        /* Row: stacked kicker + title on the left, arrow pinned right and
+           vertically centred against the whole card. */
         .fn-path {
           display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 10px;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          width: 100%;
           text-align: left;
           padding: 24px 22px;
-          border-radius: 14px;
+          border-radius: 16px;
           cursor: pointer;
-          transition: border-color 0.2s, background 0.2s, transform 0.15s;
+          transition: border-color 0.2s, filter 0.2s, transform 0.15s;
           font-family: var(--font-body, 'Inter'), sans-serif;
         }
         .fn-path:active { transform: scale(0.99); }
 
-        .fn-path-primary {
-          background: #111111;
-          border: 1px solid #111111;
+        .fn-path-body {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+          min-width: 0;
         }
-        .fn-path-primary:hover { background: #262626; border-color: #262626; }
+
+        /* --brand-dark-surface is static across themes, so these stay dark
+           cards in both. In dark mode the page background is near-black, so a
+           border is needed to separate the card from it. */
+        .fn-path-primary {
+          background: var(--brand-dark-surface);
+          border: 1px solid var(--brand-dark-surface);
+        }
+        .fn-path-primary:hover { filter: brightness(1.4); }
+        .dark .fn-path-primary { border-color: var(--border); }
 
         .fn-path-secondary {
           background: transparent;
@@ -178,17 +194,21 @@ export function HeroSection() {
           letter-spacing: 0.16em;
           text-transform: uppercase;
         }
-        .fn-path-primary .fn-path-kicker { color: #F5E642; }
+        .fn-path-primary .fn-path-kicker { color: var(--primary); }
         .fn-path-secondary .fn-path-kicker { color: #C4A000; }
 
         .fn-path-title {
           font-family: var(--font-body, 'Inter'), sans-serif;
-          font-weight: 500;
+          font-weight: 600;
           font-size: 19px;
-          letter-spacing: -0.3px;
-          line-height: 1.2;
+          letter-spacing: -0.2px;
+          line-height: 1.35;
         }
-        .fn-path-primary .fn-path-title { color: #FFFFFF; }
+        @media (min-width: 1024px) {
+          .fn-path-title { font-size: 20px; }
+        }
+        /* Sits on the static dark surface, so it stays white in both themes. */
+        .fn-path-primary .fn-path-title { color: var(--color-white); }
         .fn-path-secondary .fn-path-title { color: #111111; }
         .dark .fn-path-secondary .fn-path-title { color: var(--foreground); }
 
@@ -201,25 +221,14 @@ export function HeroSection() {
         .fn-path-secondary .fn-path-desc { color: #444444; }
         .dark .fn-path-secondary .fn-path-desc { color: var(--muted-foreground); }
 
-        /* Carries the card title text alongside the arrow glyph. */
-        .fn-path-arrow {
-          margin-top: 2px;
-          font-size: 17px;
-          font-weight: 600;
-          line-height: 1.4;
-          letter-spacing: -0.01em;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
+        /* Standalone arrow pinned to the card's right edge. */
+        .fn-path-icon {
+          flex-shrink: 0;
+          transition: transform 0.2s;
         }
-        @media (min-width: 1024px) {
-          .fn-path-arrow { font-size: 18px; }
-        }
-        .fn-path-arrow svg { flex-shrink: 0; }
-        .fn-path-primary .fn-path-arrow { color: #FFFFFF; }
-        .fn-path-secondary .fn-path-arrow { color: #C4A000; }
-        .fn-path-arrow svg { transition: transform 0.2s; }
-        .fn-path:hover .fn-path-arrow svg { transform: translateX(4px); }
+        .fn-path-primary .fn-path-icon { color: var(--color-white); }
+        .fn-path-secondary .fn-path-icon { color: #C4A000; }
+        .fn-path:hover .fn-path-icon { transform: translateX(4px); }
 
         /* ── Trust line ── */
         .fn-hero-trust {
@@ -318,53 +327,43 @@ export function HeroSection() {
                 </div>
               ) : (
                 <div>
-                  <div className="fn-hero-eyebrow">For Australian first home buyers</div>
-                  <h1 className="fn-hero-title" style={{ fontSize: 'clamp(24px, 3.2vw, 40px)' }}>
-                    Australia's Smarter<br />First Home Buyer Guide
+                  {/* <div className="fn-hero-eyebrow">For Australian first home buyers</div> */}
+                  <h1 className="fn-hero-title max-w-2xl " style={{ fontSize: 'clamp(24px, 3.2vw, 40px)' }}>
+                    {/* Australia <br/> */}
+                     {/* Smarter<br /> */}
+                First Home Buyers Guide
                   </h1>
-                  <p className="fn-hero-sub">
-                    Your first home, made easier — in about 3 minutes.
+                  <p className="fn-hero-sub -mt-3">
+                    {/* Your first home, made easier — in about 3 minutes. */}
+                   FirstNest identifies every Australian government grant and scheme you qualify for, federal and state, then builds your personalised roadmap to homeownership.
                   </p>
                   {/* Primary: grants (black card), Secondary: borrowing (outline card) */}
                   <div className="fn-hero-paths">
                     <button type="button" className="fn-path fn-path-primary"
-                      onClick={() => router.push('/onboarding?flow=grants')}
-                      style={{ alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%' }}>
+                      onClick={() => router.push('/onboarding?flow=grants')}>
+                      <span className="fn-path-body">
                         <span className="fn-path-kicker">Eligibility</span>
-                        <span style={{
-                          fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                          background: '#F5E642', color: '#111111', borderRadius: 9999, padding: '3px 8px',
-                        }}>Most popular</span>
-                      </div>
-                      <span className="fn-path-title" style={{ fontSize: 13, textAlign: 'center', width: '100%' }}>Grants & Schemes Eligibility</span>
-                      <span className="fn-path-desc" style={{ fontSize: 13, textAlign: 'center', width: '100%' }}>Borrowing Capacity</span>
-                      <span className="fn-path-arrow" style={{ color: '#F5E642', justifyContent: 'center', width: '100%' }}>
-                        Know Your Budget
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                        </svg>
+                        <span className="fn-path-title">Check my borrowing capacity
+                          </span>
                       </span>
+                      <svg className="fn-path-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                      </svg>
                     </button>
 
-                    <button type="button" className="fn-path fn-path-secondary"
-                      onClick={() => router.push('/grant-calculator')}
-                      style={{ alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                    <button type="button" className="fn-path fn-path-primary"
+                      onClick={() => router.push('/grant-calculator')}>
+                      <span className="fn-path-body">
                         <span className="fn-path-kicker">Government support</span>
-                      </div>
-                      <span className="fn-path-title" style={{ fontSize: 13, textAlign: 'center', width: '100%' }}>Grant Calculator</span>
-                      <span className="fn-path-desc" style={{ fontSize: 13, textAlign: 'center', width: '100%' }}>State-by-State Grants</span>
-                      <span className="fn-path-arrow" style={{ justifyContent: 'center', width: '100%', color: '#C4A000' }}>
-                        Know Your Savings
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                        </svg>
+                        <span className="fn-path-title">Check  my grants & schemes</span>
                       </span>
+                      <svg className="fn-path-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                      </svg>
                     </button>
                   </div>
 
-                  <p className="fn-hero-trust">Free · No sign-up · No credit check</p>
+                  <p className="fn-hero-trust ml-3 -mt-3"> No credit check</p>
                 </div>
               )}
             </div>

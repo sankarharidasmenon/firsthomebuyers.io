@@ -17,7 +17,7 @@ function GooglePlayIcon() {
 
 function AppleIcon() {
   return (
-    <svg viewBox="0 0 384 512" width="12" height="12" fill="currentColor" aria-hidden="true">
+    <svg viewBox="0 0 384 512" width="12" height="12" fill="#FFFFFF" aria-hidden="true">
       <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
     </svg>
   )
@@ -188,7 +188,7 @@ export function Footer() {
       </div>
 
       {/* ── Bottom bar ── */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="-mb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8 w-full py-5">
 
           {/* Collapsible legal panel */}
@@ -253,7 +253,7 @@ export function Footer() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 20 }}>
+          {/* <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 20 }}>
             <div style={{ display: 'flex', gap: 6, flexShrink: 0, paddingTop: 2 }}>
               <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
                 <rect width="24" height="8" fill="#111111"/>
@@ -271,7 +271,7 @@ export function Footer() {
               FirstNest acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
               throughout Australia and their continuing connection to land, waters and community.
             </p>
-          </div>
+          </div> */}
 
           {/* Bottom row: copyright + store badges + legal toggle */}
           <div className="flex flex-col md:flex-row items-center md:justify-between gap-6">
@@ -422,7 +422,25 @@ export function Footer() {
             </div>
             
           </div>
-
+     <div className="mt-4 -mb-8" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 20 }}>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0, paddingTop: 2 }}>
+              <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
+                <rect width="24" height="8" fill="#111111"/>
+                <rect y="8" width="24" height="8" fill="#CC0000"/>
+                <circle cx="12" cy="8" r="3.5" fill="#FFCC00"/>
+              </svg>
+              <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
+                <rect width="24" height="16" fill="#006341"/>
+                <rect y="4" width="24" height="1.5" fill="#FFFFFF"/>
+                <rect y="10.5" width="24" height="1.5" fill="#FFFFFF"/>
+                <circle cx="12" cy="8" r="2" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
+              </svg>
+            </div>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: 0 }}>
+              FirstNest acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
+              throughout Australia and their continuing connection to land, waters and community.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

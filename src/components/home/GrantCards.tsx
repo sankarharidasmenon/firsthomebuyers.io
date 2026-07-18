@@ -1,7 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
-import { RotateCcw, ArrowUpRight } from 'lucide-react'
+import { RotateCcw, ArrowUpRight, Filter } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 /* ── View-model ─────────────────────────────────────────────────────────── */
 export interface Scheme {
@@ -192,6 +199,61 @@ export function RegionFlag({ code }: { code: string }) {
 
 export const GROUP_ORDER = ['AU', 'ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA']
 
+/** Pseudo-tab shown first; selects every scheme rather than one jurisdiction. */
+export const ALL_TAB = 'ALL'
+
+/* ── Category (grant vs scheme) ─────────────────────────────────────────── */
+
+export type CategoryFilterValue = 'all' | 'grant' | 'scheme'
+
+/**
+ * Single source of truth for the grant/scheme split. The sheet's `Type` column
+ * holds mixed values ("Grant", "Guarantee", "Concession", "Loan"), so anything
+ * naming a grant is a grant and everything else is treated as a scheme.
+ * Drives the card accent, the category badge and the filter alike.
+ */
+export function schemeCategory(s: Scheme): Exclude<CategoryFilterValue, 'all'> {
+  return /grant/i.test(s.typeLabel) ? 'grant' : 'scheme'
+}
+
+const FILTER_OPTIONS: { id: CategoryFilterValue; label: string }[] = [
+  { id: 'all', label: 'All types' },
+  { id: 'grant', label: 'Grants' },
+  { id: 'scheme', label: 'Schemes' },
+]
+
+/** Type filter — right-aligned Select. */
+export function CategoryFilter({
+  value,
+  onChange,
+}: {
+  value: CategoryFilterValue
+  onChange: (v: CategoryFilterValue) => void
+}) {
+  return (
+    <div className="flex justify-end">
+      <Select value={value} onValueChange={v => onChange(v as CategoryFilterValue)}>
+        <SelectTrigger
+          aria-label="Filter by type"
+          className="h-10 min-h-[40px] rounded-full border-border bg-background px-4 text-[13px] font-medium data-[size=default]:h-10"
+        >
+          <Filter className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+          <SelectValue />
+        </SelectTrigger>
+        {/* popper + offset opens below the trigger; the default item-aligned
+            mode overlays the panel on top of it and hides the label. */}
+        <SelectContent position="popper" align="end" sideOffset={8}>
+          {FILTER_OPTIONS.map(opt => (
+            <SelectItem key={opt.id} value={opt.id} className="text-[13px]">
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
 const VISIBLE_LIMIT = 8
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
@@ -248,54 +310,89 @@ export function toCard(s: ApiScheme): Scheme {
 }
 
 /* ── Ledger row ─────────────────────────────────────────────────────────── */
+
+/* Category accents — grants read warm yellow, everything else (schemes,
+   guarantees, concessions) reads soft green. Both tints sit on the cream
+   section background and use existing palette tokens.
+   Dark theme uses low-alpha tints instead: --color-fn-yellow-light and
+   --color-green-bg are light fills that are not redefined in .dark, so using
+   them there would put a pale chip on a near-black surface. */
+const ACCENTS = {
+  grant: {
+    label: 'Grant',
+    surface:
+      'bg-[var(--color-fn-yellow-light)] border-[var(--color-fn-yellow-deep)]/35 dark:bg-[var(--color-brand-gold)]/10 dark:border-[var(--color-brand-gold)]/25',
+    /* White chip with dark text — #C4A000 on white is ~2.9:1 and fails AA at
+       this size, so the category colour lives in the border, not the text. */
+    badge:
+      'bg-card text-foreground border-[var(--color-fn-yellow-deep)]/45 dark:bg-[var(--color-brand-gold)]/15 dark:text-[var(--color-brand-gold)] dark:border-[var(--color-brand-gold)]/30',
+    /* Solid category chip. Mid-tone fill + dark text reads in both themes. */
+    chip: 'bg-[var(--color-fn-yellow-deep)] text-[var(--color-fn-navy)] border-transparent',
+  },
+  scheme: {
+    label: 'Scheme',
+    surface:
+      'bg-[var(--color-green-bg)] border-[var(--color-green)]/35 dark:bg-[var(--color-green)]/10 dark:border-[var(--color-green)]/25',
+    badge:
+      'bg-card text-foreground border-[var(--color-green)]/50 dark:bg-[var(--color-green)]/15 dark:text-[var(--color-green)] dark:border-[var(--color-green)]/30',
+    chip: 'bg-[var(--color-green)] text-[var(--color-fn-navy)] border-transparent',
+  },
+} as const
+
 export function SchemeRow({ s }: { s: Scheme }): ReactNode {
+  const accent = ACCENTS[schemeCategory(s)]
+
+  /* Category → coverage → program type, in priority order. Empty values are
+     dropped and repeated text is shown once — the sheet's Type is often the
+     same word as the derived category (e.g. both "Grant"). */
+  const badges = [
+    { text: accent.label, style: accent.chip },
+    { text: s.coverageLabel, style: accent.badge },
+    {
+      text: s.typeLabel,
+      style: 'bg-transparent text-muted-foreground border-foreground/20',
+    },
+  ].filter(
+    (badge, i, all) =>
+      Boolean(badge.text) &&
+      all.findIndex(b => b.text.toLowerCase() === badge.text.toLowerCase()) === i,
+  )
+
   const inner = (
     <>
       <div className="min-w-0 flex-1 pr-4 md:pr-6">
-        <p className="text-[16px] sm:text-[17px] md:text-[18px] font-semibold text-foreground tracking-[-0.01em] leading-snug mb-2 md:mb-2.5">{s.heroTitle}</p>
+        <p className="text-[16px] sm:text-[17px] font-semibold text-foreground tracking-[-0.01em] leading-snug mb-1.5">
+          {s.heroTitle}
+        </p>
         {s.description && (
-          <p className="text-[13.5px] sm:text-sm font-light text-muted-foreground leading-relaxed mb-4 md:mb-5 max-w-[70ch]">
+          <p className="text-[13.5px] sm:text-sm font-light text-muted-foreground leading-relaxed mb-3 max-w-[70ch]">
             {s.description}
           </p>
         )}
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2 md:gap-x-3">
-          {/* Coverage — filled, so it reads as the primary classifier */}
-          {s.coverageLabel && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold tracking-wider uppercase border border-transparent bg-[var(--color-fn-yellow-light)] text-[var(--color-fn-navy)] dark:bg-[var(--color-brand-gold)]/20 dark:text-[var(--color-brand-gold)] dark:border-[var(--color-brand-gold)]/25">
-              {s.coverageLabel}
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
+          {badges.map(({ text, style }) => (
+            <span
+              key={text}
+              className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold tracking-wider uppercase border ${style}`}
+            >
+              {text}
             </span>
-          )}
-          {/* Program type — outlined, secondary to coverage */}
-          {s.typeLabel && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold tracking-wider uppercase bg-transparent text-muted-foreground border border-border">
-              {s.typeLabel}
-            </span>
-          )}
-          {([s.statusLabel, s.sourceWebsite].filter(Boolean).length > 0) && (
-            <span className="text-[11px] sm:text-[11.5px] font-medium text-muted-foreground/80 tracking-wide uppercase">
-              {[s.statusLabel, s.sourceWebsite].filter(Boolean).join('  ·  ')}
-            </span>
-          )}
+          ))}
         </div>
       </div>
       {s.officialUrl && (
-        <span className="text-muted-foreground/40 group-hover:text-foreground transition-all duration-250 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 flex-shrink-0 mt-0.5 sm:mt-1" aria-hidden="true">
+        <span className="text-muted-foreground/40 group-hover:text-foreground transition-all duration-250 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 flex-shrink-0" aria-hidden="true">
           <ArrowUpRight size={18} strokeWidth={2} />
         </span>
       )}
     </>
   )
 
-  const rowClasses = "group flex items-start justify-between p-5 sm:p-6 md:p-7 mb-3 sm:mb-4 rounded-2xl border border-[var(--color-fn-yellow-deep)]/40 dark:border-[var(--color-brand-gold)]/30 bg-card hover:-translate-y-0.5 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.3)] transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+  const rowClasses = `group flex h-full items-start justify-between p-5 md:p-6 rounded-2xl border ${accent.surface} hover:-translate-y-0.5 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.3)] transition-all duration-250 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background`
 
   if (s.officialUrl) {
     return (
-      <a
-        href={s.officialUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={rowClasses}
-      >
+      <a href={s.officialUrl} target="_blank" rel="noopener noreferrer" className={rowClasses}>
         {inner}
       </a>
     )
@@ -306,7 +403,7 @@ export function SchemeRow({ s }: { s: Scheme }): ReactNode {
 /* ── Skeleton row ───────────────────────────────────────────────────────── */
 export function SkeletonRow(): ReactNode {
   return (
-    <div className="flex items-start justify-between p-5 sm:p-6 md:p-7 mb-3 sm:mb-4 rounded-2xl border border-[var(--color-fn-yellow-deep)]/20 dark:border-[var(--color-brand-gold)]/20 bg-card/50" style={{ pointerEvents: 'none' }}>
+    <div className="flex items-start justify-between p-5 md:p-6 rounded-2xl border border-[var(--color-fn-yellow-deep)]/20 dark:border-[var(--color-brand-gold)]/20 bg-card/50" style={{ pointerEvents: 'none' }}>
       <div className="min-w-0 flex-1">
         <div className="h-5 w-2/3 md:w-1/3 rounded-md bg-muted animate-pulse mb-3" />
         <div className="h-4 w-full md:w-2/3 rounded-md bg-muted/60 animate-pulse mb-2" />
@@ -320,8 +417,9 @@ export function SkeletonRow(): ReactNode {
 export const GrantCards = () => {
   const [schemes, setSchemes] = useState<Scheme[]>([])
   const [status, setStatus] = useState<'loading' | 'error' | 'empty' | 'ready'>('loading')
-  const [activeTab, setActiveTab] = useState<string>('AU')
+  const [activeTab, setActiveTab] = useState<string>(ALL_TAB)
   const [showAll, setShowAll] = useState(false)
+  const [typeFilter, setTypeFilter] = useState<CategoryFilterValue>('all')
 
   const load = useCallback(async () => {
     setStatus('loading')
@@ -340,8 +438,14 @@ export const GrantCards = () => {
 
   useEffect(() => { load() }, [load])
 
+  /* Apply the type filter before grouping so the region tabs, their counts and
+     the cards all reflect the current selection. */
+  const filtered = typeFilter === 'all'
+    ? schemes
+    : schemes.filter(s => schemeCategory(s) === typeFilter)
+
   const grouped: Record<string, Scheme[]> = {}
-  for (const s of schemes) {
+  for (const s of filtered) {
     if (!grouped[s.flagCode]) grouped[s.flagCode] = []
     grouped[s.flagCode].push(s)
   }
@@ -361,15 +465,18 @@ export const GrantCards = () => {
       return true
     })
   }
-  const groups = GROUP_ORDER.filter(code => (grouped[code]?.length ?? 0) > 0)
-  const totalCount = groups.reduce((n, code) => n + grouped[code].length, 0)
+  const regionGroups = GROUP_ORDER.filter(code => (grouped[code]?.length ?? 0) > 0)
+  /* Concatenate the already-deduped per-region lists so "All" matches exactly
+     what the individual tabs show. */
+  const allTiles = regionGroups.flatMap(code => grouped[code])
+  const groups = regionGroups.length > 0 ? [ALL_TAB, ...regionGroups] : []
 
   useEffect(() => {
     if (groups.length > 0 && !groups.includes(activeTab)) setActiveTab(groups[0])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groups.join(',')])
 
-  const activeTiles = grouped[activeTab] ?? []
+  const activeTiles = activeTab === ALL_TAB ? allTiles : (grouped[activeTab] ?? [])
   const visibleTiles = showAll ? activeTiles : activeTiles.slice(0, VISIBLE_LIMIT)
   const hiddenCount = activeTiles.length - VISIBLE_LIMIT
 
@@ -406,8 +513,8 @@ export const GrantCards = () => {
                 <div key={i} className="shrink-0 h-[44px] rounded-full bg-muted animate-pulse" style={{ width: w }} />
               ))}
             </div>
-            <div className="flex flex-col">
-              {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {[...Array(6)].map((_, i) => <SkeletonRow key={i} />)}
             </div>
           </div>
         )}
@@ -436,8 +543,8 @@ export const GrantCards = () => {
         {/* ── Ready ── */}
         {status === 'ready' && (
           <div className="animate-in fade-in duration-500">
-            <div 
-              className="flex flex-nowrap md:flex-wrap gap-2 md:gap-3 mb-8 md:mb-10 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
+            <div
+              className="flex flex-nowrap md:flex-wrap gap-2 md:gap-3 mb-1 md:mb-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
               style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
             >
               {groups.map(code => (
@@ -453,20 +560,35 @@ export const GrantCards = () => {
                   `}
                   onClick={() => selectTab(code)}
                 >
-                  <RegionFlag code={code} />
-                  {REGION_LABELS[code] ?? code}
+                  {code !== ALL_TAB && <RegionFlag code={code} />}
+                  {code === ALL_TAB ? 'All' : REGION_LABELS[code] ?? code}
                   <span className={`text-[11px] font-normal ml-0.5 ${code === activeTab ? 'opacity-80' : 'opacity-60'}`}>
-                    {grouped[code].length}
+                    {code === ALL_TAB ? allTiles.length : grouped[code].length}
                   </span>
                 </button>
               ))}
             </div>
 
-            <div className="flex flex-col">
-              {visibleTiles.map((s, i) => (
-                <SchemeRow key={`${activeTab}-${i}`} s={s} />
-              ))}
+            {/* Type filter — sits under the region tabs, right-aligned */}
+            <div className="mb-6 md:mb-8">
+              <CategoryFilter
+                value={typeFilter}
+                onChange={v => { setTypeFilter(v); setShowAll(false) }}
+              />
             </div>
+
+            {groups.length === 0 ? (
+              <div className="py-16 px-6 text-center border border-dashed border-border rounded-2xl bg-muted/10">
+                <p className="text-foreground font-medium mb-1">No matching schemes.</p>
+                <p className="text-muted-foreground text-sm">Try a different filter.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {visibleTiles.map((s, i) => (
+                  <SchemeRow key={`${activeTab}-${i}`} s={s} />
+                ))}
+              </div>
+            )}
 
             {hiddenCount > 0 && !showAll && (
               <div className="text-center mt-8 md:mt-12">
@@ -475,7 +597,9 @@ export const GrantCards = () => {
                   className="inline-flex items-center justify-center min-h-[44px] px-8 py-3 rounded-full text-[13.5px] font-medium bg-transparent border border-border/60 text-foreground hover:bg-muted/50 hover:border-border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   onClick={() => setShowAll(true)}
                 >
-                  Show all {activeTiles.length} {activeTab === 'AU' ? 'Federal' : REGION_LABELS[activeTab] ?? activeTab} schemes
+                  Show all {activeTiles.length}{' '}
+                  {activeTab === ALL_TAB ? '' : activeTab === 'AU' ? 'Federal ' : `${REGION_LABELS[activeTab] ?? activeTab} `}
+                  schemes
                 </button>
               </div>
             )}

@@ -47,7 +47,7 @@ const ZONES: Zone[] = [
     advertiser: 'Metro Home Loans', tagline: 'Rates that work for you',
     ctaLabel: 'Book a Free Call', ctaUrl: '#', price: '$199/mo',
     mediaUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop' },
-  { id: '004', status: 'occupied', size: 'small', type: 'image', advertiser: 'Test Ad Small', tagline: 'Testing small box', ctaLabel: 'Click Here', ctaUrl: '#', price: '$99/mo', mediaUrl: '/ad-image.jpeg', objectFit: 'cover' },
+  { id: '004', status: 'occupied', size: 'small', type: 'image', advertiser: '', tagline: '', ctaLabel: 'Click Here', ctaUrl: '#', price: '$99/mo', mediaUrl: '/ad-image.jpeg', objectFit: 'cover' },
   { id: '005', status: 'occupied', size: 'large', type: 'video',
     advertiser: 'Coastal Real Estate', tagline: 'Coastal living at its finest',
     ctaLabel: 'View Properties', ctaUrl: '#', price: '$399/mo',
@@ -61,7 +61,7 @@ const ZONES: Zone[] = [
     advertiser: 'OpenDoor Finance', tagline: 'Open the door to ownership',
     ctaLabel: 'Apply Online', ctaUrl: '#', price: '$199/mo',
     mediaUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&auto=format&fit=crop' },
-  { id: '008', status: 'occupied', size: 'large', type: 'image', advertiser: 'Test Ad Large', tagline: 'Testing large box', ctaLabel: 'Click Here', ctaUrl: '#', price: '$399/mo', mediaUrl: '/ad-image.jpeg', objectFit: 'cover' },
+  { id: '008', status: 'occupied', size: 'large', type: 'image', advertiser: '', tagline: '', ctaLabel: 'Click Here', ctaUrl: '#', price: '$399/mo', mediaUrl: '/ad-image.jpeg', objectFit: 'cover' },
   { id: '009', status: 'occupied', size: 'medium', type: 'video',
     advertiser: 'BlueSky Properties', tagline: 'Your future starts here',
     ctaLabel: 'See All Listings', ctaUrl: '#', price: '$199/mo',
@@ -316,7 +316,7 @@ export default function AdsPage() {
               marginBottom: 0,
             }}>
               Welcome your next client.{' '}
-              <span style={{ color: '#C8AA00' }}>Secure the space.</span>
+              <span style={{ color: '#C8AA00' }}>Rent this space.</span>
             </h1>
 
           </div>
@@ -386,7 +386,7 @@ export default function AdsPage() {
                       <SerialBadge id={zone.id} dark />
 
                       {/* Sponsored badge — top-right */}
-                      <div className="absolute top-3 right-3 z-20">
+                      {/* <div className="absolute top-3 right-3 z-20">
                         <span style={{
                           background: 'rgba(0,0,0,0.45)',
                           backdropFilter: 'blur(4px)',
@@ -398,7 +398,7 @@ export default function AdsPage() {
                           padding: '2px 6px',
                           borderRadius: 9999,
                         }}>SPONSORED</span>
-                      </div>
+                      </div> */}
 
                       {/* Content — bottom */}
                       <div className="absolute bottom-0 left-0 right-0 z-10 p-3 lg:p-4">
