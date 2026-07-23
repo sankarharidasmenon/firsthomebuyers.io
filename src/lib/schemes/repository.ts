@@ -109,6 +109,14 @@ export async function listEligible(q: EligibilityQuery): Promise<Scheme[]> {
 }
 
 function matchesEligibility(s: Scheme, q: EligibilityQuery): boolean {
+  // Never offer a scheme that is no longer available — closed, ended, expired,
+  // or merged/superseded into another program (e.g. the Regional First Home
+  // Buyer Guarantee, merged into the First Home Guarantee on 1 Oct 2025). A blank
+  // or "active"/"open" status is treated as available.
+  if (/\b(closed|ended|expired|merged|superseded|replaced|inactive|no longer)\b/i.test(String(s.status || ''))) {
+    return false;
+  }
+
   // State / jurisdiction: federal schemes ("All States & Territories") apply
   // everywhere. NOTE: match "ALL STATES/TERRITORIES" — never a bare "AUSTRALIA",
   // which also appears inside "Western Australia" / "South Australia".
@@ -123,8 +131,13 @@ function matchesEligibility(s: Scheme, q: EligibilityQuery): boolean {
     }
   }
 
-  // First home buyer requirement.
-  if (q.firstHomeBuyer === false && /yes/i.test(String(s.first_home_buyer_required || ''))) {
+  // First home buyer requirement. Treat a scheme as first-home-buyer-only when
+  // ANY reliable signal says so — not just the first_home_buyer_required column,
+  // which can arrive blank from an imported spreadsheet (this is what leaked the
+  // First Home Super Saver scheme to prior owners). Inferring from the scheme
+  // name and prior-ownership wording keeps the filter correct across re-imports
+  // even when that one cell is empty.
+  if (q.firstHomeBuyer === false && schemeRequiresFirstHomeBuyer(s)) {
     return false;
   }
 
@@ -153,6 +166,25 @@ function matchesEligibility(s: Scheme, q: EligibilityQuery): boolean {
   }
 
   return true;
+}
+
+/**
+ * Whether a scheme is restricted to first home buyers. Robust to incomplete
+ * imported data: the explicit first_home_buyer_required column is authoritative
+ * when it clearly says Yes or No, but when it is blank/ambiguous the requirement
+ * is inferred from the scheme name/acronym ("First Home …") and prior-ownership
+ * wording. This prevents a blank cell from leaking an FHB-only scheme (e.g.
+ * First Home Super Saver) to someone who has previously owned property.
+ */
+function schemeRequiresFirstHomeBuyer(s: Scheme): boolean {
+  const explicit = String(s.first_home_buyer_required || '').trim();
+  if (/yes/i.test(explicit)) return true;
+  if (/^no\b/i.test(explicit)) return false; // an explicit "No" is authoritative
+  // Column blank/unknown → infer from strong secondary signals.
+  const name = `${s.scheme_name || ''} ${s.acronym || ''}`;
+  if (/first[\s-]?home/i.test(name)) return true;
+  if (/(must not|never|not)\b[^.]*\bown/i.test(String(s.prior_ownership_rules || ''))) return true;
+  return false;
 }
 
 const PROPERTY_TYPE_KEYWORDS: Record<string, string[]> = {

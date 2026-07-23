@@ -14,6 +14,8 @@ import { getStep1, getStep2, getStep3 } from '@/lib/localStorage'
 import { toast } from 'sonner'
 import { DUMMY_USER } from '@/lib/dummyData'
 import { fetchEligibility, type EligibilityResult, type EligibilityItem, type DisplayCategory } from '@/lib/schemes/eligibilityClient'
+import { loadAnswers } from '@/lib/questionnaire/storage'
+import { toEligibilityAnswers } from '@/lib/questionnaire/logic'
 
 // Section header — airy, not heavy
 function SectionHeader({ icon, title, description }: { icon: string; title: string; description: string }) {
@@ -54,24 +56,22 @@ export default function GrantsResultsPage() {
   const load = useCallback(async () => {
     setLoadState('loading')
     try {
-      const s1 = getStep1() ?? { firstName: DUMMY_USER.firstName, state: DUMMY_USER.state, buyingWith: 'solo' as const }
-      const s2 = getStep2() ?? { annualIncome: DUMMY_USER.annualIncome, partnerIncome: DUMMY_USER.partnerIncome, monthlyExpenses: DUMMY_USER.monthlyExpenses }
-      const s3 = getStep3() ?? { depositAmount: DUMMY_USER.depositAmount, targetPropertyPrice: DUMMY_USER.targetPropertyPrice, propertyType: DUMMY_USER.propertyType, firstHomeBuyer: DUMMY_USER.firstHomeBuyer }
+      const answers = loadAnswers()
+      
+      // If there's no name, we likely don't have real answers (empty state)
+      if (!answers.name) {
+        setLoadState('empty')
+        return
+      }
 
-      setDisplay({ state: s1.state, firstName: s1.firstName, targetPropertyPrice: s3.targetPropertyPrice })
+      setDisplay({ state: answers.state || 'VIC', firstName: answers.name, targetPropertyPrice: answers.price || 0 })
 
-      const res = await fetchEligibility({
-        state: s1.state,
-        firstHomeBuyer: s3.firstHomeBuyer,
-        income: s2.annualIncome + (s2.partnerIncome || 0),
-        hasPartner: s1.buyingWith === 'partner',
-        propertyPrice: s3.targetPropertyPrice,
-        deposit: s3.depositAmount,
-        propertyType: s3.propertyType,
-        // Single-parent status isn't captured by onboarding: for couples it's
-        // definitely not; for solo we leave it unknown so the DB doesn't exclude.
-        singleParent: s1.buyingWith === 'partner' ? false : undefined,
-      })
+      const eligReq = toEligibilityAnswers(answers)
+      // Pass singleParent manually if we want, but it's handled by generic logic if we pass raw answers.
+      // Wait, toEligibilityAnswers doesn't set singleParent. Let's set it here just in case.
+      eligReq.singleParent = eligReq.hasPartner ? false : undefined
+
+      const res = await fetchEligibility(eligReq)
 
       setResult(res)
       setLoadState(res.items.length ? 'ready' : 'empty')
@@ -181,14 +181,14 @@ export default function GrantsResultsPage() {
 
   const ActionButtons = () => (
     <div className="px-5 pb-7 pt-1 flex flex-col lg:px-6 lg:pb-6" style={{ gap: 10 }}>
-      <Button onClick={() => router.push('/next-steps')} variant="primary" fullWidth>NEXT STEPS →</Button>
+      {/* <Button onClick={() => router.push('/next-steps')} variant="primary" fullWidth>NEXT STEPS →</Button>
       <button
         type="button"
         onClick={handleSave}
         style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.875rem', color: saved ? '#16A34A' : '#AAAAAA', textAlign: 'center', padding: '6px 0', transition: 'color 150ms' }}
       >
         {saved ? '✓ Saved to My Results' : '💾 Save to My Results'}
-      </button>
+      </button> */}
       <Link
         href="/"
         style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: '#BBBBBB', textAlign: 'center', padding: '4px 0', textDecoration: 'none', display: 'block', transition: 'color 150ms' }}
@@ -272,7 +272,13 @@ export default function GrantsResultsPage() {
                           {result.eligibleSchemesCount > 0 ? result.eligibleSchemesCount : '—'}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                      <div className="flex justify-between items-baseline pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                        <span className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem' }}>Total Benefit</span>
+                        <span className="text-[#16A34A]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.25rem' }}>
+                          ${(result.cashGrantsTotal + result.taxSavingsTotal).toLocaleString('en-AU')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pt-3">
                         <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>Property target</span>
                         <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem' }}>
                           ${display.targetPropertyPrice.toLocaleString('en-AU')}

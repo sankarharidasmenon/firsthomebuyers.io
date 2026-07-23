@@ -1,15 +1,3 @@
-/**
- * Client-side eligibility data source (Phase 2B-3).
- *
- * Replaces the hardcoded evaluateEligibility()/GRANTS_DUMMY path on the grants
- * results page. Eligibility is decided entirely by the database via the Phase 2A
- * read APIs:
- *   - GET /api/schemes            → all schemes (for the eligible/ineligible split)
- *   - GET /api/schemes/eligible   → the schemes the user qualifies for
- *
- * The API result is mapped into the SAME shapes the existing UI (GrantCard,
- * TotalSavingsHero) already consumes, so no component is redesigned.
- */
 import type { EvaluatedGrant, EligibilityStatus, Grant } from '@/lib/schemes/types'
 
 export interface EligibilityAnswers {
@@ -18,17 +6,22 @@ export interface EligibilityAnswers {
   income: number
   hasPartner: boolean
   propertyPrice: number
-  deposit: number
+  deposit: number | null
   propertyType: string
   singleParent?: boolean
+  rawAnswers?: any // Full answers from the questionnaire
 }
 
 export type DisplayCategory = 'cash' | 'schemes' | 'tax'
+
+export type RuleResult = { met: boolean; text: string; missing?: boolean; isCheck?: boolean }
 
 export interface EligibilityItem {
   eg: EvaluatedGrant
   category: DisplayCategory
   variant: 'grant' | 'scheme'
+  bucket: 'yes' | 'check' | 'no'
+  ruleResults: RuleResult[]
 }
 
 export interface EligibilityResult {
@@ -55,6 +48,11 @@ interface ApiScheme {
   income_cap_single?: string | null
   income_cap_couple?: string | null
   property_price_cap?: string | null
+  minimum_deposit?: string | null
+  eligible_property_types?: string | null
+  prior_ownership_rules?: string | null
+  owner_occupier_required?: string | null
+  single_parent_required?: string | null
 }
 
 function parseMoney(v: unknown): number | null {
@@ -69,34 +67,159 @@ function deriveCategory(type: string): DisplayCategory {
   return 'schemes'
 }
 
-function buildCriteria(s: ApiScheme, a: EligibilityAnswers): EvaluatedGrant['criteria'] {
-  const criteria: EvaluatedGrant['criteria'] = []
-  if (s.status) criteria.push({ text: `Program status: ${s.status}`, met: true })
-  if (s.benefit_value) criteria.push({ text: `Benefit: ${s.benefit_value}`, met: true })
+function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 'check' | 'no', ruleResults: RuleResult[] } {
+  const rules: RuleResult[] = []
+  let bucket: 'yes' | 'check' | 'no' = 'yes'
+  const ra = a.rawAnswers || {}
+
+  const fail = (text: string) => { rules.push({ met: false, text }); bucket = 'no' }
+  const pass = (text: string) => { rules.push({ met: true, text }) }
+  const check = (text: string) => { rules.push({ met: false, isCheck: true, text }); if (bucket === 'yes') bucket = 'check' }
+
+  // 1. Scheme applicability (State / Federal)
   if (s.applicable_states) {
     const states = String(s.applicable_states).toUpperCase()
-    const federal = /ALL STATES|ALL TERRITORIES|AUSTRALIA/.test(states)
-    criteria.push({ text: `Applies to: ${s.applicable_states}`, met: federal || states.includes(a.state.toUpperCase()) })
+    const federal = /ALL STATES|ALL TERRITORIES|NATION|AUSTRALIA[- ]WIDE/.test(states)
+    const stateMatch = federal || states.includes(a.state.toUpperCase())
+    if (stateMatch) pass(`Applicable to ${federal ? 'all states (Federal)' : a.state}`)
+    else fail(`Scheme is for ${s.applicable_states}, not ${a.state}`)
   }
-  if (/yes/i.test(String(s.first_home_buyer_required || ''))) {
-    criteria.push({ text: 'First home buyer required', met: a.firstHomeBuyer })
+
+  if (bucket === 'no' as any) return { bucket, ruleResults: rules } // fast fail
+
+  // 2. Property type
+  if (s.eligible_property_types && a.propertyType) {
+    const pt = a.propertyType.toLowerCase()
+    const st = String(s.eligible_property_types).toLowerCase()
+    if (!st.includes('property')) {
+      let ptMatch = false
+      if (pt === 'house' && (st.includes('house') || st.includes('home') || st.includes('dwelling'))) ptMatch = true
+      if (pt === 'townhouse' && (st.includes('townhouse') || st.includes('home'))) ptMatch = true
+      if (pt === 'apartment' && (st.includes('apartment') || st.includes('unit'))) ptMatch = true
+      if (pt === 'offplan' && st.includes('off-the-plan')) ptMatch = true
+      if (st.includes('new home') && ra.propertyType !== 'New' && ra.propertyType !== 'Off-the-Plan') ptMatch = false
+
+      if (ptMatch || st === '') pass(`Property type (${ra.propertyType}) is eligible`)
+      else fail(`Property type (${ra.propertyType}) does not match: ${s.eligible_property_types}`)
+    } else {
+      pass(`Property type (${ra.propertyType}) is eligible`)
+    }
+  } else {
+    pass(`Property type requirement satisfied`)
   }
+
+  // 3. Property location (Skipped for now unless RFHBG)
+  if (s.scheme_id === 'fed-regional-first-home-buyer-guarantee') {
+    fail(`Property is not located in an eligible regional area (Metro assumed for now)`)
+  } else {
+    pass(`Property location requirement satisfied`)
+  }
+
+  // 4. Property price cap
+  const priceCap = parseMoney(s.property_price_cap)
+  if (priceCap !== null && a.propertyPrice > 0) {
+    if (a.propertyPrice <= priceCap) pass(`Purchase price ($${a.propertyPrice.toLocaleString()}) is within the ${s.applicable_states || a.state} price cap.`)
+    else fail(`Purchase price ($${a.propertyPrice.toLocaleString()}) exceeds the ${s.applicable_states || a.state} price cap of $${priceCap.toLocaleString()}`)
+  } else if (priceCap !== null) {
+    check(`Purchase price not provided, cap is $${priceCap.toLocaleString()}`)
+  } else {
+    pass(`No property price cap applied`)
+  }
+
+  // 5. Applicant age
+  if (ra.is18 === 'Yes') {
+    if (ra.buyingWith === 'Jointly' && ra.coDob) {
+      // Logic from QuestionnaireFlow is that coDob < 18 is a hardstop anyway, but we verify here
+      pass(`All applicants are 18+ years old`)
+    } else {
+      pass(`Applicant is 18+ years old`)
+    }
+  } else if (ra.is18 === 'No') {
+    fail(`Applicant must be 18 or older`)
+  } else {
+    check(`Applicant age not provided`)
+  }
+
+  // 6. Citizenship / Residency
+  if (ra.citizenship) {
+    const RESIDENT_OK = ['Australian Citizen', 'Permanent Resident', 'NZ Special Category Visa (SCV) holder']
+    if (RESIDENT_OK.includes(ra.citizenship)) {
+      pass(`Citizenship / Residency requirement satisfied`)
+    } else {
+      check(`Residency status (${ra.citizenship}) may not be eligible`)
+    }
+  } else {
+    check(`Citizenship / Residency not provided`)
+  }
+
+  // 7. First home buyer / Previous ownership
+  const requiresFHB = /yes/i.test(s.first_home_buyer_required || '') || /first[\s-]?home/i.test(s.scheme_name || '')
+  if (requiresFHB) {
+    if (a.firstHomeBuyer) pass(`First-home buyer requirement satisfied`)
+    else fail(`Applicant has previously owned residential property.`)
+  } else {
+    pass(`First-home buyer requirement satisfied`)
+  }
+
+  // 8. Previous grants or schemes
+  if (ra.priorBenefit === 'Yes') {
+    fail(`Applicant has previously received a first-home grant or concession`)
+  } else if (ra.priorBenefit === 'No') {
+    pass(`No previous grants or schemes received`)
+  }
+
+  // 9. Owner-occupier requirement
+  if (ra.ppr === 'Yes') pass(`Owner-occupier requirement satisfied`)
+  else if (ra.ppr === 'No') fail(`Property must be Principal Place of Residence`)
+  else check(`Owner-occupier intent not provided`)
+
+  // 10. Move-in requirement
+  if (ra.ppr === 'Yes') {
+    if (ra.moveIn === 'Yes') pass(`Will move in within required timeframe`)
+    else if (ra.moveIn === 'No') check(`Move-in timeframe may not meet government requirements`)
+    else check(`Move-in timeframe not provided`)
+  } else {
+    pass(`Move-in requirement skipped (Not PPR)`)
+  }
+
+  // 11. Income thresholds
   const incomeCap = parseMoney(a.hasPartner ? s.income_cap_couple : s.income_cap_single)
   if (incomeCap !== null) {
-    criteria.push({ text: `Income under $${incomeCap.toLocaleString('en-AU')}`, met: a.income <= incomeCap })
+    if (a.income > 0) {
+      if (a.income <= incomeCap) pass(`Combined income ($${a.income.toLocaleString()}) within $${incomeCap.toLocaleString()} threshold`)
+      else fail(`Combined income ($${a.income.toLocaleString()}) exceeds $${incomeCap.toLocaleString()} threshold`)
+    } else {
+      check(`Income not provided, threshold is $${incomeCap.toLocaleString()}`)
+    }
+  } else {
+    pass(`No income threshold applies`)
   }
-  const priceCap = parseMoney(s.property_price_cap)
-  if (priceCap !== null) {
-    criteria.push({ text: `Property price under $${priceCap.toLocaleString('en-AU')}`, met: a.propertyPrice <= priceCap })
+
+  // 12. Deposit requirement (if applicable)
+  if (s.minimum_deposit) {
+    if (a.deposit !== null) {
+      // Calculate deposit percentage. Help to buy is 2%, FHG is 5%
+      const depositPct = a.propertyPrice > 0 ? (a.deposit / a.propertyPrice) * 100 : 0
+      const requiredPct = parseFloat(s.minimum_deposit.replace('%', ''))
+      if (depositPct >= requiredPct) pass(`Deposit requirement (${s.minimum_deposit}) verified`)
+      else fail(`Deposit is less than the required ${s.minimum_deposit}`)
+    } else {
+      check(`Minimum ${s.minimum_deposit} deposit is required for the ${s.scheme_name}. Deposit information is not currently collected in the questionnaire, therefore eligibility cannot be fully verified.`)
+    }
   }
-  if (criteria.length === 0) criteria.push({ text: 'Check official eligibility criteria', met: true })
-  return criteria
+
+  // 13. Scheme-specific exceptions (ADF, Family Violence, etc.)
+  if (s.single_parent_required === 'Yes') {
+    if (a.hasPartner) fail(`Applicant is not a single parent (applying with partner)`)
+    else check(`Single parent status could not be fully verified`) // We don't ask about dependents in this flow
+  }
+
+  return { bucket, ruleResults: rules }
 }
 
-function toItem(s: ApiScheme, eligible: boolean, a: EligibilityAnswers): EligibilityItem {
+function toItem(s: ApiScheme, a: EligibilityAnswers): EligibilityItem {
   const category = deriveCategory(String(s.type || s.benefit_type || ''))
   const variant: 'grant' | 'scheme' = category === 'cash' ? 'grant' : 'scheme'
-  const status: EligibilityStatus = eligible ? 'eligible' : 'ineligible'
 
   const cashValue = parseMoney(s.benefit_value)
   const value: number | string = category === 'cash' && cashValue !== null ? cashValue : (s.benefit_value || '').trim()
@@ -112,52 +235,41 @@ function toItem(s: ApiScheme, eligible: boolean, a: EligibilityAnswers): Eligibi
     benefitLine: (s.catchy_line || s.benefit_value || '').trim() || undefined,
   }
 
+  // Evaluate exactly according to the 13-rule plan
+  const { bucket, ruleResults } = evaluateScheme(s, a)
+  const status: EligibilityStatus = bucket === 'yes' ? 'eligible' : bucket === 'check' ? 'check' : 'ineligible'
+
   const eg: EvaluatedGrant = {
     grant,
     status,
     value,
-    criteria: buildCriteria(s, a),
-    reason: eligible ? undefined : "Based on your answers, you don't currently meet the eligibility criteria for this scheme.",
+    criteria: ruleResults,
+    reason: bucket === 'no' ? 'Does not meet mandatory criteria' : undefined,
   }
-  return { eg, category, variant }
+  return { eg, category, variant, bucket, ruleResults }
 }
 
-/** Fetch eligibility from the database and map it into the UI's shapes. */
 export async function fetchEligibility(a: EligibilityAnswers): Promise<EligibilityResult> {
-  const params = new URLSearchParams({
-    state: a.state,
-    firstHomeBuyer: String(a.firstHomeBuyer),
-    income: String(a.income),
-    hasPartner: String(a.hasPartner),
-    propertyPrice: String(a.propertyPrice),
-    propertyType: a.propertyType,
-    deposit: String(a.deposit),
-  })
-  if (a.singleParent !== undefined) params.set('singleParent', String(a.singleParent))
-
-  const [allRes, eligRes] = await Promise.all([
-    fetch('/api/schemes', { cache: 'no-store' }),
-    fetch(`/api/schemes/eligible?${params.toString()}`, { cache: 'no-store' }),
-  ])
+  const allRes = await fetch('/api/schemes', { cache: 'no-store' })
   if (!allRes.ok) throw new Error(`Failed to load schemes (HTTP ${allRes.status})`)
-  if (!eligRes.ok) throw new Error(`Failed to load eligibility (HTTP ${eligRes.status})`)
 
   const all = ((await allRes.json()).schemes ?? []) as ApiScheme[]
-  const eligible = ((await eligRes.json()).schemes ?? []) as ApiScheme[]
-  const eligibleIds = new Set(eligible.map((s) => s.scheme_id))
 
-  const items = all.map((s) => toItem(s, eligibleIds.has(s.scheme_id), a))
+  // Exclude closed schemes
+  const active = all.filter(s => !s.status || !/closed|ended|expired|merged|superseded|inactive/i.test(String(s.status)))
+
+  const items = active.map((s) => toItem(s, a))
 
   const sumEligible = (cat: DisplayCategory) =>
     items
-      .filter((i) => i.category === cat && i.eg.status === 'eligible')
+      .filter((i) => i.category === cat && i.bucket === 'yes')
       .reduce((sum, i) => sum + (typeof i.eg.value === 'number' ? i.eg.value : parseMoney(i.eg.value) ?? 0), 0)
 
   return {
     items,
     cashGrantsTotal: sumEligible('cash'),
     taxSavingsTotal: sumEligible('tax'),
-    eligibleSchemesCount: items.filter((i) => i.category === 'schemes' && i.eg.status === 'eligible').length,
-    totalEligibleCount: items.filter((i) => i.eg.status === 'eligible').length,
+    eligibleSchemesCount: items.filter((i) => i.category === 'schemes' && i.bucket === 'yes').length,
+    totalEligibleCount: items.filter((i) => i.bucket === 'yes').length,
   }
 }

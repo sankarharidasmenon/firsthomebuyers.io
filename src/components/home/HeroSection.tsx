@@ -62,13 +62,13 @@ export function HeroSection() {
           width: 100%;
           max-width: 1150px;
           margin: 0 auto;
-          padding: 48px 16px;
+          padding: 24px 16px 32px;
         }
         @media (min-width: 640px) {
           .fn-hero-inner { padding-left: 24px; padding-right: 24px; }
         }
         @media (min-width: 1024px) {
-          .fn-hero-inner { padding: 80px 32px 72px; }
+          .fn-hero-inner { padding: 48px 32px 48px; }
         }
 
         .fn-hero-grid {
@@ -150,11 +150,12 @@ export function HeroSection() {
           flex-direction: row;
           align-items: center;
           justify-content: space-between;
-          gap: 16px;
+          gap: 12px;
           width: 100%;
           text-align: left;
-          padding: 24px 22px;
-          border-radius: 16px;
+          padding: 14px 18px;
+          border-radius: 14px;
+          overflow: hidden;
           cursor: pointer;
           transition: border-color 0.2s, filter 0.2s, transform 0.15s;
           font-family: var(--font-body, 'Inter'), sans-serif;
@@ -165,7 +166,7 @@ export function HeroSection() {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          gap: 10px;
+          gap: 5px;
           min-width: 0;
         }
 
@@ -188,24 +189,35 @@ export function HeroSection() {
         .dark .fn-path-secondary:hover { border-color: var(--foreground); background: transparent; }
 
         .fn-path-kicker {
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 600;
-          line-height: 1.2;
+          line-height: 1.1;
           letter-spacing: 0.16em;
           text-transform: uppercase;
         }
         .fn-path-primary .fn-path-kicker { color: var(--primary); }
         .fn-path-secondary .fn-path-kicker { color: #C4A000; }
 
+        /* Single line by design. The lg step down is deliberate: at 1024–1280
+           the left column is at its narrowest, so the label needs to be smaller
+           there than it is on mobile, where the card spans the full width. */
         .fn-path-title {
           font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 600;
-          font-size: 19px;
-          letter-spacing: -0.2px;
-          line-height: 1.35;
+          font-size: 15px;
+          letter-spacing: -0.3px;
+          line-height: 1.25;
+          white-space: normal;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
         @media (min-width: 1024px) {
-          .fn-path-title { font-size: 20px; }
+          .fn-path-title { font-size: 13.5px; }
+        }
+        @media (min-width: 1280px) {
+          .fn-path-title { font-size: 15px; }
         }
         /* Sits on the static dark surface, so it stays white in both themes. */
         .fn-path-primary .fn-path-title { color: var(--color-white); }
@@ -343,10 +355,9 @@ export function HeroSection() {
                       onClick={() => router.push('/onboarding?flow=grants')}>
                       <span className="fn-path-body">
                         <span className="fn-path-kicker">Eligibility</span>
-                        <span className="fn-path-title">Check my borrowing capacity
-                          </span>
+                        <span className="fn-path-title">Check my grants &amp; schemes</span>
                       </span>
-                      <svg className="fn-path-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg className="fn-path-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                       </svg>
                     </button>
@@ -355,9 +366,9 @@ export function HeroSection() {
                       onClick={() => router.push('/grant-calculator')}>
                       <span className="fn-path-body">
                         <span className="fn-path-kicker">Government support</span>
-                        <span className="fn-path-title">Check  my grants & schemes</span>
+                        <span className="fn-path-title">Check my grant calculator</span>
                       </span>
-                      <svg className="fn-path-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg className="fn-path-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                       </svg>
                     </button>

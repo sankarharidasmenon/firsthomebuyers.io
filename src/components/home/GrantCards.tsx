@@ -505,7 +505,7 @@ export const GrantCards = () => {
         {/* ── Loading ── */}
         {status === 'loading' && (
           <div className="animate-in fade-in duration-500">
-            <div 
+            <div
               className="flex flex-nowrap md:flex-wrap gap-2 md:gap-3 mb-8 md:mb-10 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
               style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
             >

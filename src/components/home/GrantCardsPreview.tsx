@@ -94,7 +94,7 @@ export const GrantCardsPreview = () => {
   const activeTiles = activeTab === ALL_TAB ? allTiles : (grouped[activeTab] ?? [])
 
   return (
-    <section className="pt-10 md:pt-12 lg:pt-14 pb-16 md:pb-20 lg:pb-24 w-full bg-[var(--color-fn-yellow-pale)] dark:bg-background border-t border-border/20">
+    <section className="pt-6 md:pt-8 lg:pt-10 pb-16 md:pb-20 lg:pb-24 w-full bg-[var(--color-fn-yellow-pale)] dark:bg-background border-t border-border/20">
       <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Header Layout */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 md:mb-12 gap-6 md:gap-10">

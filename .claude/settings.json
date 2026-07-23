@@ -39,7 +39,20 @@
       "Bash(curl -s -o /dev/null \"http://localhost:3000/results/grants\")",
       "Bash(grep -v \"// \")",
       "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\(p.scripts\\)\\)\")",
-      "Bash(grep -v '^$')"
+      "Bash(grep -v '^$')",
+      "Bash(echo \"TSC_DONE exit=$?\")",
+      "Bash(curl -s -H 'apikey: sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' -H 'Authorization: Bearer sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' 'https://qbtlvhyqdciqnmmetzux.supabase.co/rest/v1/government_schemes?select=*&order=priority_ranking.asc' -o C:/Users/User/AppData/Local/Temp/claude/f--firstnest-v3/92066e6f-f2b8-4ef2-a45f-c9edc5a676dc/scratchpad/live.json -w 'HTTP %{http_code}\\\\n')",
+      "Bash(curl -s -H 'apikey: sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' -H 'Authorization: Bearer sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' 'https://qbtlvhyqdciqnmmetzux.supabase.co/rest/v1/government_schemes?select=*&order=priority_ranking.asc' -o C:/Users/User/AppData/Local/Temp/claude/f--firstnest-v3/92066e6f-f2b8-4ef2-a45f-c9edc5a676dc/scratchpad/live2.json -w 'HTTP %{http_code}\\\\n')",
+      "Bash(node runcase.js)",
+      "Bash(curl -s -H 'apikey: sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' -H 'Authorization: Bearer sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' 'https://qbtlvhyqdciqnmmetzux.supabase.co/rest/v1/government_schemes?select=*&order=priority_ranking.asc' -o C:/Users/User/AppData/Local/Temp/claude/f--firstnest-v3/92066e6f-f2b8-4ef2-a45f-c9edc5a676dc/scratchpad/live2.json)",
+      "Bash(curl -s -H 'apikey: sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' -H 'Authorization: Bearer sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' 'https://qbtlvhyqdciqnmmetzux.supabase.co/rest/v1/government_schemes?select=scheme_id,scheme_name,single_parent_required,income_cap_single,income_cap_couple&order=scheme_id.asc')",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{JSON.parse\\(d\\).forEach\\(r=>console.log\\(r.scheme_id.padEnd\\(42\\),'| SP:',JSON.stringify\\(r.single_parent_required\\),'| capS:',JSON.stringify\\(r.income_cap_single\\),'| capC:',JSON.stringify\\(r.income_cap_couple\\)\\)\\)}\\)\")",
+      "Bash(curl -s -H 'apikey: sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' -H 'Authorization: Bearer sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' 'https://qbtlvhyqdciqnmmetzux.supabase.co/rest/v1/government_schemes?select=*&order=priority_ranking.asc' -o C:/Users/User/AppData/Local/Temp/claude/f--firstnest-v3/92066e6f-f2b8-4ef2-a45f-c9edc5a676dc/scratchpad/final.json)",
+      "Bash(node verify.js)",
+      "Bash(curl -s -H 'apikey: sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' -H 'Authorization: Bearer sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' 'https://qbtlvhyqdciqnmmetzux.supabase.co/rest/v1/government_schemes?select=scheme_id,status&order=scheme_id.asc')",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const rows=JSON.parse\\(d\\);const counts={};rows.forEach\\(r=>counts[r.status]=\\(counts[r.status]||0\\)+1\\);console.log\\('status value counts:',JSON.stringify\\(counts\\)\\);}\\)\")",
+      "Bash(echo \"TSC exit=$?\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,0\\)\\)\")"
     ],
     "additionalDirectories": [
       "f:\\firstnest-v3"
