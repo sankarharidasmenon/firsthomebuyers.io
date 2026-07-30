@@ -33,9 +33,24 @@
  *   Concession         duty, no property value limit, transactions from
  *                      1 July 2026
  *                      https://www.revenue.act.gov.au/home-buyer-assistance/home-buyer-concession-scheme/about-the-home-buyer-concession-scheme
+ *   WA general         RevenueWA, "Duties Fact Sheet - Residential Land",
+ *                      general rate (identical to the residential rate since
+ *                      1 July 2022)
+ *                      https://www.wa.gov.au/government/publications/duties-fact-sheet-residential-land
+ *   WA FHOR            RevenueWA, first home owner rate of duty — nil to
+ *                      $600,000, concessional $600,001–$800,000, from
+ *                      7 May 2026
+ *                      https://www.wa.gov.au/government/publications/duties-fact-sheet-first-home-owner-rate
+ *   NT conveyance      Stamp Duty Act 1978 (NT), Schedule 1 clause 1(2), as in
+ *                      force at 1 July 2025 — the primary legislation, not a
+ *                      summary page
+ *                      https://legislation.nt.gov.au/en/Legislation/STAMP-DUTY-ACT-1978
+ *   NT HLPE            NT Government, House and Land Package Exemption — full
+ *                      exemption, no value cap, contracts to 30 June 2027
+ *                      https://nt.gov.au/property/home-owner-assistance/stamp-duty-exemption
  */
 
-export type DutyState = 'NSW' | 'VIC' | 'QLD' | 'SA' | 'ACT'
+export type DutyState = 'NSW' | 'VIC' | 'QLD' | 'SA' | 'ACT' | 'WA' | 'NT'
 
 /** One row of a rate schedule: duty = base + rate × (value − threshold). */
 interface Bracket {
@@ -239,7 +254,103 @@ function actDuty(value: number): number {
  */
 const ACT_HBC_FROM = '1 July 2026'
 
-/** Duty with no concession of any kind — the "normal duty" figure. */
+/* ── WA transfer duty ────────────────────────────────────────────────────── */
+/**
+ * Western Australia's general rate. Since 1 July 2022 the general rate and the
+ * old residential rate are identical — RevenueWA states that outright — so this
+ * one table is the correct baseline for a first home buyer.
+ *
+ * Rates are "per $100 or part thereof", the same rounding as QLD, SA and ACT.
+ *
+ * Cross-checked against two historical first home owner rate periods, where the
+ * FHOR taper was set to meet the general rate exactly at its cap:
+ *   Metro/Peel to 6 May 2026:  $13.63 × 2,000 = $27,260 vs general $27,265 at $700,000
+ *   Regional  to 6 May 2026:   $11.89 × 2,500 = $29,725 vs general $29,740.50 at $750,000
+ * Both land within rounding, which validates this table independently.
+ */
+const WA_GENERAL: Bracket[] = [
+  { threshold: 725000, base: 28453, rate: 0.0515 },
+  { threshold: 360000, base: 11115, rate: 0.0475 },
+  { threshold: 150000, base: 3135, rate: 0.038 },
+  { threshold: 120000, base: 2280, rate: 0.0285 },
+  { threshold: 0, base: 0, rate: 0.019 },
+]
+
+/**
+ * First home owner rate of duty, transactions entered into on or after
+ * 7 May 2026: nil duty to $600,000, then $16.15 for every $100, or part of $100,
+ * above $600,000, up to the $800,000 cap.
+ *
+ * The rate is $16.15, NOT the $20.14 printed in RevenueWA's "Duties Fact Sheet -
+ * First Home Owner Rate". Two official sources conflict, and three independent
+ * lines of evidence resolve it:
+ *
+ *  1. RevenueWA Circular 23, "Finance Legislation Amendment (Housing
+ *     Affordability) Bill 2026" — the circular explaining the amending
+ *     legislation — states $16.15 for homes above $600,000 and $20.14 for vacant
+ *     land above $450,000. The fact sheet prints those two figures the other way
+ *     round, i.e. transposed.
+ *  2. Arithmetic. WA sets the taper so FHOR duty meets the GENERAL rate exactly
+ *     at the cap, as both earlier FHOR periods did. With the circular's
+ *     assignment: homes $16.15 × 2,000 = $32,300 vs general $32,315.50 at
+ *     $800,000 (−$15.50, the same rounding delta the 2025 regional band showed);
+ *     vacant land $20.14 × 1,000 = $20,140 vs general $20,140 at $550,000 — an
+ *     EXACT match. With the fact sheet's assignment, homes would cost $40,280 at
+ *     $800,000 against a general rate of $32,315.50 — a "concession" $7,964 worse
+ *     than paying full duty, which cannot be the intent.
+ *  3. The rate needed for homes to meet the general rate at $800,000 is
+ *     $16.1578 per $100, which rounds to the circular's $16.15.
+ *
+ * Vacant land keeps its own thresholds ($450,000 / $550,000 at $20.14). The
+ * questionnaire cannot distinguish vacant land from a home purchase, so those
+ * are recorded in the scheme data rather than modelled here.
+ */
+const WA_FHOR_EXEMPT_TO = 600000
+const WA_FHOR_CAP = 800000
+const WA_FHOR_RATE_PER_100 = 16.15
+
+/* ── NT conveyance duty ──────────────────────────────────────────────────── */
+/**
+ * The Northern Territory is the only jurisdiction here that does not use a
+ * bracket table. Stamp Duty Act 1978 (NT), Schedule 1 clause 1(2), quoted
+ * verbatim from the consolidated Act as in force at 1 July 2025:
+ *
+ *   (a) if the dutiable value … does not exceed $525 000:
+ *         D = (0.06571441 x V2) + 15V
+ *       where D is the duty (expressed in dollars) and
+ *             V is 1/1 000 of the dutiable value (expressed in dollars)
+ *   (b) if the dutiable value exceeds $525 000 but is less than $3 000 000,
+ *       the duty is 4.95% of the dutiable value;
+ *   (c) if the dutiable value is $3 000 000 or more but is less than
+ *       $5 000 000, the duty is 5.75% of the dutiable value;
+ *   (d) if the dutiable value is $5 000 000 or more, the duty is 5.95%
+ *       of the dutiable value.
+ *
+ * The quadratic is calibrated to meet the 4.95% flat rate at its ceiling: at
+ * $525,000 the formula gives $25,987.60 against 4.95% of $525,000 = $25,987.50,
+ * a 10 cent difference. That near-continuity is a useful check that the
+ * coefficients are transcribed correctly.
+ *
+ * Note the percentages above $3,000,000 are flat rates on the WHOLE dutiable
+ * value, so each band boundary is a genuine step, not a taper.
+ */
+const NT_FORMULA_CEILING = 525000
+const NT_QUADRATIC_A = 0.06571441
+const NT_QUADRATIC_B = 15
+const NT_FLAT_BANDS: { from: number; rate: number }[] = [
+  { from: 5000000, rate: 0.0595 },
+  { from: 3000000, rate: 0.0575 },
+  { from: 0, rate: 0.0495 },
+]
+
+function ntDuty(value: number): number {
+  if (value <= NT_FORMULA_CEILING) {
+    const v = value / 1000
+    return cents(NT_QUADRATIC_A * v * v + NT_QUADRATIC_B * v)
+  }
+  const band = NT_FLAT_BANDS.find((b) => value >= b.from)!
+  return cents(band.rate * value)
+}
 export function standardDuty(state: DutyState, value: number): number {
   if (!Number.isFinite(value) || value <= 0) return 0
   switch (state) {
@@ -253,6 +364,10 @@ export function standardDuty(state: DutyState, value: number): number {
       return cents(dutyPerHundredOrPart(value, SA_GENERAL))
     case 'ACT':
       return actDuty(value)
+    case 'WA':
+      return cents(dutyPerHundredOrPart(value, WA_GENERAL))
+    case 'NT':
+      return ntDuty(value)
   }
 }
 
@@ -343,6 +458,42 @@ export function firstHomeDuty(state: DutyState, price: number): DutyOutcome {
     }
   }
 
+  if (state === 'WA') {
+    if (price <= WA_FHOR_EXEMPT_TO) {
+      return {
+        ...base, payable: 0, saving: standard,
+        note: 'Full first home owner rate — no transfer duty payable up to $600,000 for transactions entered into on or after 7 May 2026.',
+      }
+    }
+    if (price <= WA_FHOR_CAP) {
+      // "$16.15 for every $100, OR PART OF $100, by which it exceeds $600,000" —
+      // so the excess rounds up to the next whole $100 before the rate applies.
+      const hundreds = Math.ceil((price - WA_FHOR_EXEMPT_TO) / 100)
+      // Never charge more than the general rate: a concession cannot cost more
+      // than not having it. The published rate does not breach this, but the
+      // guard makes that impossible rather than merely true today.
+      const payable = Math.min(cents(WA_FHOR_RATE_PER_100 * hundreds), standard)
+      return {
+        ...base, payable, saving: cents(standard - payable),
+        note: `Concessional first home owner rate — $${WA_FHOR_RATE_PER_100.toFixed(2)} for every $100, or part of $100, above $600,000, leaving $${formatDuty(payable)} of duty payable. The concession tapers to nil at the $800,000 cap.`,
+      }
+    }
+    return { ...base, payable: standard, saving: 0, note: 'No first home owner rate of duty at $800,000 or above.' }
+  }
+
+  if (state === 'NT') {
+    // The House and Land Package Exemption removes duty entirely, with no cap on
+    // the value of the property, for contracts signed to 30 June 2027. The
+    // caller only reaches this branch when the rules engine has already found an
+    // NT duty scheme eligible, and HLPE is the Territory's only one.
+    return {
+      ...base,
+      payable: 0,
+      saving: standard,
+      note: 'Full House and Land Package Exemption — no stamp duty payable at any property value, for contracts signed by 30 June 2027.',
+    }
+  }
+
   // QLD — home concession, then the first home concession rebate on top.
   const homeConcessionDuty = cents(dutyPerHundredOrPart(price, QLD_HOME))
   const rebate = price < QLD_FIRST_HOME_REBATE_CEILING
@@ -373,5 +524,5 @@ function round(n: number): number {
 
 /** Whether this state has a duty schedule implemented. */
 export function supportsDuty(state: string): state is DutyState {
-  return state === 'NSW' || state === 'VIC' || state === 'QLD' || state === 'SA' || state === 'ACT'
+  return state === 'NSW' || state === 'VIC' || state === 'QLD' || state === 'SA' || state === 'ACT' || state === 'WA' || state === 'NT'
 }

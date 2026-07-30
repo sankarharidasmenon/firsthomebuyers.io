@@ -134,6 +134,12 @@ export function inferState(postcode: string): StateCode | null {
   // PO boxes — 5950 Adelaide Airport is a live locality in Housing Australia's
   // own table, so the whole 5xxx block belongs to SA).
   if (pc >= 5000 && pc <= 5999) return 'SA'
+  // WA: 6000–6999
+  if (pc >= 6000 && pc <= 6999) return 'WA'
+  // TAS: 7000–7999
+  if (pc >= 7000 && pc <= 7999) return 'TAS'
+  // NT: 0800–0999
+  if (pc >= 800 && pc <= 999) return 'NT'
   return null
 }
 
@@ -447,29 +453,389 @@ export const SUBURBS: SuburbEntry[] = [
   { suburb: 'Jacka', postcode: '2914', state: 'ACT' },
   { suburb: 'Moncrieff', postcode: '2914', state: 'ACT' },
   { suburb: 'Throsby', postcode: '2914', state: 'ACT' },
+
+  // ── WA ──
+  // Greater Perth GCCSA (capital) — sourced from Australia Post locality data,
+  // classified by ABS Greater Capital City Statistical Area boundaries.
+  // Perth CBD & inner
+  { suburb: 'Perth', postcode: '6000', state: 'WA', region: 'capital' },
+  { suburb: 'East Perth', postcode: '6004', state: 'WA', region: 'capital' },
+  { suburb: 'West Perth', postcode: '6005', state: 'WA', region: 'capital' },
+  { suburb: 'Northbridge', postcode: '6003', state: 'WA', region: 'capital' },
+  { suburb: 'Highgate', postcode: '6003', state: 'WA', region: 'capital' },
+  // Inner west
+  { suburb: 'Subiaco', postcode: '6008', state: 'WA', region: 'capital' },
+  { suburb: 'Shenton Park', postcode: '6008', state: 'WA', region: 'capital' },
+  { suburb: 'Nedlands', postcode: '6009', state: 'WA', region: 'capital' },
+  { suburb: 'Dalkeith', postcode: '6009', state: 'WA', region: 'capital' },
+  { suburb: 'Crawley', postcode: '6009', state: 'WA', region: 'capital' },
+  { suburb: 'Claremont', postcode: '6010', state: 'WA', region: 'capital' },
+  { suburb: 'Swanbourne', postcode: '6010', state: 'WA', region: 'capital' },
+  { suburb: 'Cottesloe', postcode: '6011', state: 'WA', region: 'capital' },
+  { suburb: 'Peppermint Grove', postcode: '6011', state: 'WA', region: 'capital' },
+  { suburb: 'Mosman Park', postcode: '6012', state: 'WA', region: 'capital' },
+  { suburb: 'Floreat', postcode: '6014', state: 'WA', region: 'capital' },
+  { suburb: 'Wembley', postcode: '6014', state: 'WA', region: 'capital' },
+  { suburb: 'Jolimont', postcode: '6014', state: 'WA', region: 'capital' },
+  { suburb: 'City Beach', postcode: '6015', state: 'WA', region: 'capital' },
+  { suburb: 'Osborne Park', postcode: '6017', state: 'WA', region: 'capital' },
+  { suburb: 'Churchlands', postcode: '6018', state: 'WA', region: 'capital' },
+  { suburb: 'Innaloo', postcode: '6018', state: 'WA', region: 'capital' },
+  { suburb: 'Karrinyup', postcode: '6018', state: 'WA', region: 'capital' },
+  { suburb: 'Gwelup', postcode: '6018', state: 'WA', region: 'capital' },
+  { suburb: 'Scarborough', postcode: '6019', state: 'WA', region: 'capital' },
+  { suburb: 'Doubleview', postcode: '6018', state: 'WA', region: 'capital' },
+  // North inner
+  { suburb: 'Leederville', postcode: '6007', state: 'WA', region: 'capital' },
+  { suburb: 'Mount Lawley', postcode: '6050', state: 'WA', region: 'capital' },
+  { suburb: 'Inglewood', postcode: '6052', state: 'WA', region: 'capital' },
+  { suburb: 'Bedford', postcode: '6052', state: 'WA', region: 'capital' },
+  { suburb: 'Bayswater', postcode: '6053', state: 'WA', region: 'capital' },
+  { suburb: 'Bassendean', postcode: '6054', state: 'WA', region: 'capital' },
+  { suburb: 'Guildford', postcode: '6055', state: 'WA', region: 'capital' },
+  { suburb: 'Midland', postcode: '6056', state: 'WA', region: 'capital' },
+  { suburb: 'Midvale', postcode: '6056', state: 'WA', region: 'capital' },
+  { suburb: 'High Wycombe', postcode: '6057', state: 'WA', region: 'capital' },
+  { suburb: 'Maida Vale', postcode: '6057', state: 'WA', region: 'capital' },
+  { suburb: 'Forrestfield', postcode: '6058', state: 'WA', region: 'capital' },
+  { suburb: 'Dianella', postcode: '6059', state: 'WA', region: 'capital' },
+  { suburb: 'Balga', postcode: '6061', state: 'WA', region: 'capital' },
+  { suburb: 'Mirrabooka', postcode: '6061', state: 'WA', region: 'capital' },
+  { suburb: 'Nollamara', postcode: '6061', state: 'WA', region: 'capital' },
+  { suburb: 'Westminster', postcode: '6061', state: 'WA', region: 'capital' },
+  { suburb: 'Morley', postcode: '6062', state: 'WA', region: 'capital' },
+  { suburb: 'Embleton', postcode: '6062', state: 'WA', region: 'capital' },
+  { suburb: 'Beechboro', postcode: '6063', state: 'WA', region: 'capital' },
+  { suburb: 'Girrawheen', postcode: '6064', state: 'WA', region: 'capital' },
+  { suburb: 'Koondoola', postcode: '6064', state: 'WA', region: 'capital' },
+  { suburb: 'Balcatta', postcode: '6021', state: 'WA', region: 'capital' },
+  { suburb: 'Stirling', postcode: '6021', state: 'WA', region: 'capital' },
+  // Joondalup corridor
+  { suburb: 'Wanneroo', postcode: '6065', state: 'WA', region: 'capital' },
+  { suburb: 'Landsdale', postcode: '6065', state: 'WA', region: 'capital' },
+  { suburb: 'Hocking', postcode: '6065', state: 'WA', region: 'capital' },
+  { suburb: 'Darch', postcode: '6065', state: 'WA', region: 'capital' },
+  { suburb: 'Madeley', postcode: '6065', state: 'WA', region: 'capital' },
+  { suburb: 'Malaga', postcode: '6090', state: 'WA', region: 'capital' },
+  { suburb: 'Joondalup', postcode: '6027', state: 'WA', region: 'capital' },
+  { suburb: 'Edgewater', postcode: '6027', state: 'WA', region: 'capital' },
+  { suburb: 'Ocean Reef', postcode: '6027', state: 'WA', region: 'capital' },
+  { suburb: 'Mullaloo', postcode: '6027', state: 'WA', region: 'capital' },
+  { suburb: 'Heathridge', postcode: '6027', state: 'WA', region: 'capital' },
+  { suburb: 'Beldon', postcode: '6027', state: 'WA', region: 'capital' },
+  { suburb: 'Connolly', postcode: '6027', state: 'WA', region: 'capital' },
+  { suburb: 'Currambine', postcode: '6028', state: 'WA', region: 'capital' },
+  { suburb: 'Kinross', postcode: '6028', state: 'WA', region: 'capital' },
+  { suburb: 'Clarkson', postcode: '6030', state: 'WA', region: 'capital' },
+  { suburb: 'Mindarie', postcode: '6030', state: 'WA', region: 'capital' },
+  { suburb: 'Quinns Rocks', postcode: '6030', state: 'WA', region: 'capital' },
+  { suburb: 'Merriwa', postcode: '6030', state: 'WA', region: 'capital' },
+  { suburb: 'Ridgewood', postcode: '6030', state: 'WA', region: 'capital' },
+  { suburb: 'Eglinton', postcode: '6034', state: 'WA', region: 'capital' },
+  { suburb: 'Yanchep', postcode: '6035', state: 'WA', region: 'capital' },
+  { suburb: 'Butler', postcode: '6036', state: 'WA', region: 'capital' },
+  { suburb: 'Two Rocks', postcode: '6037', state: 'WA', region: 'capital' },
+  { suburb: 'Alkimos', postcode: '6038', state: 'WA', region: 'capital' },
+  { suburb: 'Ellenbrook', postcode: '6069', state: 'WA', region: 'capital' },
+  { suburb: 'The Vines', postcode: '6069', state: 'WA', region: 'capital' },
+  // Kalamunda Hills
+  { suburb: 'Kalamunda', postcode: '6076', state: 'WA', region: 'capital' },
+  // South of river — Fremantle & surrounds
+  { suburb: 'Fremantle', postcode: '6160', state: 'WA', region: 'capital' },
+  { suburb: 'North Fremantle', postcode: '6159', state: 'WA', region: 'capital' },
+  { suburb: 'Beaconsfield', postcode: '6162', state: 'WA', region: 'capital' },
+  { suburb: 'South Fremantle', postcode: '6162', state: 'WA', region: 'capital' },
+  { suburb: 'Hamilton Hill', postcode: '6163', state: 'WA', region: 'capital' },
+  { suburb: 'Spearwood', postcode: '6163', state: 'WA', region: 'capital' },
+  { suburb: 'Hilton', postcode: '6163', state: 'WA', region: 'capital' },
+  { suburb: "O'Connor", postcode: '6163', state: 'WA', region: 'capital' },
+  { suburb: 'Bibra Lake', postcode: '6163', state: 'WA', region: 'capital' },
+  { suburb: 'Munster', postcode: '6166', state: 'WA', region: 'capital' },
+  { suburb: 'Henderson', postcode: '6166', state: 'WA', region: 'capital' },
+  // Cockburn
+  { suburb: 'Cockburn Central', postcode: '6164', state: 'WA', region: 'capital' },
+  { suburb: 'Jandakot', postcode: '6164', state: 'WA', region: 'capital' },
+  { suburb: 'Yangebup', postcode: '6164', state: 'WA', region: 'capital' },
+  { suburb: 'Success', postcode: '6164', state: 'WA', region: 'capital' },
+  { suburb: 'Atwell', postcode: '6164', state: 'WA', region: 'capital' },
+  { suburb: 'Hammond Park', postcode: '6164', state: 'WA', region: 'capital' },
+  { suburb: 'Aubin Grove', postcode: '6164', state: 'WA', region: 'capital' },
+  // Canning & Gosnells
+  { suburb: 'Canning Vale', postcode: '6155', state: 'WA', region: 'capital' },
+  { suburb: 'Willetton', postcode: '6155', state: 'WA', region: 'capital' },
+  { suburb: 'Riverton', postcode: '6148', state: 'WA', region: 'capital' },
+  { suburb: 'Shelley', postcode: '6148', state: 'WA', region: 'capital' },
+  { suburb: 'Rossmoyne', postcode: '6148', state: 'WA', region: 'capital' },
+  { suburb: 'Ferndale', postcode: '6148', state: 'WA', region: 'capital' },
+  { suburb: 'Bull Creek', postcode: '6149', state: 'WA', region: 'capital' },
+  { suburb: 'Leeming', postcode: '6149', state: 'WA', region: 'capital' },
+  { suburb: 'Winthrop', postcode: '6150', state: 'WA', region: 'capital' },
+  { suburb: 'Murdoch', postcode: '6150', state: 'WA', region: 'capital' },
+  { suburb: 'Langford', postcode: '6147', state: 'WA', region: 'capital' },
+  { suburb: 'Lynwood', postcode: '6147', state: 'WA', region: 'capital' },
+  { suburb: 'Parkwood', postcode: '6147', state: 'WA', region: 'capital' },
+  { suburb: 'Bentley', postcode: '6102', state: 'WA', region: 'capital' },
+  { suburb: 'St James', postcode: '6102', state: 'WA', region: 'capital' },
+  { suburb: 'Cannington', postcode: '6107', state: 'WA', region: 'capital' },
+  { suburb: 'Beckenham', postcode: '6107', state: 'WA', region: 'capital' },
+  { suburb: 'Kenwick', postcode: '6107', state: 'WA', region: 'capital' },
+  { suburb: 'Thornlie', postcode: '6108', state: 'WA', region: 'capital' },
+  { suburb: 'Maddington', postcode: '6109', state: 'WA', region: 'capital' },
+  { suburb: 'Gosnells', postcode: '6110', state: 'WA', region: 'capital' },
+  { suburb: 'Martin', postcode: '6110', state: 'WA', region: 'capital' },
+  { suburb: 'Kelmscott', postcode: '6111', state: 'WA', region: 'capital' },
+  { suburb: 'Camillo', postcode: '6111', state: 'WA', region: 'capital' },
+  { suburb: 'Armadale', postcode: '6112', state: 'WA', region: 'capital' },
+  // Belmont / east
+  { suburb: 'Victoria Park', postcode: '6100', state: 'WA', region: 'capital' },
+  { suburb: 'Burswood', postcode: '6100', state: 'WA', region: 'capital' },
+  { suburb: 'East Victoria Park', postcode: '6101', state: 'WA', region: 'capital' },
+  { suburb: 'Carlisle', postcode: '6101', state: 'WA', region: 'capital' },
+  { suburb: 'Rivervale', postcode: '6103', state: 'WA', region: 'capital' },
+  { suburb: 'Belmont', postcode: '6104', state: 'WA', region: 'capital' },
+  { suburb: 'Redcliffe', postcode: '6104', state: 'WA', region: 'capital' },
+  { suburb: 'Ascot', postcode: '6104', state: 'WA', region: 'capital' },
+  { suburb: 'Cloverdale', postcode: '6105', state: 'WA', region: 'capital' },
+  // Peel region (part of Greater Perth GCCSA)
+  { suburb: 'Mandurah', postcode: '6210', state: 'WA', region: 'capital' },
+  { suburb: 'Halls Head', postcode: '6210', state: 'WA', region: 'capital' },
+  { suburb: 'Greenfields', postcode: '6210', state: 'WA', region: 'capital' },
+  { suburb: 'Meadow Springs', postcode: '6210', state: 'WA', region: 'capital' },
+  { suburb: 'Lakelands', postcode: '6180', state: 'WA', region: 'capital' },
+  { suburb: 'Falcon', postcode: '6210', state: 'WA', region: 'capital' },
+  { suburb: 'Madora Bay', postcode: '6210', state: 'WA', region: 'capital' },
+  { suburb: 'Dudley Park', postcode: '6210', state: 'WA', region: 'capital' },
+  { suburb: 'Dawesville', postcode: '6211', state: 'WA', region: 'capital' },
+  // WA Rest — South West
+  { suburb: 'Bunbury', postcode: '6230', state: 'WA', region: 'rest' },
+  { suburb: 'Dalyellup', postcode: '6230', state: 'WA', region: 'rest' },
+  { suburb: 'Eaton', postcode: '6232', state: 'WA', region: 'rest' },
+  { suburb: 'Australind', postcode: '6233', state: 'WA', region: 'rest' },
+  { suburb: 'Harvey', postcode: '6220', state: 'WA', region: 'rest' },
+  { suburb: 'Collie', postcode: '6225', state: 'WA', region: 'rest' },
+  { suburb: 'Busselton', postcode: '6280', state: 'WA', region: 'rest' },
+  { suburb: 'Vasse', postcode: '6280', state: 'WA', region: 'rest' },
+  { suburb: 'Dunsborough', postcode: '6281', state: 'WA', region: 'rest' },
+  { suburb: 'Yallingup', postcode: '6282', state: 'WA', region: 'rest' },
+  { suburb: 'Cowaramup', postcode: '6284', state: 'WA', region: 'rest' },
+  { suburb: 'Margaret River', postcode: '6285', state: 'WA', region: 'rest' },
+  { suburb: 'Augusta', postcode: '6290', state: 'WA', region: 'rest' },
+  { suburb: 'Manjimup', postcode: '6258', state: 'WA', region: 'rest' },
+  { suburb: 'Pemberton', postcode: '6260', state: 'WA', region: 'rest' },
+  { suburb: 'Bridgetown', postcode: '6255', state: 'WA', region: 'rest' },
+  // WA Rest — Great Southern
+  { suburb: 'Albany', postcode: '6330', state: 'WA', region: 'rest' },
+  { suburb: 'Yakamia', postcode: '6330', state: 'WA', region: 'rest' },
+  { suburb: 'Middleton Beach', postcode: '6330', state: 'WA', region: 'rest' },
+  { suburb: 'Denmark', postcode: '6333', state: 'WA', region: 'rest' },
+  { suburb: 'Mount Barker', postcode: '6324', state: 'WA', region: 'rest' },
+  { suburb: 'Katanning', postcode: '6317', state: 'WA', region: 'rest' },
+  { suburb: 'Narrogin', postcode: '6312', state: 'WA', region: 'rest' },
+  { suburb: 'Wagin', postcode: '6315', state: 'WA', region: 'rest' },
+  // WA Rest — Wheat Belt & Mid West
+  { suburb: 'Northam', postcode: '6401', state: 'WA', region: 'rest' },
+  { suburb: 'York', postcode: '6302', state: 'WA', region: 'rest' },
+  { suburb: 'Toodyay', postcode: '6566', state: 'WA', region: 'rest' },
+  { suburb: 'Merredin', postcode: '6415', state: 'WA', region: 'rest' },
+  { suburb: 'Moora', postcode: '6510', state: 'WA', region: 'rest' },
+  { suburb: 'Geraldton', postcode: '6530', state: 'WA', region: 'rest' },
+  { suburb: 'Wonthella', postcode: '6530', state: 'WA', region: 'rest' },
+  { suburb: 'Spalding', postcode: '6530', state: 'WA', region: 'rest' },
+  { suburb: 'Northampton', postcode: '6535', state: 'WA', region: 'rest' },
+  { suburb: 'Dongara', postcode: '6525', state: 'WA', region: 'rest' },
+  { suburb: 'Jurien Bay', postcode: '6516', state: 'WA', region: 'rest' },
+  { suburb: 'Carnarvon', postcode: '6701', state: 'WA', region: 'rest' },
+  { suburb: 'Exmouth', postcode: '6707', state: 'WA', region: 'rest' },
+  // WA Rest — Goldfields-Esperance
+  { suburb: 'Kalgoorlie', postcode: '6430', state: 'WA', region: 'rest' },
+  { suburb: 'Boulder', postcode: '6432', state: 'WA', region: 'rest' },
+  { suburb: 'Coolgardie', postcode: '6429', state: 'WA', region: 'rest' },
+  { suburb: 'Kambalda West', postcode: '6442', state: 'WA', region: 'rest' },
+  { suburb: 'Norseman', postcode: '6443', state: 'WA', region: 'rest' },
+  { suburb: 'Southern Cross', postcode: '6426', state: 'WA', region: 'rest' },
+  { suburb: 'Esperance', postcode: '6450', state: 'WA', region: 'rest' },
+  // WA Rest — Pilbara
+  { suburb: 'Port Hedland', postcode: '6721', state: 'WA', region: 'rest' },
+  { suburb: 'South Hedland', postcode: '6722', state: 'WA', region: 'rest' },
+  { suburb: 'Karratha', postcode: '6714', state: 'WA', region: 'rest' },
+  { suburb: 'Dampier', postcode: '6713', state: 'WA', region: 'rest' },
+  { suburb: 'Roebourne', postcode: '6718', state: 'WA', region: 'rest' },
+  { suburb: 'Wickham', postcode: '6720', state: 'WA', region: 'rest' },
+  { suburb: 'Newman', postcode: '6753', state: 'WA', region: 'rest' },
+  { suburb: 'Tom Price', postcode: '6751', state: 'WA', region: 'rest' },
+  // WA Rest — Kimberley
+  { suburb: 'Broome', postcode: '6725', state: 'WA', region: 'rest' },
+  { suburb: 'Derby', postcode: '6728', state: 'WA', region: 'rest' },
+  { suburb: 'Kununurra', postcode: '6743', state: 'WA', region: 'rest' },
+
+  // ── TAS ──
+  // Greater Hobart GCCSA (capital) — Hobart, Clarence, Glenorchy, Kingborough
+  // and Brighton LGAs, sourced from ABS 2021 GCCSA boundaries.
+  { suburb: 'Hobart', postcode: '7000', state: 'TAS', region: 'capital' },
+  { suburb: 'North Hobart', postcode: '7000', state: 'TAS', region: 'capital' },
+  { suburb: 'West Hobart', postcode: '7000', state: 'TAS', region: 'capital' },
+  { suburb: 'Mount Stuart', postcode: '7000', state: 'TAS', region: 'capital' },
+  { suburb: 'South Hobart', postcode: '7004', state: 'TAS', region: 'capital' },
+  { suburb: 'Battery Point', postcode: '7004', state: 'TAS', region: 'capital' },
+  { suburb: 'Sandy Bay', postcode: '7005', state: 'TAS', region: 'capital' },
+  { suburb: 'Mount Nelson', postcode: '7007', state: 'TAS', region: 'capital' },
+  { suburb: 'New Town', postcode: '7008', state: 'TAS', region: 'capital' },
+  { suburb: 'Lenah Valley', postcode: '7008', state: 'TAS', region: 'capital' },
+  { suburb: 'Moonah', postcode: '7009', state: 'TAS', region: 'capital' },
+  { suburb: 'Derwent Park', postcode: '7009', state: 'TAS', region: 'capital' },
+  { suburb: 'Glenorchy', postcode: '7010', state: 'TAS', region: 'capital' },
+  { suburb: 'Montrose', postcode: '7010', state: 'TAS', region: 'capital' },
+  { suburb: 'Claremont', postcode: '7011', state: 'TAS', region: 'capital' },
+  { suburb: 'Berriedale', postcode: '7011', state: 'TAS', region: 'capital' },
+  { suburb: 'Lindisfarne', postcode: '7015', state: 'TAS', region: 'capital' },
+  { suburb: 'Rose Bay', postcode: '7015', state: 'TAS', region: 'capital' },
+  { suburb: 'Risdon Vale', postcode: '7016', state: 'TAS', region: 'capital' },
+  { suburb: 'Bellerive', postcode: '7018', state: 'TAS', region: 'capital' },
+  { suburb: 'Howrah', postcode: '7018', state: 'TAS', region: 'capital' },
+  { suburb: 'Mornington', postcode: '7018', state: 'TAS', region: 'capital' },
+  { suburb: 'Rosny', postcode: '7018', state: 'TAS', region: 'capital' },
+  { suburb: 'Warrane', postcode: '7018', state: 'TAS', region: 'capital' },
+  { suburb: 'Rokeby', postcode: '7019', state: 'TAS', region: 'capital' },
+  { suburb: 'Clarendon Vale', postcode: '7019', state: 'TAS', region: 'capital' },
+  { suburb: 'Granton', postcode: '7030', state: 'TAS', region: 'capital' },
+  { suburb: 'Brighton', postcode: '7030', state: 'TAS', region: 'capital' },
+  { suburb: 'Herdsmans Cove', postcode: '7030', state: 'TAS', region: 'capital' },
+  { suburb: 'Kingston', postcode: '7050', state: 'TAS', region: 'capital' },
+  { suburb: 'Kingston Beach', postcode: '7050', state: 'TAS', region: 'capital' },
+  { suburb: 'Blackmans Bay', postcode: '7052', state: 'TAS', region: 'capital' },
+  { suburb: 'Bonnet Hill', postcode: '7053', state: 'TAS', region: 'capital' },
+  { suburb: 'Margate', postcode: '7054', state: 'TAS', region: 'capital' },
+  { suburb: 'Snug', postcode: '7054', state: 'TAS', region: 'capital' },
+  { suburb: 'Huntingfield', postcode: '7055', state: 'TAS', region: 'capital' },
+  { suburb: 'Sandfly', postcode: '7059', state: 'TAS', region: 'capital' },
+  { suburb: 'Midway Point', postcode: '7171', state: 'TAS', region: 'capital' },
+  { suburb: 'Sorell', postcode: '7172', state: 'TAS', region: 'capital' },
+  { suburb: 'Dodges Ferry', postcode: '7173', state: 'TAS', region: 'capital' },
+  // TAS Rest — Launceston & surrounds
+  { suburb: 'Launceston', postcode: '7250', state: 'TAS', region: 'rest' },
+  { suburb: 'Prospect', postcode: '7250', state: 'TAS', region: 'rest' },
+  { suburb: 'St Leonards', postcode: '7250', state: 'TAS', region: 'rest' },
+  { suburb: 'Ravenswood', postcode: '7250', state: 'TAS', region: 'rest' },
+  { suburb: 'Riverside', postcode: '7250', state: 'TAS', region: 'rest' },
+  { suburb: 'Kings Meadows', postcode: '7249', state: 'TAS', region: 'rest' },
+  { suburb: 'Newnham', postcode: '7248', state: 'TAS', region: 'rest' },
+  { suburb: 'Invermay', postcode: '7248', state: 'TAS', region: 'rest' },
+  { suburb: 'Mowbray', postcode: '7248', state: 'TAS', region: 'rest' },
+  { suburb: 'Rocherlea', postcode: '7248', state: 'TAS', region: 'rest' },
+  { suburb: 'Legana', postcode: '7277', state: 'TAS', region: 'rest' },
+  { suburb: 'Relbia', postcode: '7258', state: 'TAS', region: 'rest' },
+  { suburb: 'George Town', postcode: '7253', state: 'TAS', region: 'rest' },
+  { suburb: 'Longford', postcode: '7301', state: 'TAS', region: 'rest' },
+  { suburb: 'Westbury', postcode: '7303', state: 'TAS', region: 'rest' },
+  { suburb: 'Deloraine', postcode: '7304', state: 'TAS', region: 'rest' },
+  { suburb: 'Latrobe', postcode: '7307', state: 'TAS', region: 'rest' },
+  { suburb: 'Port Sorell', postcode: '7307', state: 'TAS', region: 'rest' },
+  // TAS Rest — Devonport
+  { suburb: 'Devonport', postcode: '7310', state: 'TAS', region: 'rest' },
+  { suburb: 'Spreyton', postcode: '7310', state: 'TAS', region: 'rest' },
+  { suburb: 'Ulverstone', postcode: '7315', state: 'TAS', region: 'rest' },
+  { suburb: 'Penguin', postcode: '7316', state: 'TAS', region: 'rest' },
+  { suburb: 'Sulphur Creek', postcode: '7316', state: 'TAS', region: 'rest' },
+  // TAS Rest — Burnie / North West
+  { suburb: 'Burnie', postcode: '7320', state: 'TAS', region: 'rest' },
+  { suburb: 'Somerset', postcode: '7322', state: 'TAS', region: 'rest' },
+  { suburb: 'Wynyard', postcode: '7325', state: 'TAS', region: 'rest' },
+  { suburb: 'Smithton', postcode: '7330', state: 'TAS', region: 'rest' },
+  { suburb: 'Stanley', postcode: '7331', state: 'TAS', region: 'rest' },
+  // TAS Rest — East Coast & Midlands
+  { suburb: 'Scottsdale', postcode: '7260', state: 'TAS', region: 'rest' },
+  { suburb: 'St Helens', postcode: '7216', state: 'TAS', region: 'rest' },
+  { suburb: 'Scamander', postcode: '7215', state: 'TAS', region: 'rest' },
+  { suburb: 'Bicheno', postcode: '7215', state: 'TAS', region: 'rest' },
+  { suburb: 'Swansea', postcode: '7190', state: 'TAS', region: 'rest' },
+  { suburb: 'Triabunna', postcode: '7190', state: 'TAS', region: 'rest' },
+  { suburb: 'Orford', postcode: '7190', state: 'TAS', region: 'rest' },
+  { suburb: 'Ross', postcode: '7209', state: 'TAS', region: 'rest' },
+  { suburb: 'Campbell Town', postcode: '7210', state: 'TAS', region: 'rest' },
+  { suburb: 'Evandale', postcode: '7212', state: 'TAS', region: 'rest' },
+  { suburb: 'Fingal', postcode: '7214', state: 'TAS', region: 'rest' },
+  { suburb: 'Oatlands', postcode: '7120', state: 'TAS', region: 'rest' },
+  { suburb: 'New Norfolk', postcode: '7140', state: 'TAS', region: 'rest' },
+  // TAS Rest — Huon / Southern
+  { suburb: 'Huonville', postcode: '7109', state: 'TAS', region: 'rest' },
+  { suburb: 'Grove', postcode: '7109', state: 'TAS', region: 'rest' },
+  { suburb: 'Geeveston', postcode: '7116', state: 'TAS', region: 'rest' },
+  // TAS Rest — West Coast
+  { suburb: 'Queenstown', postcode: '7467', state: 'TAS', region: 'rest' },
+  { suburb: 'Strahan', postcode: '7468', state: 'TAS', region: 'rest' },
+  { suburb: 'Zeehan', postcode: '7469', state: 'TAS', region: 'rest' },
+  { suburb: 'Rosebery', postcode: '7470', state: 'TAS', region: 'rest' },
+
+  // ── NT ──
+  // Greater Darwin GCCSA (capital) — Darwin, Palmerston, and Litchfield
+  // urban corridor, sourced from ABS 2021 GCCSA boundaries.
+  // Darwin city & inner suburbs
+  { suburb: 'Darwin', postcode: '0800', state: 'NT', region: 'capital' },
+  { suburb: 'Stuart Park', postcode: '0820', state: 'NT', region: 'capital' },
+  { suburb: 'Parap', postcode: '0820', state: 'NT', region: 'capital' },
+  { suburb: 'Fannie Bay', postcode: '0820', state: 'NT', region: 'capital' },
+  { suburb: 'Larrakeyah', postcode: '0820', state: 'NT', region: 'capital' },
+  { suburb: 'Bayview', postcode: '0820', state: 'NT', region: 'capital' },
+  { suburb: 'The Gardens', postcode: '0820', state: 'NT', region: 'capital' },
+  { suburb: 'Winnellie', postcode: '0820', state: 'NT', region: 'capital' },
+  { suburb: 'Coconut Grove', postcode: '0810', state: 'NT', region: 'capital' },
+  { suburb: 'Rapid Creek', postcode: '0810', state: 'NT', region: 'capital' },
+  { suburb: 'Nightcliff', postcode: '0810', state: 'NT', region: 'capital' },
+  { suburb: 'Casuarina', postcode: '0810', state: 'NT', region: 'capital' },
+  { suburb: 'Tiwi', postcode: '0810', state: 'NT', region: 'capital' },
+  { suburb: 'Wulagi', postcode: '0812', state: 'NT', region: 'capital' },
+  { suburb: 'Karama', postcode: '0812', state: 'NT', region: 'capital' },
+  { suburb: 'Malak', postcode: '0812', state: 'NT', region: 'capital' },
+  { suburb: 'Marrara', postcode: '0812', state: 'NT', region: 'capital' },
+  { suburb: 'Anula', postcode: '0812', state: 'NT', region: 'capital' },
+  { suburb: 'Berrimah', postcode: '0828', state: 'NT', region: 'capital' },
+  // Palmerston
+  { suburb: 'Palmerston', postcode: '0830', state: 'NT', region: 'capital' },
+  { suburb: 'Durack', postcode: '0830', state: 'NT', region: 'capital' },
+  { suburb: 'Woodroffe', postcode: '0830', state: 'NT', region: 'capital' },
+  { suburb: 'Farrar', postcode: '0830', state: 'NT', region: 'capital' },
+  { suburb: 'Kilgariff', postcode: '0830', state: 'NT', region: 'capital' },
+  { suburb: 'Rosebery', postcode: '0832', state: 'NT', region: 'capital' },
+  { suburb: 'Bakewell', postcode: '0832', state: 'NT', region: 'capital' },
+  { suburb: 'Gunn', postcode: '0832', state: 'NT', region: 'capital' },
+  { suburb: 'Johnston', postcode: '0832', state: 'NT', region: 'capital' },
+  { suburb: 'Mitchell', postcode: '0832', state: 'NT', region: 'capital' },
+  { suburb: 'Bellamack', postcode: '0832', state: 'NT', region: 'capital' },
+  { suburb: 'Zuccoli', postcode: '0832', state: 'NT', region: 'capital' },
+  // NT Rest — Alice Springs
+  { suburb: 'Alice Springs', postcode: '0870', state: 'NT', region: 'rest' },
+  { suburb: 'Gillen', postcode: '0870', state: 'NT', region: 'rest' },
+  { suburb: 'Sadadeen', postcode: '0870', state: 'NT', region: 'rest' },
+  { suburb: 'Araluen', postcode: '0870', state: 'NT', region: 'rest' },
+  { suburb: 'Desert Springs', postcode: '0870', state: 'NT', region: 'rest' },
+  { suburb: 'East Side', postcode: '0870', state: 'NT', region: 'rest' },
+  { suburb: 'The Gap', postcode: '0870', state: 'NT', region: 'rest' },
+  { suburb: 'Larapinta', postcode: '0875', state: 'NT', region: 'rest' },
+  // NT Rest — regional
+  { suburb: 'Katherine', postcode: '0850', state: 'NT', region: 'rest' },
+  { suburb: 'Emungalan', postcode: '0852', state: 'NT', region: 'rest' },
+  { suburb: 'Mataranka', postcode: '0852', state: 'NT', region: 'rest' },
+  { suburb: 'Tennant Creek', postcode: '0860', state: 'NT', region: 'rest' },
+  { suburb: 'Nhulunbuy', postcode: '0880', state: 'NT', region: 'rest' },
+  { suburb: 'Yirrkala', postcode: '0880', state: 'NT', region: 'rest' },
+  { suburb: 'Jabiru', postcode: '0886', state: 'NT', region: 'rest' },
+  { suburb: 'Pine Creek', postcode: '0847', state: 'NT', region: 'rest' },
 ]
 
 /** Search suburbs by name or postcode prefix (case-insensitive) across all states. */
 export function searchSuburbs(query: string, limit = 8): SuburbEntry[] {
   const q = query.trim().toLowerCase()
-  // Empty query → show a balanced NSW + VIC mix so both states are visible.
   if (!q) {
-    const nsw = SUBURBS.filter((s) => s.state === 'NSW')
-    const vic = SUBURBS.filter((s) => s.state === 'VIC')
+    const states = ['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'ACT', 'NT']
+    const grouped = states.map(st => SUBURBS.filter(s => s.state === st))
     const mix: SuburbEntry[] = []
-    for (let i = 0; i < Math.max(nsw.length, vic.length) && mix.length < limit; i++) {
-      if (nsw[i]) mix.push(nsw[i])
-      if (vic[i]) mix.push(vic[i])
+    const maxLen = Math.max(...grouped.map(g => g.length))
+    for (let i = 0; i < maxLen && mix.length < limit; i++) {
+      for (const g of grouped) {
+        if (g[i] && mix.length < limit) mix.push(g[i])
+      }
     }
-    // The caller filters by the selected state and then takes the first few, so
-    // SA suburbs are APPENDED after the NSW/VIC mix rather than interleaved into
-    // it. An SA applicant gets a populated dropdown before typing; the NSW, VIC
-    // and QLD results are byte-identical to what they were, because nothing
-    // ahead of the append moved. (QLD has never had empty-query results — that
-    // predates this change and is left exactly as it was.)
-    mix.push(...SUBURBS.filter((s) => s.state === 'SA'))
-    mix.push(...SUBURBS.filter((s) => s.state === 'ACT'))
-    return mix.slice(0, limit)
+    return mix
   }
   const starts: SuburbEntry[] = []
   const contains: SuburbEntry[] = []

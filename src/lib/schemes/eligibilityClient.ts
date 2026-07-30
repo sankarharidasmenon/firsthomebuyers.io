@@ -125,7 +125,26 @@ export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: '
   if (s.applicable_states) {
     const states = String(s.applicable_states).toUpperCase()
     const federal = /ALL STATES|ALL TERRITORIES|NATION|AUSTRALIA[- ]WIDE/.test(states)
-    const stateMatch = federal || states.includes(a.state.toUpperCase())
+    
+    const STATE_NAMES: Record<string, string> = {
+      NSW: 'NEW SOUTH WALES',
+      VIC: 'VICTORIA',
+      QLD: 'QUEENSLAND',
+      SA: 'SOUTH AUSTRALIA',
+      WA: 'WESTERN AUSTRALIA',
+      TAS: 'TASMANIA',
+      ACT: 'AUSTRALIAN CAPITAL TERRITORY',
+      NT: 'NORTHERN TERRITORY'
+    }
+    const code = a.state.toUpperCase()
+    const fullName = STATE_NAMES[code]
+    
+    // Use word boundaries for the code so "WA" doesn't match inside "NEW SOUTH WALES".
+    // Or check if the full name is present.
+    const stateMatch = federal || 
+      new RegExp(`\\b${code}\\b`).test(states) || 
+      (fullName && states.includes(fullName))
+
     if (stateMatch) pass(`Applicable to ${federal ? 'all states (Federal)' : a.state}`)
     else fail(`Scheme is for ${s.applicable_states}, not ${a.state}`)
   }

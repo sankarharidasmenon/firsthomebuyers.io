@@ -46,7 +46,7 @@ const RESIDENT_OK = new Set(['Australian Citizen', 'Permanent Resident', 'NZ Spe
 // ─────────────────────────────────────────────────────────────────────────────
 export type Errors = Partial<Record<keyof Answers, string>>
 
-const SUPPORTED_STATES = new Set(['NSW', 'VIC', 'QLD', 'SA', 'ACT'])
+const SUPPORTED_STATES = new Set(['NSW', 'VIC', 'QLD', 'SA', 'ACT', 'WA', 'TAS', 'NT'])
 
 // Step 1 — Getting started (name + state)
 export function validateStart(a: Answers): Errors {

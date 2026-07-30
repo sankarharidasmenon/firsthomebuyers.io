@@ -148,13 +148,25 @@ export function citizenshipVerdict(
   legacyAccepted: readonly string[],
 ): 'ok' | 'no' | 'unknown' {
   void legacyAccepted;
+
+  // Pre-validation: If residency is unknown/unsupported, we cannot confidently evaluate.
+  // We return 'unknown' even if the scheme does not explicitly state a residency rule.
+  const isSupported = status === 'Australian Citizen' || 
+                      status === 'Permanent Resident' || 
+                      /special category/i.test(status);
+                      
+  if (!isSupported) {
+    return 'unknown';
+  }
+
   if (!requirement.stated) return 'ok';
+  
   if (status === 'Australian Citizen') return 'ok';
-  // A permanent resident, and a NZ SCV holder (whom the NSW schemes treat as a
-  // permanent resident), satisfy anything short of a citizens-only scheme.
+  
   if (status === 'Permanent Resident' || /special category/i.test(status)) {
     return requirement.citizenOnly ? 'no' : 'ok';
   }
+  
   return 'unknown';
 }
 

@@ -21,7 +21,7 @@ import { Results } from './Results'
 
 const YES_NO = [{ value: 'Yes' as const, label: 'Yes' }, { value: 'No' as const, label: 'No' }]
 const ALL_STATES = ['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'ACT', 'NT']
-const SUPPORTED_STATE_CHIPS = ['NSW', 'VIC', 'QLD', 'SA', 'ACT']
+const SUPPORTED_STATE_CHIPS = ['NSW', 'VIC', 'QLD', 'SA', 'ACT', 'WA', 'TAS', 'NT']
 const STATE_CHIPS = ALL_STATES.map((s) => ({ value: s, label: SUPPORTED_STATE_CHIPS.includes(s) ? s : `${s} · soon` }))
 const PROP_CHIPS = PROPERTY_TYPE_OPTIONS.map((v) => ({ value: v, label: v }))
 const ENTITY_CHIPS = PURCHASE_ENTITY_OPTIONS.map((v) => ({ value: v, label: v }))
@@ -139,7 +139,19 @@ export function QuestionnaireFlow() {
                       <input className={`fhbq-input${errors.name ? ' invalid' : ''}`} placeholder="e.g. Sarah" value={a.name} onChange={(e) => set('name', e.target.value)} />
                     </Q>
                     <Q label="Which state or territory are you buying in?" help="Grants, concessions, and property price caps vary significantly depending on the state or territory where you intend to buy." error={errors.state}>
-                      <Chips options={STATE_CHIPS} value={a.state} onChange={(v) => set('state', v as Answers['state'])} disabled={(v) => !SUPPORTED_STATE_CHIPS.includes(v)} />
+                      <Chips options={STATE_CHIPS} value={a.state} onChange={(v) => {
+                        const nextState = v as Answers['state'];
+                        if (a.state !== nextState) {
+                          setA((prev) => {
+                            const next = { ...prev, state: nextState, suburb: '', postcode: '' };
+                            saveAnswers(next);
+                            return next;
+                          });
+                          setErrors((e) => (e.state ? { ...e, state: undefined } : e));
+                        } else {
+                          set('state', nextState);
+                        }
+                      }} disabled={(v) => !SUPPORTED_STATE_CHIPS.includes(v)} />
                     </Q>
                   </>
                 )}

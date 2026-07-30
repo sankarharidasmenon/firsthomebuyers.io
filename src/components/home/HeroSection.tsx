@@ -343,7 +343,7 @@ export function HeroSection() {
                   <h1 className="fn-hero-title max-w-2xl " style={{ fontSize: 'clamp(24px, 3.2vw, 40px)' }}>
                     {/* Australia <br/> */}
                      {/* Smarter<br /> */}
-                First Home Buyers Guide
+               Australian First Home Buyers 
                   </h1>
                   <p className="fn-hero-sub -mt-3">
                     {/* Your first home, made easier — in about 3 minutes. */}

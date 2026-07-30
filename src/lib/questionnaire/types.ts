@@ -9,7 +9,7 @@
  */
 
 export type YesNo = 'Yes' | 'No'
-export type StateCode = 'NSW' | 'VIC' | 'QLD' | 'SA' | 'ACT'
+export type StateCode = 'NSW' | 'VIC' | 'QLD' | 'SA' | 'ACT' | 'WA' | 'TAS' | 'NT'
 
 export const CITIZENSHIP_OPTIONS = [
   'Australian Citizen',
