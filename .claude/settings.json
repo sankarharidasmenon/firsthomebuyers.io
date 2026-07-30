@@ -52,7 +52,22 @@
       "Bash(curl -s -H 'apikey: sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' -H 'Authorization: Bearer sb_publishable_QjS6YR-tQCP4e16U0CGx3Q_GETsN82J' 'https://qbtlvhyqdciqnmmetzux.supabase.co/rest/v1/government_schemes?select=scheme_id,status&order=scheme_id.asc')",
       "Bash(node -e \"process.stdin.resume\\(\\);let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const rows=JSON.parse\\(d\\);const counts={};rows.forEach\\(r=>counts[r.status]=\\(counts[r.status]||0\\)+1\\);console.log\\('status value counts:',JSON.stringify\\(counts\\)\\);}\\)\")",
       "Bash(echo \"TSC exit=$?\")",
-      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,0\\)\\)\")"
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,0\\)\\)\")",
+      "WebFetch(domain:www.vic.gov.au)",
+      "Bash(grep -vE \"injected env|FHBG DEBUG|^  \\(scheme_id|scheme_name|prior_ownership|evaluation|rawAnswers|rule15\\):|^    \\(status|reasons\\):|^      '|^    \\\\]|^  \\\\}$|^\\\\}$\")",
+      "Bash(grep -vE \"injected env|FHBG DEBUG|^  \\(scheme_id|scheme_name|prior_ownership|evaluation|rawAnswers|rule15\\):|^    \\(status|reasons\\):|^      '|^    \\\\]|^  \\\\}$|^\\\\}$|npm notice\")",
+      "Bash(sed -i \"s|import { resolvePurchaseCap, resolveStateCaps } from '@/lib/schemes/priceCaps'|import { resolvePurchaseCap, resolveRegionCap, resolveStateCaps } from '@/lib/schemes/priceCaps'|\" src/lib/schemes/eligibilityClient.ts)",
+      "Bash(sed -i \"s|  propertyCategory?: 'new' \\\\| 'established' \\\\| 'offplan' \\\\| 'land'|  propertyCategory?: 'new' \\\\| 'established' \\\\| 'offplan' \\\\| 'land'\\\\n  /** Price-cap region for the suburb, when the dataset classifies it. */\\\\n  propertyRegion?: 'capital' \\\\| 'regional-centre' \\\\| 'rest'|\" src/lib/schemes/eligibilityClient.ts)",
+      "Bash(python3 -c \"pass\")",
+      "Bash(sed -i 's|      : `Sliding-scale first home concession — the \\\\$\\\\${rebate.amount.toLocaleString\\(.en-AU.\\)} rebate covers the duty in full at this price. Duty increases as the price rises through this band.`|      : `Sliding-scale first home concession — the $${rebate.amount.toLocaleString\\(\"en-AU\"\\)} rebate covers the duty in full at this price. Duty increases as the price rises through this band.`|' src/lib/schemes/stampDuty.ts)",
+      "Bash(sed -i 's|saving: round\\(standard - payable\\), note }|saving: cents\\(standard - payable\\), note }|; s|saving: round\\(standard - homeConcessionDuty\\)|saving: cents\\(standard - homeConcessionDuty\\)|' src/lib/schemes/stampDuty.ts)",
+      "Bash(perl -0pi -e \"s/\\\\\\\\\\\\$\\\\{duty\\\\.standard\\\\.toLocaleString\\\\\\('en-AU'\\\\\\)\\\\}/\\\\\\\\\\\\${formatDuty\\(duty.standard\\)}/; s/\\\\\\\\\\\\$\\\\{duty\\\\.payable\\\\.toLocaleString\\\\\\('en-AU'\\\\\\)\\\\}/\\\\\\\\\\\\${formatDuty\\(duty.payable\\)}/; s/\\\\\\\\\\\\$\\\\{duty\\\\.saving\\\\.toLocaleString\\\\\\('en-AU'\\\\\\)\\\\}/\\\\\\\\\\\\${formatDuty\\(duty.saving\\)}/\" src/components/results/GrantCard.tsx)",
+      "Bash(perl -0pi -e \"s/const fmt = \\\\\\(n: number \\\\| null\\\\\\) => \\\\\\(n === null \\\\? 'n\\\\/a' : \\\\`\\\\\\\\\\\\$\\\\\\\\\\\\$\\\\{n\\\\.toLocaleString\\\\\\('en-AU'\\\\\\)\\\\}\\\\`\\\\\\);/const fmt = \\(n: number | null\\) => \\(n === null ? 'n\\\\/a' : \\\\`\\\\\\\\\\\\$\\\\\\\\\\\\${formatDuty\\(n\\)}\\\\`\\);/\" scripts/verify-stamp-duty.ts)",
+      "Bash(awk -F'expected=| engine=' '{ if \\($2 != $3\\) print \"DIVERGE: \" $0 }')",
+      "WebFetch(domain:www.revenuesa.sa.gov.au)",
+      "Bash(curl -sL -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/126.0 Safari/537.36\" -o /dev/null -w \"%{http_code} %{url_effective}\\\\n\" \"https://www.revenuesa.sa.gov.au/grants-and-concessions/first-home-owners\")",
+      "Bash(./fetch.sh \"https://www.revenuesa.sa.gov.au/first-home-owners-grant\")",
+      "Bash(awk 'NR>250' fhog.txt)"
     ],
     "additionalDirectories": [
       "f:\\firstnest-v3"

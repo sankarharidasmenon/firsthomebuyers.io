@@ -1,4 +1,20 @@
+import { capIsExclusive, citizenshipRequirement, citizenshipVerdict, exemptsAdfFromResidence, incomeCapVariesWithDependants, partnerOwnershipRuleType, recognisesFamilyViolenceRequalification, requiresNaturalPerson, requiresUnoccupiedNewHome, restrictedPropertyCategories } from '@/lib/schemes/applicantRules'
+import { resolvePurchaseCap, resolveRegionCap, resolveStateCaps } from '@/lib/schemes/priceCaps'
 import type { EvaluatedGrant, EligibilityStatus, Grant } from '@/lib/schemes/types'
+
+type FhbgRuntimeDebug = {
+  scheme_id?: string
+  scheme_name?: string
+  prior_ownership_rules?: string | null
+  // `bucket` values as produced by evaluateScheme, not the display statuses.
+  evaluation?: { status?: 'yes' | 'check' | 'no'; reasons?: string[] }
+  rawAnswers?: { partnerOwned?: unknown; hasPartner?: unknown }
+  rule15?: string | null
+}
+
+declare global {
+  var __firstnestDebug: { fhbg?: FhbgRuntimeDebug } | undefined
+}
 
 export interface EligibilityAnswers {
   state: string
@@ -8,6 +24,15 @@ export interface EligibilityAnswers {
   propertyPrice: number
   deposit: number | null
   propertyType: string
+  /**
+   * New vs established vs land. Travels alongside `propertyType`, which stays a
+   * dwelling shape ('house' | 'apartment' | …) so existing matching is unchanged.
+   * Undefined when a caller doesn't supply it — category-restricted schemes are
+   * then left unfiltered, preserving prior behaviour.
+   */
+  propertyCategory?: 'new' | 'established' | 'offplan' | 'land'
+  /** Price-cap region for the suburb, when the dataset classifies it. */
+  propertyRegion?: 'capital' | 'regional-centre' | 'rest'
   singleParent?: boolean
   rawAnswers?: any // Full answers from the questionnaire
 }
@@ -32,7 +57,7 @@ export interface EligibilityResult {
   totalEligibleCount: number
 }
 
-interface ApiScheme {
+export interface ApiScheme {
   scheme_id: string
   scheme_name: string
   acronym?: string | null
@@ -48,11 +73,24 @@ interface ApiScheme {
   income_cap_single?: string | null
   income_cap_couple?: string | null
   property_price_cap?: string | null
+  price_cap_variations?: string | null
   minimum_deposit?: string | null
   eligible_property_types?: string | null
+  new_vs_established?: string | null
   prior_ownership_rules?: string | null
   owner_occupier_required?: string | null
   single_parent_required?: string | null
+  // Read by the Flow_Logic gates in applicantRules.ts (rules 14-16).
+  other_conditions?: string | null
+  minimum_age?: string | null
+  citizenship_residency?: string | null
+  relationship_status?: string | null
+  income_test_basis?: string | null
+}
+
+/** A scheme no longer open to new applicants is never evaluated. */
+export function isSchemeClosed(status: unknown): boolean {
+  return /closed|ended|expired|merged|superseded|inactive/i.test(String(status ?? ''))
 }
 
 function parseMoney(v: unknown): number | null {
@@ -67,7 +105,14 @@ function deriveCategory(type: string): DisplayCategory {
   return 'schemes'
 }
 
-function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 'check' | 'no', ruleResults: RuleResult[] } {
+/**
+ * The 16 eligibility rules, applied to one scheme row.
+ *
+ * Bucket semantics: every scheme starts at `yes`; a `fail` is sticky and can
+ * never be undone, a `check` only downgrades `yes`. Rule 1 is the sole short
+ * circuit — the rest keep running so the UI can render every reason.
+ */
+export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 'check' | 'no', ruleResults: RuleResult[] } {
   const rules: RuleResult[] = []
   let bucket: 'yes' | 'check' | 'no' = 'yes'
   const ra = a.rawAnswers || {}
@@ -97,10 +142,43 @@ function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 
       if (pt === 'townhouse' && (st.includes('townhouse') || st.includes('home'))) ptMatch = true
       if (pt === 'apartment' && (st.includes('apartment') || st.includes('unit'))) ptMatch = true
       if (pt === 'offplan' && st.includes('off-the-plan')) ptMatch = true
-      if (st.includes('new home') && ra.propertyType !== 'New' && ra.propertyType !== 'Off-the-Plan') ptMatch = false
 
-      if (ptMatch || st === '') pass(`Property type (${ra.propertyType}) is eligible`)
-      else fail(`Property type (${ra.propertyType}) does not match: ${s.eligible_property_types}`)
+      // "New homes only" is what the new_vs_established column records — a
+      // scheme that merely LISTS "New home" among several eligible types (the
+      // NSW First Home Buyers Assistance Scheme lists new and established alike)
+      // must not be read as new-only. A house-and-land build counts as new.
+      const newOnly = /new\b[^.]*only/i.test(String(s.new_vs_established || ''))
+      // A house-and-land build counts as "new" only for schemes that list it as
+      // an eligible property type. Grants do (NSW, VIC and QLD all list "House
+      // and land"), but Queensland's first home (new home) concession covers a
+      // COMPLETED new home — land you build on is covered by its separate
+      // vacant land concession instead. Driven by the scheme's own
+      // eligible_property_types, so no other scheme is affected.
+      const acceptsLandAndBuild = /house and land|vacant land/i.test(String(s.eligible_property_types || ''))
+      const buyingNew = ra.propertyType === 'New'
+        || ra.propertyType === 'Off-the-Plan'
+        || (ra.propertyType === 'Land + Build' && acceptsLandAndBuild)
+      // A scheme confined to established homes or to vacant land — Queensland
+      // runs these as separate programs from its new-home concession. Only fires
+      // when the caller supplied a category; no NSW or VIC row is restricted
+      // this way, so their evaluation is unaffected.
+      const categoryOnly = restrictedPropertyCategories(s)
+      const category = a.propertyCategory
+
+      if (newOnly && !buyingNew) {
+        fail(ra.propertyType === 'Land + Build'
+          ? `${s.scheme_name} applies to a completed new home — a house-and-land build is not an eligible property type for this scheme`
+          : `${s.scheme_name} is for new homes only — ${ra.propertyType} properties are not eligible`)
+      } else if (categoryOnly && category && !categoryOnly.includes(category)) {
+        const only = categoryOnly.includes('land') ? 'vacant land you build on'
+          : categoryOnly.includes('offplan') ? 'off-the-plan purchases'
+          : 'established homes'
+        fail(`${s.scheme_name} applies to ${only} — ${ra.propertyType} properties are not eligible`)
+      } else if (ptMatch || st === '') {
+        pass(`Property type (${ra.propertyType}) is eligible`)
+      } else {
+        fail(`Property type (${ra.propertyType}) does not match: ${s.eligible_property_types}`)
+      }
     } else {
       pass(`Property type (${ra.propertyType}) is eligible`)
     }
@@ -115,11 +193,39 @@ function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 
     pass(`Property location requirement satisfied`)
   }
 
-  // 4. Property price cap
-  const priceCap = parseMoney(s.property_price_cap)
+  // 4. Property price cap, most specific cap first: a cap that depends on how the
+  // home is acquired (NSW FHOG: $600k to buy a new home, $750k to build), then
+  // the applicant's own state cap (federal schemes publish one per state, with a
+  // higher figure for the capital city and listed regional centres), then the
+  // single national column. Between a state's two caps the answer depends on the
+  // suburb, which the questionnaire doesn't pin down, so that band is a "check".
+  const purchaseCap = resolvePurchaseCap(s.price_cap_variations, ra.propertyType)
+  // When the suburb's region is known the applicable cap is no longer ambiguous,
+  // so the two-cap "confirm your suburb" band collapses to a single figure.
+  // Unclassified suburbs return null here and behave exactly as before.
+  const regionCap = purchaseCap ? null : resolveRegionCap(s.price_cap_variations, a.state, a.propertyRegion)
+  const stateCaps = purchaseCap || regionCap ? [] : resolveStateCaps(s.price_cap_variations, a.state)
+  const priceCap = purchaseCap ? purchaseCap.amount
+    : regionCap ? regionCap.amount
+    : stateCaps.length > 0 ? stateCaps[0].amount
+    : parseMoney(s.property_price_cap)
+  const lowestCap = stateCaps.length > 0 ? stateCaps[stateCaps.length - 1].amount : priceCap
+  // Most caps are inclusive ("must not exceed", "up to"). The Queensland FHOG is
+  // exclusive ("less than $750,000"), so exactly the cap does not qualify.
+  const exclusive = capIsExclusive(s)
+  const within = (value: number, cap: number) => (exclusive ? value < cap : value <= cap)
   if (priceCap !== null && a.propertyPrice > 0) {
-    if (a.propertyPrice <= priceCap) pass(`Purchase price ($${a.propertyPrice.toLocaleString()}) is within the ${s.applicable_states || a.state} price cap.`)
-    else fail(`Purchase price ($${a.propertyPrice.toLocaleString()}) exceeds the ${s.applicable_states || a.state} price cap of $${priceCap.toLocaleString()}`)
+    const price = `$${a.propertyPrice.toLocaleString()}`
+    if (lowestCap !== null && within(a.propertyPrice, lowestCap)) {
+      pass(`Purchase price (${price}) is within the ${a.state} price cap.`)
+    } else if (within(a.propertyPrice, priceCap)) {
+      const region = stateCaps[0].label || `${a.state} capital city and regional centres`
+      check(`Purchase price (${price}) is within the $${priceCap.toLocaleString()} cap for ${region}, but above the $${lowestCap!.toLocaleString()} cap that applies elsewhere in ${a.state} — confirm the cap for your suburb.`)
+    } else {
+      const capFor = purchaseCap?.label ? ` for ${purchaseCap.label}` : ''
+      const limit = exclusive ? `must be less than $${priceCap.toLocaleString()}` : `of $${priceCap.toLocaleString()}`
+      fail(`Purchase price (${price}) exceeds the ${a.state} price cap ${limit}${capFor}`)
+    }
   } else if (priceCap !== null) {
     check(`Purchase price not provided, cap is $${priceCap.toLocaleString()}`)
   } else {
@@ -140,23 +246,70 @@ function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 
     check(`Applicant age not provided`)
   }
 
-  // 6. Citizenship / Residency
-  if (ra.citizenship) {
-    const RESIDENT_OK = ['Australian Citizen', 'Permanent Resident', 'NZ Special Category Visa (SCV) holder']
-    if (RESIDENT_OK.includes(ra.citizenship)) {
-      pass(`Citizenship / Residency requirement satisfied`)
-    } else {
-      check(`Residency status (${ra.citizenship}) may not be eligible`)
-    }
-  } else {
+  // 6. Citizenship / Residency — evaluated for EVERY applicant on the purchase,
+  // against the scheme's own published requirement.
+  //
+  // A joint application is only as strong as its weakest applicant on a scheme
+  // that binds all of them: Help to Buy requires Australian citizenship, so a
+  // permanent-resident co-buyer rules it out, while the 5% Deposit Scheme
+  // accepts permanent residents and is unaffected. Where Revenue NSW says "at
+  // least one applicant", one qualifying buyer is enough. All of that comes from
+  // `citizenship_residency`, so no scheme is named here.
+  const RESIDENT_OK = ['Australian Citizen', 'Permanent Resident', 'NZ Special Category Visa (SCV) holder']
+  const requirement = citizenshipRequirement(s)
+  const applicants: { label: string; status: string }[] = [
+    { label: 'Applicant', status: String(ra.citizenship ?? '') },
+    ...(ra.buyingWith === 'Jointly' && ra.coCitizenship
+      ? [{ label: 'Co-buyer', status: String(ra.coCitizenship) }]
+      : []),
+  ].filter((x) => x.status !== '')
+
+  if (applicants.length === 0) {
     check(`Citizenship / Residency not provided`)
+  } else {
+    const verdicts = applicants.map((x) => ({ ...x, verdict: citizenshipVerdict(requirement, x.status, RESIDENT_OK) }))
+    const rejected = verdicts.filter((v) => v.verdict === 'no')
+    const unknown = verdicts.filter((v) => v.verdict === 'unknown')
+    const accepted = verdicts.filter((v) => v.verdict === 'ok')
+
+    if (requirement.scope === 'any') {
+      // One qualifying buyer carries the application.
+      if (accepted.length > 0) pass(`Citizenship / Residency requirement satisfied (at least one applicant qualifies)`)
+      else if (unknown.length > 0) check(`Residency status (${unknown.map((u) => u.status).join(', ')}) may not be eligible`)
+      else fail(`No applicant meets the citizenship or residency requirement for ${s.scheme_name}`)
+    } else if (rejected.length > 0) {
+      fail(`${rejected.map((r) => `${r.label} is a ${r.status.toLowerCase()}`).join('; ')} — ${s.scheme_name} requires every applicant to be an Australian citizen`)
+    } else if (unknown.length > 0) {
+      check(`Residency status (${unknown.map((u) => u.status).join(', ')}) may not be eligible`)
+    } else {
+      pass(`Citizenship / Residency requirement satisfied for all applicants`)
+    }
   }
 
   // 7. First home buyer / Previous ownership
   const requiresFHB = /yes/i.test(s.first_home_buyer_required || '') || /first[\s-]?home/i.test(s.scheme_name || '')
+  const priorOwner = ra.everOwned === 'Yes'
+  // A scheme of the applicant's own state. State occupancy nuances — Victoria's
+  // "owned but never lived in it" test — are creatures of that state's
+  // legislation and cannot carry into a scheme with its own published test.
+  const ownStateScheme = String(s.applicable_states || '').toUpperCase().includes(String(a.state || '').toUpperCase())
+
   if (requiresFHB) {
-    if (a.firstHomeBuyer) pass(`First-home buyer requirement satisfied`)
-    else fail(`Applicant has previously owned residential property.`)
+    if (a.firstHomeBuyer && priorOwner && !ownStateScheme) {
+      // Housing Australia tests ownership in the last 10 years (measured from the
+      // sale date), and Help to Buy tests CURRENT ownership — neither cares
+      // whether the previous home was occupied. The questionnaire captures
+      // neither the sale date nor current ownership, so this cannot be decided.
+      check(`${s.scheme_name} applies its own prior-ownership test, which does not depend on whether you lived in the property — confirm the date you last held an interest and whether you still own it`)
+    } else if (a.firstHomeBuyer) {
+      pass(`First-home buyer requirement satisfied`)
+    } else if (ra.vicFamilyViolence === 'Yes' && recognisesFamilyViolenceRequalification(s)) {
+      // Victorian legislation lets victim-survivors requalify, but the
+      // Commissioner assesses it — it is not automatic.
+      check(`You may requalify for ${s.scheme_name} under the family violence provisions despite previously owning a home — this is assessed by the State Revenue Office`)
+    } else {
+      fail(`Applicant has previously owned residential property.`)
+    }
   } else {
     pass(`First-home buyer requirement satisfied`)
   }
@@ -176,6 +329,11 @@ function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 
   // 10. Move-in requirement
   if (ra.ppr === 'Yes') {
     if (ra.moveIn === 'Yes') pass(`Will move in within required timeframe`)
+    // V02 — an active Defence Force member is exempt from the residence
+    // requirement, but only for schemes that publish that exemption.
+    else if (ra.vicAdf === 'Yes' && exemptsAdfFromResidence(s)) {
+      pass(`Active Australian Defence Force member — exempt from the residence requirement for ${s.scheme_name} (does not extend to reservists or Australian Public Service staff)`)
+    }
     else if (ra.moveIn === 'No') check(`Move-in timeframe may not meet government requirements`)
     else check(`Move-in timeframe not provided`)
   } else {
@@ -187,7 +345,20 @@ function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 
   if (incomeCap !== null) {
     if (a.income > 0) {
       if (a.income <= incomeCap) pass(`Combined income ($${a.income.toLocaleString()}) within $${incomeCap.toLocaleString()} threshold`)
-      else fail(`Combined income ($${a.income.toLocaleString()}) exceeds $${incomeCap.toLocaleString()} threshold`)
+      else {
+        // Some schemes extend the higher cap to a SINGLE applicant with dependent
+        // children — Queensland's Boost to Buy does. The questionnaire never asks
+        // about dependants, so between the two caps we cannot decide, and saying
+        // "no" would be a guess. Report it as needing verification instead.
+        const higherCap = !a.hasPartner && incomeCapVariesWithDependants(s)
+          ? parseMoney(s.income_cap_couple)
+          : null
+        if (higherCap !== null && a.income <= higherCap) {
+          check(`Income ($${a.income.toLocaleString()}) exceeds the $${incomeCap.toLocaleString()} single threshold but is within the $${higherCap.toLocaleString()} threshold that applies to a single applicant with dependent children — the questionnaire does not ask about dependants, so this needs verification`)
+        } else {
+          fail(`Combined income ($${a.income.toLocaleString()}) exceeds $${incomeCap.toLocaleString()} threshold`)
+        }
+      }
     } else {
       check(`Income not provided, threshold is $${incomeCap.toLocaleString()}`)
     }
@@ -214,9 +385,81 @@ function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 
     else check(`Single parent status could not be fully verified`) // We don't ask about dependents in this flow
   }
 
+  // ── Flow_Logic gates 14-16 ────────────────────────────────────────────────
+  // Three mandatory questions were collected and validated but never reached the
+  // engine, so answering them changed nothing. Each gate below applies per
+  // scheme, from that scheme's own master-data columns — see applicantRules.ts.
+  //
+  // SCOPE: NSW only, deliberately. C17 and C08 are marked NSW=Y and VIC=Y in the
+  // questionnaire spec, but VIC eligibility was explicitly out of scope for this
+  // change, and Flow_Logic r7 states NSW and VIC treat partner ownership
+  // differently. Removing `isNsw` from a condition is all that is needed to
+  // extend that gate to VIC once the VIC rules have been agreed.
+  const isNsw = String(a.state || '').toUpperCase() === 'NSW'
+
+  // 14. C17 — applicant type gate (Flow_Logic r17). Scheme-driven, not
+  // state-driven: `requiresNaturalPerson` decides per scheme, so a scheme that
+  // legislation opens to companies and trusts (the Victorian off-the-plan duty
+  // concession) stays available while grants and first-home concessions do not.
+  if (ra.entity === 'Company' || ra.entity === 'Trust') {
+    if (requiresNaturalPerson(s)) {
+      fail(`${s.scheme_name} is available to individuals only — a ${String(ra.entity).toLowerCase()} cannot claim it`)
+    } else {
+      pass(`Purchase structure (${ra.entity}) is accepted by this scheme`)
+    }
+  }
+
+  // 15. C08 — partner's prior ownership (Flow_Logic r7). Only schemes whose own
+  // prior-ownership rule extends to a spouse or partner are affected.
+  let rule15Classification: string | null = 'not-applicable'
+  if (isNsw && ra.hasPartner === 'Yes' && ra.partnerOwned === 'Yes') {
+    const partnerRule = partnerOwnershipRuleType(s)
+    rule15Classification = partnerRule
+    if (partnerRule === 'absolute') {
+      fail(`Your spouse or partner has previously owned residential property — ${s.scheme_name} requires that neither of you has owned before`)
+    } else if (partnerRule === 'time-qualified') {
+      check(`Your spouse or partner's prior ownership may affect ${s.scheme_name}, but the questionnaire does not collect ownership dates, so eligibility needs manual verification`)
+    } else {
+      pass(`Partner's prior ownership does not affect this scheme`)
+    }
+  }
+
+  // 16. N01 (NSW) — "new home never occupied". Only new-homes-only schemes
+  // depend on it; duty concessions cover established homes and are unaffected.
+  //
+  // QLD was removed from this gate by product decision: Property Type = "New" is
+  // now taken to represent a Queensland new home, so Q01 is no longer asked and
+  // its answer is no longer read. Queensland's new-home test is therefore
+  // carried entirely by rule 2, which derives `buyingNew` from propertyType.
+  // Consequence, accepted by the business: a Queensland home the buyer selects
+  // as "New" but which has been previously occupied or sold as a residence can
+  // no longer be distinguished, so the FHOG and the first home (new home)
+  // concession will be reported as eligible for it.
+  //
+  // NSW is deliberately untouched — N01 is still asked and still enforced.
+  const neverOccupied = isNsw ? ra.nswNeverOccupied : undefined
+  if (isNsw && neverOccupied === 'No' && requiresUnoccupiedNewHome(s)) {
+    fail(`The home has been previously occupied or sold as a residence, so it is not a new home for ${s.scheme_name}`)
+  }
+
+  if (s.scheme_id === 'fed-first-home-guarantee') {
+    const debugState = globalThis as typeof globalThis & { __firstnestDebug?: { fhbg?: FhbgRuntimeDebug } }
+    debugState.__firstnestDebug = debugState.__firstnestDebug || {}
+    debugState.__firstnestDebug.fhbg = {
+      scheme_id: s.scheme_id,
+      scheme_name: s.scheme_name,
+      prior_ownership_rules: s.prior_ownership_rules ?? null,
+      evaluation: { status: bucket, reasons: rules.map((r) => r.text) },
+      rawAnswers: { partnerOwned: ra.partnerOwned, hasPartner: ra.hasPartner },
+      rule15: rule15Classification ?? null,
+    }
+    console.info('[FHBG DEBUG][evaluateScheme]', debugState.__firstnestDebug.fhbg)
+  }
+
   return { bucket, ruleResults: rules }
 }
 
+/** Build the display item for one scheme. Status comes straight from the rules. */
 function toItem(s: ApiScheme, a: EligibilityAnswers): EligibilityItem {
   const category = deriveCategory(String(s.type || s.benefit_type || ''))
   const variant: 'grant' | 'scheme' = category === 'cash' ? 'grant' : 'scheme'
@@ -235,7 +478,6 @@ function toItem(s: ApiScheme, a: EligibilityAnswers): EligibilityItem {
     benefitLine: (s.catchy_line || s.benefit_value || '').trim() || undefined,
   }
 
-  // Evaluate exactly according to the 13-rule plan
   const { bucket, ruleResults } = evaluateScheme(s, a)
   const status: EligibilityStatus = bucket === 'yes' ? 'eligible' : bucket === 'check' ? 'check' : 'ineligible'
 
@@ -249,15 +491,16 @@ function toItem(s: ApiScheme, a: EligibilityAnswers): EligibilityItem {
   return { eg, category, variant, bucket, ruleResults }
 }
 
-export async function fetchEligibility(a: EligibilityAnswers): Promise<EligibilityResult> {
-  const allRes = await fetch('/api/schemes', { cache: 'no-store' })
-  if (!allRes.ok) throw new Error(`Failed to load schemes (HTTP ${allRes.status})`)
-
-  const all = ((await allRes.json()).schemes ?? []) as ApiScheme[]
-
-  // Exclude closed schemes
-  const active = all.filter(s => !s.status || !/closed|ended|expired|merged|superseded|inactive/i.test(String(s.status)))
-
+/**
+ * Evaluate every scheme for one applicant and total the result.
+ *
+ * Called from POST /api/eligibility — the single runtime evaluation point.
+ * Closed schemes are dropped, each remaining scheme runs evaluateScheme exactly
+ * once, and the totals come from those same buckets. Nothing downstream may
+ * recompute or override a status.
+ */
+export function buildEligibilityResult(schemes: ApiScheme[], a: EligibilityAnswers): EligibilityResult {
+  const active = schemes.filter((s) => !isSchemeClosed(s.status))
   const items = active.map((s) => toItem(s, a))
 
   const sumEligible = (cat: DisplayCategory) =>
@@ -272,4 +515,27 @@ export async function fetchEligibility(a: EligibilityAnswers): Promise<Eligibili
     eligibleSchemesCount: items.filter((i) => i.category === 'schemes' && i.bucket === 'yes').length,
     totalEligibleCount: items.filter((i) => i.bucket === 'yes').length,
   }
+}
+
+/**
+ * Client transport. Posts the applicant's answers to the API, which runs the
+ * engine above once per scheme, and returns the response unchanged.
+ *
+ * No rules, no mapping, no fallback here — that is what keeps the browser and
+ * `scripts/audit-bd02.ts` in agreement.
+ */
+export async function fetchEligibility(a: EligibilityAnswers): Promise<EligibilityResult> {
+  const res = await fetch('/api/eligibility', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(a),
+    cache: 'no-store',
+  })
+
+  if (!res.ok) {
+    const detail = await res.json().catch(() => null)
+    throw new Error(detail?.error ?? `Failed to evaluate eligibility (HTTP ${res.status})`)
+  }
+
+  return (await res.json()) as EligibilityResult
 }

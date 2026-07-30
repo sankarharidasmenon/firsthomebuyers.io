@@ -1,19 +1,113 @@
 /**
- * NSW & VIC suburb/postcode data for the location combobox (C14).
+ * NSW, VIC, QLD, SA & ACT suburb/postcode data for the location combobox (C14).
  *
  * A curated list of common suburbs powers the searchable dropdown; any valid
- * 4-digit NSW/VIC postcode typed directly is also accepted via `inferState`.
+ * 4-digit postcode typed directly is also accepted via `inferState`.
  * State is always derived from the postcode — the applicant never picks it.
  */
 import type { StateCode } from './types'
+
+/**
+ * Where a suburb sits for the federal price caps, which publish a higher figure
+ * for the capital city and listed regional centres than for the rest of a state.
+ *
+ * Optional: a suburb without a region behaves exactly as before — the engine
+ * cannot pick between the two caps and reports "confirm the cap for your
+ * suburb". Queensland and South Australia are classified at present.
+ */
+export type PriceCapRegion = 'capital' | 'regional-centre' | 'rest'
 
 export interface SuburbEntry {
   suburb: string
   postcode: string
   state: StateCode
+  region?: PriceCapRegion
 }
 
-/** Infer NSW/VIC from a 4-digit postcode. Returns null for ACT/other/invalid. */
+/**
+ * South Australian postcodes classified by Housing Australia's price cap.
+ *
+ * Unlike NSW, VIC and QLD — where only the curated `SUBURBS` entries carry a
+ * region — every SA postcode is classified, because the classification could be
+ * read directly from the determinant itself: Housing Australia's own Postcode
+ * Search Tool, which returns the applicable cap for each of the 1,870 SA
+ * localities. Captured 29 July 2026 from
+ * https://firsthomebuyers.gov.au/australian-government-5-percent-deposit-scheme/property-price-caps
+ *
+ * Housing Australia defines "capital city" as the ABS Greater Capital City
+ * Statistical Area, so for SA the $900,000 cap is Greater Adelaide (which takes
+ * in Gawler, Mount Barker and the Adelaide Hills) and $500,000 is the rest of
+ * the state. There are no listed SA regional centres — that footnote covers
+ * only NSW, VIC and QLD — so no SA postcode maps to 'regional-centre'.
+ *
+ * The ranges below are a LOSSLESS encoding: expanding them reproduces exactly
+ * the 142 capital and 194 rest-of-state postcodes the tool returned, with no
+ * overlap and nothing interpolated. Five postcodes are deliberately in NEITHER
+ * list because the tool splits them — localities inside one postcode fall on
+ * different sides of the boundary (see SA_SPLIT_POSTCODES). Those resolve to
+ * undefined so the engine asks the applicant to confirm rather than guessing.
+ */
+const SA_CAPITAL_RANGES: [number, number][] = [
+  [5000, 5000], [5006, 5025], [5031, 5035], [5037, 5052], [5061, 5070],
+  [5072, 5076], [5081, 5098], [5106, 5118], [5120, 5121], [5125, 5127],
+  [5131, 5134], [5136, 5142], [5144, 5144], [5150, 5156], [5158, 5171],
+  [5173, 5174], [5231, 5234], [5240, 5245], [5250, 5252], [5950, 5950],
+]
+
+const SA_REST_RANGES: [number, number][] = [
+  [5202, 5204], [5210, 5214], [5220, 5223], [5235, 5238], [5253, 5256],
+  [5259, 5273], [5275, 5280], [5290, 5291], [5301, 5304], [5306, 5311],
+  [5320, 5322], [5330, 5333], [5340, 5346], [5350, 5357], [5360, 5360],
+  [5372, 5374], [5381, 5381], [5400, 5401], [5410, 5422], [5431, 5434],
+  [5440, 5440], [5451, 5455], [5460, 5462], [5464, 5464], [5470, 5473],
+  [5480, 5483], [5485, 5485], [5490, 5491], [5493, 5493], [5495, 5495],
+  [5502, 5502], [5510, 5510], [5520, 5523], [5540, 5540], [5550, 5550],
+  [5552, 5552], [5554, 5556], [5558, 5558], [5560, 5560], [5570, 5573],
+  [5575, 5577], [5580, 5583], [5600, 5609], [5611, 5611], [5630, 5633],
+  [5640, 5642], [5650, 5655], [5660, 5661], [5670, 5671], [5680, 5680],
+  [5690, 5690], [5700, 5701], [5710, 5710], [5713, 5713], [5715, 5715],
+  [5717, 5717], [5719, 5720], [5722, 5725], [5730, 5734],
+]
+
+/**
+ * SA postcodes the official tool classifies BOTH ways — e.g. 5172 covers
+ * Willunga ($900,000) and Yundi ($500,000). A postcode alone cannot decide
+ * these, so they stay unclassified and no suburb inside them is curated below.
+ */
+export const SA_SPLIT_POSTCODES = ['5157', '5172', '5201', '5371', '5501'] as const
+
+const inRanges = (pc: number, ranges: [number, number][]) =>
+  ranges.some(([lo, hi]) => pc >= lo && pc <= hi)
+
+/** SA region from the postcode alone, or undefined for split/unknown postcodes. */
+function saRegionFromPostcode(postcode: string): PriceCapRegion | undefined {
+  const pc = Number(String(postcode).trim())
+  if (!Number.isInteger(pc)) return undefined
+  if (inRanges(pc, SA_CAPITAL_RANGES)) return 'capital'
+  if (inRanges(pc, SA_REST_RANGES)) return 'rest'
+  return undefined
+}
+
+/**
+ * The region for a postcode, or undefined when it is not classified.
+ *
+ * Housing Australia applies the higher Queensland cap ($1,000,000) to Brisbane,
+ * the Gold Coast and the Sunshine Coast, and $700,000 to the rest of the state.
+ * "Brisbane" is the Greater Brisbane capital city area, which takes in Ipswich,
+ * Logan and Moreton Bay.
+ *
+ * The curated `SUBURBS` lookup runs first, so NSW, VIC and QLD are unchanged.
+ * SA additionally falls back to its complete postcode map above, so a typed SA
+ * postcode resolves even when no SA suburb was curated for it.
+ */
+export function inferRegion(postcode: string): PriceCapRegion | undefined {
+  const pc = String(postcode).trim()
+  const match = SUBURBS.find((s) => s.postcode === pc)
+  if (match?.region) return match.region
+  return inferState(pc) === 'SA' ? saRegionFromPostcode(pc) : undefined
+}
+
+/** Infer the state from a 4-digit postcode. Returns null for unsupported/invalid. */
 export function inferState(postcode: string): StateCode | null {
   const pc = Number(String(postcode).trim())
   if (!Number.isInteger(pc) || pc < 200 || pc > 9999) return null
@@ -21,9 +115,25 @@ export function inferState(postcode: string): StateCode | null {
   if ((pc >= 1000 && pc <= 1999) || (pc >= 2000 && pc <= 2599) || (pc >= 2619 && pc <= 2899) || (pc >= 2921 && pc <= 2999)) {
     return 'NSW'
   }
-  // ACT (2600–2618, 2900–2920) is intentionally excluded — not NSW/VIC.
+  // ACT: 2600–2618 and 2900–2920 — the two blocks the NSW ranges above already
+  // step around, so adding them here cannot change any NSW answer.
+  //
+  // Two of these postcodes straddle the border. 2611 covers thirteen ACT
+  // localities (Weston Creek and Molonglo) plus four NSW rural ones — Bimberi,
+  // Brindabella, Cooleman and Uriarra; 2618 covers Hall ACT plus Springrange and
+  // Wallaroo NSW. A postcode alone cannot separate them, and both resolved to
+  // null before this change, so mapping them to ACT is strictly more useful than
+  // rejecting them. A buyer in one of those six NSW localities would be shown
+  // ACT — rare, rural, and noted here deliberately.
+  if ((pc >= 2600 && pc <= 2618) || (pc >= 2900 && pc <= 2920)) return 'ACT'
   // VIC: 3000–3999, 8000–8999 (PO)
   if ((pc >= 3000 && pc <= 3999) || (pc >= 8000 && pc <= 8999)) return 'VIC'
+  // QLD: 4000–4999, 9000–9999 (PO)
+  if ((pc >= 4000 && pc <= 4999) || (pc >= 9000 && pc <= 9999)) return 'QLD'
+  // SA: 5000–5799 (street/PO delivery), 5800–5999 (large-volume receiver and
+  // PO boxes — 5950 Adelaide Airport is a live locality in Housing Australia's
+  // own table, so the whole 5xxx block belongs to SA).
+  if (pc >= 5000 && pc <= 5999) return 'SA'
   return null
 }
 
@@ -93,9 +203,253 @@ export const SUBURBS: SuburbEntry[] = [
   { suburb: 'Wodonga', postcode: '3690', state: 'VIC' },
   { suburb: 'Torquay', postcode: '3228', state: 'VIC' },
   { suburb: 'Pakenham', postcode: '3810', state: 'VIC' },
+
+  // ── QLD ──
+  { suburb: 'Brisbane', postcode: '4000', state: 'QLD', region: 'capital' },
+  { suburb: 'South Brisbane', postcode: '4101', state: 'QLD', region: 'capital' },
+  { suburb: 'Fortitude Valley', postcode: '4006', state: 'QLD', region: 'capital' },
+  { suburb: 'New Farm', postcode: '4005', state: 'QLD', region: 'capital' },
+  { suburb: 'Toowong', postcode: '4066', state: 'QLD', region: 'capital' },
+  { suburb: 'Chermside', postcode: '4032', state: 'QLD', region: 'capital' },
+  { suburb: 'Carindale', postcode: '4152', state: 'QLD', region: 'capital' },
+  { suburb: 'Sunnybank', postcode: '4109', state: 'QLD', region: 'capital' },
+  { suburb: 'Logan Central', postcode: '4114', state: 'QLD', region: 'capital' },
+  { suburb: 'Ipswich', postcode: '4305', state: 'QLD', region: 'capital' },
+  { suburb: 'Springfield Lakes', postcode: '4300', state: 'QLD', region: 'capital' },
+  { suburb: 'Redcliffe', postcode: '4020', state: 'QLD', region: 'capital' },
+  { suburb: 'Caboolture', postcode: '4510', state: 'QLD', region: 'capital' },
+  { suburb: 'Gold Coast (Southport)', postcode: '4215', state: 'QLD', region: 'regional-centre' },
+  { suburb: 'Surfers Paradise', postcode: '4217', state: 'QLD', region: 'regional-centre' },
+  { suburb: 'Robina', postcode: '4226', state: 'QLD', region: 'regional-centre' },
+  { suburb: 'Coomera', postcode: '4209', state: 'QLD', region: 'regional-centre' },
+  { suburb: 'Sunshine Coast (Maroochydore)', postcode: '4558', state: 'QLD', region: 'regional-centre' },
+  { suburb: 'Caloundra', postcode: '4551', state: 'QLD', region: 'regional-centre' },
+  { suburb: 'Noosa Heads', postcode: '4567', state: 'QLD', region: 'regional-centre' },
+  { suburb: 'Toowoomba', postcode: '4350', state: 'QLD', region: 'rest' },
+  { suburb: 'Cairns', postcode: '4870', state: 'QLD', region: 'rest' },
+  { suburb: 'Townsville', postcode: '4810', state: 'QLD', region: 'rest' },
+  { suburb: 'Mackay', postcode: '4740', state: 'QLD', region: 'rest' },
+  { suburb: 'Rockhampton', postcode: '4700', state: 'QLD', region: 'rest' },
+  { suburb: 'Bundaberg', postcode: '4670', state: 'QLD', region: 'rest' },
+  { suburb: 'Hervey Bay', postcode: '4655', state: 'QLD', region: 'rest' },
+  { suburb: 'Gladstone', postcode: '4680', state: 'QLD', region: 'rest' },
+
+  // ── SA ──
+  // Every postcode and region below was read from Housing Australia's Postcode
+  // Search Tool on 29 July 2026 (see SA_CAPITAL_RANGES above): 'capital' is the
+  // $900,000 Greater Adelaide cap, 'rest' the $500,000 rest-of-SA cap. No
+  // suburb in a split postcode (SA_SPLIT_POSTCODES) is listed here.
+  { suburb: 'Adelaide', postcode: '5000', state: 'SA', region: 'capital' },
+  { suburb: 'North Adelaide', postcode: '5006', state: 'SA', region: 'capital' },
+  { suburb: 'Woodville', postcode: '5011', state: 'SA', region: 'capital' },
+  { suburb: 'Port Adelaide', postcode: '5015', state: 'SA', region: 'capital' },
+  { suburb: 'Semaphore', postcode: '5019', state: 'SA', region: 'capital' },
+  { suburb: 'Henley Beach', postcode: '5022', state: 'SA', region: 'capital' },
+  { suburb: 'Marion', postcode: '5043', state: 'SA', region: 'capital' },
+  { suburb: 'Glenelg', postcode: '5045', state: 'SA', region: 'capital' },
+  { suburb: 'Brighton', postcode: '5048', state: 'SA', region: 'capital' },
+  { suburb: 'Unley', postcode: '5061', state: 'SA', region: 'capital' },
+  { suburb: 'Mitcham', postcode: '5062', state: 'SA', region: 'capital' },
+  { suburb: 'Burnside', postcode: '5066', state: 'SA', region: 'capital' },
+  { suburb: 'Norwood', postcode: '5067', state: 'SA', region: 'capital' },
+  { suburb: 'Campbelltown', postcode: '5074', state: 'SA', region: 'capital' },
+  { suburb: 'Prospect', postcode: '5082', state: 'SA', region: 'capital' },
+  { suburb: 'Modbury', postcode: '5092', state: 'SA', region: 'capital' },
+  { suburb: 'Mawson Lakes', postcode: '5095', state: 'SA', region: 'capital' },
+  { suburb: 'Parafield Gardens', postcode: '5107', state: 'SA', region: 'capital' },
+  { suburb: 'Salisbury', postcode: '5108', state: 'SA', region: 'capital' },
+  { suburb: 'Elizabeth', postcode: '5112', state: 'SA', region: 'capital' },
+  { suburb: 'Andrews Farm', postcode: '5114', state: 'SA', region: 'capital' },
+  { suburb: 'Munno Para', postcode: '5115', state: 'SA', region: 'capital' },
+  { suburb: 'Gawler', postcode: '5118', state: 'SA', region: 'capital' },
+  { suburb: 'Golden Grove', postcode: '5125', state: 'SA', region: 'capital' },
+  { suburb: 'Stirling', postcode: '5152', state: 'SA', region: 'capital' },
+  { suburb: 'Noarlunga Centre', postcode: '5168', state: 'SA', region: 'capital' },
+  { suburb: 'Seaford', postcode: '5169', state: 'SA', region: 'capital' },
+  { suburb: 'Aldinga Beach', postcode: '5173', state: 'SA', region: 'capital' },
+  { suburb: 'Hahndorf', postcode: '5245', state: 'SA', region: 'capital' },
+  { suburb: 'Mount Barker', postcode: '5251', state: 'SA', region: 'capital' },
+  { suburb: 'Victor Harbor', postcode: '5211', state: 'SA', region: 'rest' },
+  { suburb: 'Goolwa', postcode: '5214', state: 'SA', region: 'rest' },
+  { suburb: 'Kingscote', postcode: '5223', state: 'SA', region: 'rest' },
+  { suburb: 'Murray Bridge', postcode: '5253', state: 'SA', region: 'rest' },
+  { suburb: 'Strathalbyn', postcode: '5255', state: 'SA', region: 'rest' },
+  { suburb: 'Naracoorte', postcode: '5271', state: 'SA', region: 'rest' },
+  { suburb: 'Mount Gambier', postcode: '5290', state: 'SA', region: 'rest' },
+  { suburb: 'Loxton', postcode: '5333', state: 'SA', region: 'rest' },
+  { suburb: 'Renmark', postcode: '5341', state: 'SA', region: 'rest' },
+  { suburb: 'Berri', postcode: '5343', state: 'SA', region: 'rest' },
+  { suburb: 'Tanunda', postcode: '5352', state: 'SA', region: 'rest' },
+  { suburb: 'Nuriootpa', postcode: '5355', state: 'SA', region: 'rest' },
+  { suburb: 'Clare', postcode: '5453', state: 'SA', region: 'rest' },
+  { suburb: 'Port Pirie', postcode: '5540', state: 'SA', region: 'rest' },
+  { suburb: 'Kadina', postcode: '5554', state: 'SA', region: 'rest' },
+  { suburb: 'Wallaroo', postcode: '5556', state: 'SA', region: 'rest' },
+  { suburb: 'Whyalla', postcode: '5600', state: 'SA', region: 'rest' },
+  { suburb: 'Port Lincoln', postcode: '5606', state: 'SA', region: 'rest' },
+  { suburb: 'Port Augusta', postcode: '5700', state: 'SA', region: 'rest' },
+  { suburb: 'Roxby Downs', postcode: '5725', state: 'SA', region: 'rest' },
+
+  // ── SA — postcode 5172 (a SPLIT postcode; see SA_SPLIT_POSTCODES) ──
+  // Verified live against Housing Australia's Postcode Search Tool, 29 July 2026.
+  // Postcode 5172 straddles the Greater Adelaide boundary — the tool returns two
+  // different caps for localities sharing this one postcode:
+  //
+  //     $900,000 (Greater Adelaide)  The Range, Whites Valley, Willunga,
+  //                                  Willunga South
+  //     $500,000 (rest of SA)        Dingabledinga, Hope Forest, Kuitpo Colony,
+  //                                  Kyeema, Montarra, Pages Flat,
+  //                                  Willunga Hill, Yundi
+  //
+  // `region` is deliberately OMITTED on every entry below. `inferRegion` resolves
+  // by POSTCODE, taking the first matching SUBURBS row — so tagging these would
+  // make one locality's cap silently stand in for the other eleven, and a Yundi
+  // buyer would be given Willunga's $900,000 cap (or vice versa), a $400,000
+  // error. Leaving them untagged keeps `inferRegion('5172')` undefined, which is
+  // what makes the engine ask the applicant to confirm their suburb instead of
+  // guessing. The classification above is recorded here rather than in the
+  // `region` field for exactly that reason.
+  { suburb: 'Willunga', postcode: '5172', state: 'SA' },
+  { suburb: 'Willunga South', postcode: '5172', state: 'SA' },
+  { suburb: 'Willunga Hill', postcode: '5172', state: 'SA' },
+  { suburb: 'Whites Valley', postcode: '5172', state: 'SA' },
+  { suburb: 'The Range', postcode: '5172', state: 'SA' },
+  { suburb: 'Yundi', postcode: '5172', state: 'SA' },
+  { suburb: 'Hope Forest', postcode: '5172', state: 'SA' },
+  { suburb: 'Kuitpo Colony', postcode: '5172', state: 'SA' },
+  { suburb: 'Kyeema', postcode: '5172', state: 'SA' },
+  { suburb: 'Pages Flat', postcode: '5172', state: 'SA' },
+  { suburb: 'Montarra', postcode: '5172', state: 'SA' },
+  { suburb: 'Dingabledinga', postcode: '5172', state: 'SA' },
+
+  // ── ACT ──
+  // Every locality and postcode below was read from the Australian Government
+  // postcode data behind Housing Australia's Postcode Search Tool on 29 July
+  // 2026 — the complete ACT set, 115 localities across 25 postcodes. None is
+  // invented.
+  //
+  // No `region` is set: the ACT publishes a SINGLE territory-wide federal price
+  // cap of $1,000,000 with no capital/regional split, so there is nothing for a
+  // region to disambiguate. `resolveStateCaps` returns one cap, and the engine
+  // decides from it without needing the suburb.
+  { suburb: 'Barton', postcode: '2600', state: 'ACT' },
+  { suburb: 'Capital Hill', postcode: '2600', state: 'ACT' },
+  { suburb: 'Deakin', postcode: '2600', state: 'ACT' },
+  { suburb: 'Parkes', postcode: '2600', state: 'ACT' },
+  { suburb: 'Russell', postcode: '2600', state: 'ACT' },
+  { suburb: 'Yarralumla', postcode: '2600', state: 'ACT' },
+  { suburb: 'Acton', postcode: '2601', state: 'ACT' },
+  { suburb: 'City', postcode: '2601', state: 'ACT' },
+  { suburb: 'Ainslie', postcode: '2602', state: 'ACT' },
+  { suburb: 'Dickson', postcode: '2602', state: 'ACT' },
+  { suburb: 'Downer', postcode: '2602', state: 'ACT' },
+  { suburb: 'Hackett', postcode: '2602', state: 'ACT' },
+  { suburb: 'Lyneham', postcode: '2602', state: 'ACT' },
+  { suburb: "O'Connor", postcode: '2602', state: 'ACT' },
+  { suburb: 'Watson', postcode: '2602', state: 'ACT' },
+  { suburb: 'Forrest', postcode: '2603', state: 'ACT' },
+  { suburb: 'Griffith', postcode: '2603', state: 'ACT' },
+  { suburb: 'Red Hill', postcode: '2603', state: 'ACT' },
+  { suburb: 'Kingston', postcode: '2604', state: 'ACT' },
+  { suburb: 'Narrabundah', postcode: '2604', state: 'ACT' },
+  { suburb: 'Curtin', postcode: '2605', state: 'ACT' },
+  { suburb: 'Garran', postcode: '2605', state: 'ACT' },
+  { suburb: 'Hughes', postcode: '2605', state: 'ACT' },
+  { suburb: 'Chifley', postcode: '2606', state: 'ACT' },
+  { suburb: 'Lyons', postcode: '2606', state: 'ACT' },
+  { suburb: "O'Malley", postcode: '2606', state: 'ACT' },
+  { suburb: 'Phillip', postcode: '2606', state: 'ACT' },
+  { suburb: 'Farrer', postcode: '2607', state: 'ACT' },
+  { suburb: 'Isaacs', postcode: '2607', state: 'ACT' },
+  { suburb: 'Mawson', postcode: '2607', state: 'ACT' },
+  { suburb: 'Pearce', postcode: '2607', state: 'ACT' },
+  { suburb: 'Torrens', postcode: '2607', state: 'ACT' },
+  { suburb: 'Canberra Airport', postcode: '2609', state: 'ACT' },
+  { suburb: 'Fyshwick', postcode: '2609', state: 'ACT' },
+  { suburb: 'Pialligo', postcode: '2609', state: 'ACT' },
+  { suburb: 'Symonston', postcode: '2609', state: 'ACT' },
+  { suburb: 'Chapman', postcode: '2611', state: 'ACT' },
+  { suburb: 'Coombs', postcode: '2611', state: 'ACT' },
+  { suburb: 'Denman Prospect', postcode: '2611', state: 'ACT' },
+  { suburb: 'Duffy', postcode: '2611', state: 'ACT' },
+  { suburb: 'Fisher', postcode: '2611', state: 'ACT' },
+  { suburb: 'Holder', postcode: '2611', state: 'ACT' },
+  { suburb: 'Rivett', postcode: '2611', state: 'ACT' },
+  { suburb: 'Stirling', postcode: '2611', state: 'ACT' },
+  { suburb: 'Uriarra Village', postcode: '2611', state: 'ACT' },
+  { suburb: 'Waramanga', postcode: '2611', state: 'ACT' },
+  { suburb: 'Weston', postcode: '2611', state: 'ACT' },
+  { suburb: 'Whitlam', postcode: '2611', state: 'ACT' },
+  { suburb: 'Wright', postcode: '2611', state: 'ACT' },
+  { suburb: 'Braddon', postcode: '2612', state: 'ACT' },
+  { suburb: 'Campbell', postcode: '2612', state: 'ACT' },
+  { suburb: 'Reid', postcode: '2612', state: 'ACT' },
+  { suburb: 'Turner', postcode: '2612', state: 'ACT' },
+  { suburb: 'Aranda', postcode: '2614', state: 'ACT' },
+  { suburb: 'Cook', postcode: '2614', state: 'ACT' },
+  { suburb: 'Hawker', postcode: '2614', state: 'ACT' },
+  { suburb: 'Macquarie', postcode: '2614', state: 'ACT' },
+  { suburb: 'Page', postcode: '2614', state: 'ACT' },
+  { suburb: 'Scullin', postcode: '2614', state: 'ACT' },
+  { suburb: 'Weetangera', postcode: '2614', state: 'ACT' },
+  { suburb: 'Charnwood', postcode: '2615', state: 'ACT' },
+  { suburb: 'Dunlop', postcode: '2615', state: 'ACT' },
+  { suburb: 'Florey', postcode: '2615', state: 'ACT' },
+  { suburb: 'Flynn', postcode: '2615', state: 'ACT' },
+  { suburb: 'Fraser', postcode: '2615', state: 'ACT' },
+  { suburb: 'Higgins', postcode: '2615', state: 'ACT' },
+  { suburb: 'Holt', postcode: '2615', state: 'ACT' },
+  { suburb: 'Latham', postcode: '2615', state: 'ACT' },
+  { suburb: 'Macgregor', postcode: '2615', state: 'ACT' },
+  { suburb: 'Macnamara', postcode: '2615', state: 'ACT' },
+  { suburb: 'Melba', postcode: '2615', state: 'ACT' },
+  { suburb: 'Spence', postcode: '2615', state: 'ACT' },
+  { suburb: 'Strathnairn', postcode: '2615', state: 'ACT' },
+  { suburb: 'Belconnen', postcode: '2617', state: 'ACT' },
+  { suburb: 'Bruce', postcode: '2617', state: 'ACT' },
+  { suburb: 'Evatt', postcode: '2617', state: 'ACT' },
+  { suburb: 'Giralang', postcode: '2617', state: 'ACT' },
+  { suburb: 'Kaleen', postcode: '2617', state: 'ACT' },
+  { suburb: 'Lawson', postcode: '2617', state: 'ACT' },
+  { suburb: 'Mckellar', postcode: '2617', state: 'ACT' },
+  { suburb: 'Hall', postcode: '2618', state: 'ACT' },
+  { suburb: 'Greenway', postcode: '2900', state: 'ACT' },
+  { suburb: 'Kambah', postcode: '2902', state: 'ACT' },
+  { suburb: 'Oxley', postcode: '2903', state: 'ACT' },
+  { suburb: 'Wanniassa', postcode: '2903', state: 'ACT' },
+  { suburb: 'Fadden', postcode: '2904', state: 'ACT' },
+  { suburb: 'Gowrie', postcode: '2904', state: 'ACT' },
+  { suburb: 'Macarthur', postcode: '2904', state: 'ACT' },
+  { suburb: 'Monash', postcode: '2904', state: 'ACT' },
+  { suburb: 'Bonython', postcode: '2905', state: 'ACT' },
+  { suburb: 'Calwell', postcode: '2905', state: 'ACT' },
+  { suburb: 'Chisholm', postcode: '2905', state: 'ACT' },
+  { suburb: 'Gilmore', postcode: '2905', state: 'ACT' },
+  { suburb: 'Isabella Plains', postcode: '2905', state: 'ACT' },
+  { suburb: 'Richardson', postcode: '2905', state: 'ACT' },
+  { suburb: 'Theodore', postcode: '2905', state: 'ACT' },
+  { suburb: 'Banks', postcode: '2906', state: 'ACT' },
+  { suburb: 'Conder', postcode: '2906', state: 'ACT' },
+  { suburb: 'Gordon', postcode: '2906', state: 'ACT' },
+  { suburb: 'Crace', postcode: '2911', state: 'ACT' },
+  { suburb: 'Mitchell', postcode: '2911', state: 'ACT' },
+  { suburb: 'Gungahlin', postcode: '2912', state: 'ACT' },
+  { suburb: 'Casey', postcode: '2913', state: 'ACT' },
+  { suburb: 'Franklin', postcode: '2913', state: 'ACT' },
+  { suburb: 'Ngunnawal', postcode: '2913', state: 'ACT' },
+  { suburb: 'Nicholls', postcode: '2913', state: 'ACT' },
+  { suburb: 'Palmerston', postcode: '2913', state: 'ACT' },
+  { suburb: 'Taylor', postcode: '2913', state: 'ACT' },
+  { suburb: 'Amaroo', postcode: '2914', state: 'ACT' },
+  { suburb: 'Bonner', postcode: '2914', state: 'ACT' },
+  { suburb: 'Forde', postcode: '2914', state: 'ACT' },
+  { suburb: 'Harrison', postcode: '2914', state: 'ACT' },
+  { suburb: 'Jacka', postcode: '2914', state: 'ACT' },
+  { suburb: 'Moncrieff', postcode: '2914', state: 'ACT' },
+  { suburb: 'Throsby', postcode: '2914', state: 'ACT' },
 ]
 
-/** Search suburbs by name or postcode prefix (case-insensitive) across BOTH states. */
+/** Search suburbs by name or postcode prefix (case-insensitive) across all states. */
 export function searchSuburbs(query: string, limit = 8): SuburbEntry[] {
   const q = query.trim().toLowerCase()
   // Empty query → show a balanced NSW + VIC mix so both states are visible.
@@ -107,6 +461,14 @@ export function searchSuburbs(query: string, limit = 8): SuburbEntry[] {
       if (nsw[i]) mix.push(nsw[i])
       if (vic[i]) mix.push(vic[i])
     }
+    // The caller filters by the selected state and then takes the first few, so
+    // SA suburbs are APPENDED after the NSW/VIC mix rather than interleaved into
+    // it. An SA applicant gets a populated dropdown before typing; the NSW, VIC
+    // and QLD results are byte-identical to what they were, because nothing
+    // ahead of the append moved. (QLD has never had empty-query results — that
+    // predates this change and is left exactly as it was.)
+    mix.push(...SUBURBS.filter((s) => s.state === 'SA'))
+    mix.push(...SUBURBS.filter((s) => s.state === 'ACT'))
     return mix.slice(0, limit)
   }
   const starts: SuburbEntry[] = []

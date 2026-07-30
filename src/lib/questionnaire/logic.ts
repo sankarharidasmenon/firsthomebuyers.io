@@ -6,6 +6,7 @@
  * already consumes.
  */
 import type { Answers, StateCode } from './types'
+import { inferRegion } from './postcodes'
 import type { EligibilityAnswers } from '@/lib/schemes/eligibilityClient'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -18,6 +19,9 @@ export const showCoIncome = isJoint               // C16
 export const showPartnerOwned = (a: Answers) => a.hasPartner === 'Yes'      // C08
 export const showMoveIn = (a: Answers) => a.ppr === 'Yes'                   // C11
 export const showNsw = (a: Answers) => a.state === 'NSW' && a.propertyType === 'New' // N01
+// Q01 (QLD "new home never occupied") was removed by product decision: selecting
+// Property Type = "New" is now taken to represent a Queensland new home, so the
+// separate question is no longer asked. N01 is unchanged — NSW still asks it.
 export const showVicLivedIn = (a: Answers) => a.state === 'VIC' && a.everOwned === 'Yes' // V01
 export const showVic = (a: Answers) => a.state === 'VIC'                    // V02, V03
 
@@ -42,13 +46,19 @@ const RESIDENT_OK = new Set(['Australian Citizen', 'Permanent Resident', 'NZ Spe
 // ─────────────────────────────────────────────────────────────────────────────
 export type Errors = Partial<Record<keyof Answers, string>>
 
-const SUPPORTED_STATES = new Set(['NSW', 'VIC'])
+const SUPPORTED_STATES = new Set(['NSW', 'VIC', 'QLD', 'SA', 'ACT'])
 
 // Step 1 — Getting started (name + state)
 export function validateStart(a: Answers): Errors {
   const e: Errors = {}
   if (!a.name.trim()) e.name = 'Enter your name to continue.'
-  if (!a.state || !SUPPORTED_STATES.has(a.state)) e.state = 'Choose NSW or VIC to continue.'
+  // The message lists the set rather than hard-coding two states, so it stops
+  // going stale each time a state is added (it still said "NSW or VIC" after
+  // QLD went live).
+  if (!a.state || !SUPPORTED_STATES.has(a.state)) {
+    const list = [...SUPPORTED_STATES]
+    e.state = `Choose ${list.slice(0, -1).join(', ')} or ${list[list.length - 1]} to continue.`
+  }
   return e
 }
 
@@ -57,6 +67,9 @@ export function validateProperty(a: Answers): Errors {
   const e: Errors = {}
   if (!a.propertyType) e.propertyType = 'Select the type of property you’re buying.'
   if (showNsw(a) && !a.nswNeverOccupied) e.nswNeverOccupied = 'Please answer the NSW new-home question.'
+  // No Q01 validation — the QLD new-home question was removed, so a Queensland
+  // applicant choosing "New" must be able to complete this step with no hidden
+  // required field.
   if (a.price == null || a.price <= 0) e.price = 'Enter the purchase price.'
   if (!a.postcode || !a.state) e.postcode = 'Search and select a suburb.'
   if (!a.ppr) e.ppr = 'Let us know if this will be your home.'
@@ -164,6 +177,28 @@ const PROPERTY_TYPE_MAP: Record<string, EligibilityAnswers['propertyType']> = {
   'Land + Build': 'house',
 }
 
+/**
+ * The property CATEGORY, kept separate from the dwelling-shape value above.
+ *
+ * `PROPERTY_TYPE_MAP` answers "what kind of dwelling is it?" and deliberately
+ * collapses New and Established into `house` — every scheme that matches on
+ * dwelling keywords ("house", "unit", "townhouse") depends on that and must not
+ * change. It cannot answer "is this a new home or an established one?", which is
+ * what Queensland needs: the First Home Concession is for established homes and
+ * the First Home (New Home) Concession is for new ones, and they are separate
+ * schemes with different rules.
+ *
+ * So the category travels alongside the type rather than replacing it. Callers
+ * that do not set it (e.g. the home-page calculator) leave category-restricted
+ * schemes unfiltered, exactly as before.
+ */
+const PROPERTY_CATEGORY_MAP: Record<string, EligibilityAnswers['propertyCategory']> = {
+  New: 'new',
+  'Established (Existing)': 'established',
+  'Off-the-Plan': 'offplan',
+  'Land + Build': 'land',
+}
+
 /** Combined household income used for income-tested schemes. */
 export function combinedIncome(a: Answers): number {
   return (a.income ?? 0) + (isJoint(a) ? a.coIncome ?? 0 : 0)
@@ -181,6 +216,10 @@ export function toEligibilityAnswers(a: Answers): EligibilityAnswers {
     propertyPrice: a.price ?? 0,
     deposit: typeof a.deposit === 'number' ? a.deposit : null,
     propertyType: a.propertyType ? PROPERTY_TYPE_MAP[a.propertyType] : 'house',
+    propertyCategory: a.propertyType ? PROPERTY_CATEGORY_MAP[a.propertyType] : undefined,
+    // Only classified suburbs carry a region; anything else stays undefined and
+    // the engine keeps its previous "confirm the cap for your suburb" answer.
+    propertyRegion: a.postcode ? inferRegion(a.postcode) : undefined,
     rawAnswers: a, // Pass the full Answers object down for deep evaluation!
   }
 }

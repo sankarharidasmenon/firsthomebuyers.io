@@ -9,7 +9,7 @@
  */
 
 export type YesNo = 'Yes' | 'No'
-export type StateCode = 'NSW' | 'VIC'
+export type StateCode = 'NSW' | 'VIC' | 'QLD' | 'SA' | 'ACT'
 
 export const CITIZENSHIP_OPTIONS = [
   'Australian Citizen',
@@ -67,7 +67,13 @@ export interface Answers {
   coIncome: number | null                // C16  (if Jointly)
 
   // ── NSW-specific ──
-  nswNeverOccupied: YesNo | ''           // N01  (if NSW & New)
+  nswNeverOccupied: YesNo | ''           // N01
+
+  // ── QLD-specific ──
+  // Q01 — RETIRED by product decision. No longer asked, validated or read by the
+  // rules engine; Property Type = "New" now represents a Queensland new home.
+  // The field is kept so stored answers and API payloads keep their exact shape.
+  qldNeverOccupied: YesNo | ''           // Q01  (retired)
 
   // ── VIC-specific ──
   vicLivedInPrior: YesNo | ''            // V01  (if VIC & everOwned = Yes)
@@ -101,6 +107,7 @@ export const EMPTY_ANSWERS: Answers = {
   income: null,
   coIncome: null,
   nswNeverOccupied: '',
+  qldNeverOccupied: '',
   vicLivedInPrior: '',
   vicAdf: '',
   vicFamilyViolence: '',

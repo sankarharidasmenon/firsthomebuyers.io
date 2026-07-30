@@ -27,7 +27,8 @@ import { validateRows } from '../src/lib/masterData/validate';
 import { importSchemes } from '../src/lib/masterData/import';
 import { getImportHistory } from '../src/lib/masterData/import';
 import { getAdminClient } from '../src/lib/supabase/server';
-import { listSchemes, getScheme, listFeatured, listEligible } from '../src/lib/schemes/repository';
+import { listSchemes, getScheme, listFeatured } from '../src/lib/schemes/repository';
+import { buildEligibilityResult } from '../src/lib/schemes/eligibilityClient';
 import { DATA_WORKSHEET, EXPECTED_HEADERS } from '../src/lib/masterData/columns';
 
 const XLSX = path.resolve(process.cwd(), 'government-data-extractor/output/government_schemes.xlsx');
@@ -111,8 +112,15 @@ async function main() {
     const featured = await listFeatured(6);
     check('GET /api/schemes/featured returns ≤ 6 active', featured.length > 0 && featured.length <= 6);
 
-    const eligible = await listEligible({ state: 'VIC', firstHomeBuyer: true, income: 90000, propertyPrice: 650000 });
-    check('GET /api/schemes/eligible filters deterministically', eligible.length > 0 && eligible.length <= all.length, `got ${eligible.length}`);
+    // Eligibility now has exactly one implementation — evaluateScheme, reached
+    // through buildEligibilityResult. Assert it runs over every open scheme.
+    const evaluated = buildEligibilityResult(all as never, {
+      state: 'VIC', firstHomeBuyer: true, income: 90000, hasPartner: false,
+      propertyPrice: 650000, deposit: null, propertyType: 'house',
+    });
+    check('eligibility engine evaluates every open scheme once',
+      evaluated.items.length > 0 && evaluated.items.length <= all.length,
+      `got ${evaluated.items.length} of ${all.length}`);
 
     // Rollback: a failing import (malformed payload) must leave data untouched.
     const countBefore = (await listSchemes()).length;

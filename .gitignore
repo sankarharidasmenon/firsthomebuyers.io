@@ -45,3 +45,12 @@ next-env.d.ts
 /docs/
 
 /data-extractor/
+
+/scripts/
+
+/scratch-act-audit.ts
+/scratch-impact.ts
+/scratch-multi.ts
+/scratch-others.ts
+/tmp-trace.ts
+/tmp-verify-live.ts

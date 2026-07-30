@@ -14,6 +14,7 @@ import { getStep1, getStep2, getStep3 } from '@/lib/localStorage'
 import { toast } from 'sonner'
 import { DUMMY_USER } from '@/lib/dummyData'
 import { fetchEligibility, type EligibilityResult, type EligibilityItem, type DisplayCategory } from '@/lib/schemes/eligibilityClient'
+import { categoryDisplay, summariseEligibility, taxDisplay, totalBenefitDisplay } from '@/lib/schemes/summary'
 import { loadAnswers } from '@/lib/questionnaire/storage'
 import { toEligibilityAnswers } from '@/lib/questionnaire/logic'
 
@@ -35,6 +36,19 @@ function SectionHeader({ icon, title, description }: { icon: string; title: stri
 }
 
 const STATUS_PRI: Record<string, number> = { eligible: 1, check: 2, ineligible: 3 }
+
+/**
+ * Category order WITHIN a status band. Presentation only — it decides where a
+ * card is drawn, never whether it qualifies.
+ *
+ * Sorting by status and then by category means each (status, category) pair
+ * forms one contiguous run, so a section header appears at most once per status
+ * band. Previously only the status was sorted, and the grouping loop below —
+ * which starts a new block whenever consecutive items differ — reproduced the
+ * backend's interleaved category order as repeated headers ("Cash Grants" could
+ * appear five times inside the ineligible band).
+ */
+const CATEGORY_PRI: Record<DisplayCategory, number> = { cash: 1, schemes: 2, tax: 3 }
 
 const CATEGORY_META = {
   cash: { icon: '💰', title: 'Cash Grants', description: 'One-time payments that do not need to be repaid' },
@@ -66,12 +80,9 @@ export default function GrantsResultsPage() {
 
       setDisplay({ state: answers.state || 'VIC', firstName: answers.name, targetPropertyPrice: answers.price || 0 })
 
-      const eligReq = toEligibilityAnswers(answers)
-      // Pass singleParent manually if we want, but it's handled by generic logic if we pass raw answers.
-      // Wait, toEligibilityAnswers doesn't set singleParent. Let's set it here just in case.
-      eligReq.singleParent = eligReq.hasPartner ? false : undefined
-
-      const res = await fetchEligibility(eligReq)
+      // Answers go to the engine exactly as the questionnaire mapped them. Every
+      // caller must send the identical payload, or two pages will disagree.
+      const res = await fetchEligibility(toEligibilityAnswers(answers))
 
       setResult(res)
       setLoadState(res.items.length ? 'ready' : 'empty')
@@ -89,7 +100,7 @@ export default function GrantsResultsPage() {
         savedAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         borrowing: { min: 0, max: 0 },
-        grantsTotal: result.cashGrantsTotal + result.taxSavingsTotal,
+        grantsTotal: summariseEligibility(result.items).totalBenefit,
         eligibleGrants: result.items.filter((i) => i.eg.status === 'eligible').map((i) => i.eg.grant.id),
         state: display.state,
         firstName: display.firstName,
@@ -103,12 +114,29 @@ export default function GrantsResultsPage() {
     }
   }
 
+  // Summary figures, derived from the SAME items that render the cards below, so
+  // the header and sidebar can never disagree with the list. No re-evaluation.
+  const summary = summariseEligibility(result?.items ?? [], {
+    state: display.state,
+    price: display.targetPropertyPrice,
+  })
+  const sidebarCash = categoryDisplay(summary.cash, { costed: '', uncosted: '', none: '' })
+  const sidebarTax = taxDisplay(summary)
+  const sidebarTotal = totalBenefitDisplay(summary)
+
   const CardList = () => {
     if (!result) return null
     type Item = EligibilityItem & { status: string }
+    // Order for DISPLAY: status band first, then category within the band. The
+    // sort is stable, so two cards sharing a status and category keep the exact
+    // order the engine returned them in — no scheme is reprioritised, only
+    // repositioned. `.sort()` mutates, so it runs on the array `.map()` just
+    // produced, never on `result.items` itself.
     const flatItems: Item[] = result.items
       .map((i) => ({ ...i, status: i.eg.status }))
-      .sort((a, b) => (STATUS_PRI[a.status] ?? 3) - (STATUS_PRI[b.status] ?? 3))
+      .sort((a, b) =>
+        (STATUS_PRI[a.status] ?? 3) - (STATUS_PRI[b.status] ?? 3) ||
+        (CATEGORY_PRI[a.category] ?? 9) - (CATEGORY_PRI[b.category] ?? 9))
 
     // Group consecutive items with the same (status, category) into blocks
     type Block = { status: string; category: DisplayCategory; items: Item[] }
@@ -119,6 +147,16 @@ export default function GrantsResultsPage() {
       else blocks.push({ status: item.status, category: item.category, items: [item] })
     }
     const visibleBlocks = showIneligible ? blocks : blocks.filter((b) => b.status !== 'ineligible')
+
+    // Card numbering — presentation only. Counts the cards actually rendered, in
+    // render order, continuing across section headers instead of restarting.
+    // Derived from `visibleBlocks`, so hiding the ineligible schemes renumbers
+    // 1..N over what remains rather than leaving gaps. Nothing here reads or
+    // writes eligibility; the numbers follow the order, never set it.
+    const cardNumbers = new Map<string, number>()
+    for (const block of visibleBlocks) {
+      for (const item of block.items) cardNumbers.set(item.eg.grant.id, cardNumbers.size + 1)
+    }
 
     return (
       <div className="px-5 flex flex-col pt-5 pb-6" style={{ gap: 28 }}>
@@ -133,6 +171,10 @@ export default function GrantsResultsPage() {
                   evaluatedGrant={item.eg}
                   hidden={!showIneligible && item.eg.status === 'ineligible'}
                   variant={item.variant}
+                  // Same calculator as the summary card — only for the duty
+                  // scheme the applicant actually qualifies for.
+                  duty={item.category === 'tax' && item.bucket === 'yes' ? summary.duty : null}
+                  index={cardNumbers.get(item.eg.grant.id)}
                 />
               ))}
             </div>
@@ -211,10 +253,7 @@ export default function GrantsResultsPage() {
             {loadState === 'ready' && result ? (
               <>
                 <TotalSavingsHero
-                  cashGrantsTotal={result.cashGrantsTotal}
-                  taxSavingsTotal={result.taxSavingsTotal}
-                  eligibleSchemesCount={result.eligibleSchemesCount}
-                  totalEligibleCount={result.totalEligibleCount}
+                  summary={summary}
                   state={display.state || 'your state'}
                 />
                 <ResultsTabSwitcher />
@@ -235,10 +274,7 @@ export default function GrantsResultsPage() {
               {/* Left column */}
               <div className="bg-white dark:bg-card rounded-2xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)' }}>
                 <TotalSavingsHero
-                  cashGrantsTotal={result.cashGrantsTotal}
-                  taxSavingsTotal={result.taxSavingsTotal}
-                  eligibleSchemesCount={result.eligibleSchemesCount}
-                  totalEligibleCount={result.totalEligibleCount}
+                  summary={summary}
                   state={display.state || 'your state'}
                 />
                 <ResultsTabSwitcher />
@@ -254,30 +290,41 @@ export default function GrantsResultsPage() {
                       Your summary
                     </p>
                     <div className="flex flex-col" style={{ gap: 18 }}>
+                       <div className="flex justify-between items-baseline">
+                        <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>🏠 Eligible Schemes</span>
+                        <span className={summary.schemes.eligibleCount > 0 ? 'text-[#16A34A]' : 'text-[#CCCCCC] dark:text-muted-foreground/30'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
+                          {summary.schemes.eligibleCount > 0 ? summary.schemes.eligibleCount : '—'}
+                        </span>
+                      </div>
                       <div className="flex justify-between items-baseline">
-                        <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>💰 Cash Grants</span>
-                        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem', color: result.cashGrantsTotal > 0 ? '#16A34A' : '#CCCCCC' }}>
-                          {result.cashGrantsTotal > 0 ? `$${result.cashGrantsTotal.toLocaleString('en-AU')}` : '—'}
+                        <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>💰 Grants</span>
+                        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem', color: sidebarCash.muted ? '#CCCCCC' : '#16A34A' }}>
+                          {sidebarCash.value}
                         </span>
                       </div>
                       <div className="flex justify-between items-baseline">
                         <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>🧾 Tax & Duty Savings</span>
-                        <span className={result.taxSavingsTotal > 0 ? 'text-[#111111] dark:text-foreground' : 'text-[#CCCCCC] dark:text-muted-foreground/30'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
-                          {result.taxSavingsTotal > 0 ? `$${result.taxSavingsTotal.toLocaleString('en-AU')}` : '—'}
+                        <span className={sidebarTax.muted ? 'text-[#CCCCCC] dark:text-muted-foreground/30' : 'text-[#111111] dark:text-foreground'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
+                          {sidebarTax.value}
                         </span>
                       </div>
-                      <div className="flex justify-between items-baseline">
+                      {/* <div className="flex justify-between items-baseline">
                         <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>🏠 Eligible Schemes</span>
-                        <span className={result.eligibleSchemesCount > 0 ? 'text-[#16A34A]' : 'text-[#CCCCCC] dark:text-muted-foreground/30'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
-                          {result.eligibleSchemesCount > 0 ? result.eligibleSchemesCount : '—'}
+                        <span className={summary.schemes.eligibleCount > 0 ? 'text-[#16A34A]' : 'text-[#CCCCCC] dark:text-muted-foreground/30'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
+                          {summary.schemes.eligibleCount > 0 ? summary.schemes.eligibleCount : '—'}
                         </span>
-                      </div>
+                      </div> */}
                       <div className="flex justify-between items-baseline pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
                         <span className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem' }}>Total Benefit</span>
                         <span className="text-[#16A34A]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.25rem' }}>
-                          ${(result.cashGrantsTotal + result.taxSavingsTotal).toLocaleString('en-AU')}
+                          {sidebarTotal.value}
                         </span>
                       </div>
+                      {sidebarTotal.note && (
+                        <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: -10, textAlign: 'right' }}>
+                          {sidebarTotal.note}
+                        </p>
+                      )}
                       <div className="flex justify-between items-center pt-3">
                         <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>Property target</span>
                         <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem' }}>

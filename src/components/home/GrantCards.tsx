@@ -467,16 +467,28 @@ export const GrantCards = () => {
   }
   const regionGroups = GROUP_ORDER.filter(code => (grouped[code]?.length ?? 0) > 0)
   /* Concatenate the already-deduped per-region lists so "All" matches exactly
-     what the individual tabs show. */
+     what the individual tabs show. Grouping stays strictly by jurisdiction, so
+     each scheme appears here exactly once. */
   const allTiles = regionGroups.flatMap(code => grouped[code])
   const groups = regionGroups.length > 0 ? [ALL_TAB, ...regionGroups] : []
+
+  /* A state tab lists that state's own schemes AND the federal ones, because
+     both are available to a buyer there — a NSW buyer can claim the NSW grant
+     and the federal 5% Deposit Scheme. State schemes lead; the "Federal" badge
+     already on every card distinguishes them. The AU tab stays federal-only,
+     and "All" keeps one card per scheme. */
+  const tilesFor = (code: string): Scheme[] => {
+    if (code === ALL_TAB) return allTiles
+    if (code === 'AU') return grouped.AU ?? []
+    return [...(grouped[code] ?? []), ...(grouped.AU ?? [])]
+  }
 
   useEffect(() => {
     if (groups.length > 0 && !groups.includes(activeTab)) setActiveTab(groups[0])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groups.join(',')])
 
-  const activeTiles = activeTab === ALL_TAB ? allTiles : (grouped[activeTab] ?? [])
+  const activeTiles = tilesFor(activeTab)
   const visibleTiles = showAll ? activeTiles : activeTiles.slice(0, VISIBLE_LIMIT)
   const hiddenCount = activeTiles.length - VISIBLE_LIMIT
 
@@ -563,7 +575,7 @@ export const GrantCards = () => {
                   {code !== ALL_TAB && <RegionFlag code={code} />}
                   {code === ALL_TAB ? 'All' : REGION_LABELS[code] ?? code}
                   <span className={`text-[11px] font-normal ml-0.5 ${code === activeTab ? 'opacity-80' : 'opacity-60'}`}>
-                    {code === ALL_TAB ? allTiles.length : grouped[code].length}
+                    {tilesFor(code).length}
                   </span>
                 </button>
               ))}
