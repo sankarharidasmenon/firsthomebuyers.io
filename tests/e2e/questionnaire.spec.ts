@@ -182,12 +182,26 @@ test.describe('conditional branching', () => {
     await q.nextButton.click()
     await expect(q.stepIndicator(3)).toBeVisible()
 
-    const coBuyerHeading = page.getByText('Co-buyer details')
-    await expect(coBuyerHeading).toBeHidden()
+    /**
+     * Assert on the collapsed container, not on the text inside it.
+     *
+     * <Cond> keeps its children MOUNTED and collapses with
+     * grid-template-rows: 0fr + opacity: 0 + aria-hidden, so the reveal can
+     * animate. Playwright measures an element's own box and ignores clipping
+     * by an ancestor's overflow, and it does not count opacity: 0 as hidden —
+     * so `getByText('Co-buyer details')` reports VISIBLE while collapsed even
+     * though the block is correctly hidden from sight and from assistive tech.
+     * `toBeHidden()` therefore fails against a correctly-behaving app.
+     *
+     * aria-hidden is the real contract here: it is what a screen reader obeys,
+     * and it is what this test is actually about.
+     */
+    const coBuyerBlock = page.locator('.fhbq-cond', { hasText: 'Co-buyer details' })
+    await expect(coBuyerBlock).toHaveAttribute('aria-hidden', 'true')
 
     await page.getByRole('radio', { name: /With a partner/ }).click()
 
-    await expect(coBuyerHeading).toBeVisible()
+    await expect(coBuyerBlock).toHaveAttribute('aria-hidden', 'false')
   })
 })
 

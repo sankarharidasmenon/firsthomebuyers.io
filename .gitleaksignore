@@ -1,0 +1,40 @@
+# gitleaks — accepted findings.
+#
+# Every entry below is a `commit:path:rule:line` fingerprint for ONE finding in
+# ONE historical commit. Nothing here is a wildcard: if either of these values
+# is committed again in a NEW commit, the scan fails, exactly as it should.
+#
+# Adding an entry requires evidence that the match is not a live secret. Both
+# groups below were verified against `gitleaks detect` output (rule
+# curl-auth-header, 8 findings, all in .claude/settings.json).
+#
+# ── Group 1 — Supabase PUBLISHABLE key, .claude/settings.json (6 findings) ──
+# Value: sb_publishable_… — the browser-side key, the successor to the "anon"
+# key. It is shipped to every visitor inside the JS bundle as
+# NEXT_PUBLIC_SUPABASE_ANON_KEY (see .env.example), so it is public by design
+# and access is constrained by Row Level Security, not by keeping it hidden.
+# gitleaks matches it only because it appears after `-H 'Authorization: Bearer'`
+# in a recorded curl command, which is a shape heuristic, not a severity one.
+#
+# NOT ignored, and never to be: SUPABASE_SERVICE_ROLE_KEY. That one bypasses
+# RLS. It has never been committed — confirmed by scanning all 26 commits.
+#
+# These are stale Claude Code permission-allowlist entries pointing at a
+# scratch path from a finished session. Deleting them from
+# .claude/settings.json is worthwhile hygiene, but it does not remove them from
+# history, which is what --fetch-depth 0 scans — hence these fingerprints.
+8bce89387cb091d217df4e20e41fc8efb793781f:.claude/settings.json:curl-auth-header:44
+8bce89387cb091d217df4e20e41fc8efb793781f:.claude/settings.json:curl-auth-header:45
+8bce89387cb091d217df4e20e41fc8efb793781f:.claude/settings.json:curl-auth-header:47
+8bce89387cb091d217df4e20e41fc8efb793781f:.claude/settings.json:curl-auth-header:48
+8bce89387cb091d217df4e20e41fc8efb793781f:.claude/settings.json:curl-auth-header:50
+8bce89387cb091d217df4e20e41fc8efb793781f:.claude/settings.json:curl-auth-header:52
+
+# ── Group 2 — literal placeholder string (2 findings) ───────────────────────
+# Value: "change-me-super-admin-token" — the placeholder default of the former
+# MASTER_DATA_ADMIN_TOKEN, in a recorded `-H 'x-admin-token: …'` curl command.
+# It is a self-describing placeholder, not a credential, and the token scheme
+# it belonged to no longer exists: /api/admin/master-data/upload now authorises
+# through Supabase role-based auth. A textbook false positive.
+92bb706e71dfb5d6b6fd3d02264401421fa06c4c:.claude/settings.json:curl-auth-header:23
+92bb706e71dfb5d6b6fd3d02264401421fa06c4c:.claude/settings.json:curl-auth-header:30

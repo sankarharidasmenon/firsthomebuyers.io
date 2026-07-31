@@ -40,7 +40,7 @@ const eslintConfig = defineConfig([
   // disabling linting altogether. `npm run lint:ci` caps the total warning
   // count, so any NEW violation still fails the build.
   //
-  // Counts measured on branch v6 before the gate was introduced (49 errors):
+  // Errors downgraded by THIS block (49):
   //   react-hooks/static-components       18
   //   react-hooks/set-state-in-effect     17
   //   @typescript-eslint/no-explicit-any   7
@@ -48,11 +48,25 @@ const eslintConfig = defineConfig([
   //   react-hooks/purity                   2
   //   prefer-const                         1
   //
-  // Ratchet: fix a rule's violations, restore it to "error" here, and lower
-  // the --max-warnings budget in the "lint:ci" script by the same amount.
-  // `prefer-const` and `react/no-unescaped-entities` are the cheapest wins.
-  // The react-hooks rules flag genuine effect/purity smells — schedule those
-  // deliberately, with tests in place first.
+  // The --max-warnings budget is NOT that number. It must cover every warning
+  // ESLint emits, including ones this block never touches because they are
+  // warnings in eslint-config-next already. Full breakdown of the 105 that
+  // `npm run lint:ci` currently budgets for:
+  //   the 49 above                        49
+  //   @typescript-eslint/no-unused-vars   49   (dead imports / vars / props)
+  //   @next/next/no-img-element            7
+  //
+  // Deriving the budget from this block alone is what set it to a wrong value
+  // once already. Take the total from `npx eslint .` and nothing else.
+  //
+  // Ratchet: fix a rule's violations, restore it to "error" here (where it is
+  // listed below), and lower the --max-warnings budget in the "lint:ci" script
+  // by the same amount. The budget must always equal the real count, so that
+  // any NEW violation fails CI. `@typescript-eslint/no-unused-vars` is the
+  // biggest and cheapest win — every one is unreferenced code. `prefer-const`
+  // and `react/no-unescaped-entities` are next. The react-hooks rules flag
+  // genuine effect/purity smells — schedule those deliberately, with tests in
+  // place first.
   // ──────────────────────────────────────────────────────────────────────────
   {
     name: "firstnest/legacy-baseline",

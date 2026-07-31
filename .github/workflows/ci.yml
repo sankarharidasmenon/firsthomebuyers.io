@@ -253,7 +253,17 @@ jobs:
     name: UI Tests
     needs: [unit-tests, integration-tests, api-tests]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 20 was not survivable, measured rather than guessed. This job runs the
+    # suite TWICE (functional, then accessibility) and playwright.config.ts
+    # prefixes each run with `npm run build`, so the job pays for two full
+    # production builds. Measured locally: 63 functional specs on chromium
+    # alone, 3 workers, 2.6 min of test time. CI runs 4 projects (chromium,
+    # firefox, webkit, mobile-chrome) = 252 test runs at 2 workers, so roughly
+    # 2.6 x 4 x 3/2 ~= 16 min of test time before either build, before the
+    # slower-than-chromium engines, and before retries. Raising a runner
+    # timeout weakens nothing: it is a runaway-job guard, not a quality gate,
+    # and every assertion still has to pass.
+    timeout-minutes: 45
 
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}

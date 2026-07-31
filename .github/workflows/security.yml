@@ -84,17 +84,25 @@ jobs:
       # paid GITLEAKS_LICENSE for organisation-owned repositories) and not a
       # container image (project policy: no container images anywhere).
       #
-      # The asset URL is resolved from the releases API rather than pinned, so
-      # a stale version pin cannot 404 the job. HARDENING: pin an exact version
-      # and verify its checksum once you have a known-good release.
+      # The version is PINNED. It used to be resolved at runtime from
+      # https://api.github.com/.../releases/latest, which broke the job in two
+      # ways: that endpoint is rate-limited to 60 requests per hour per source
+      # IP for unauthenticated callers and GitHub-hosted runners share a NAT
+      # pool, so `curl -sSfL` intermittently took a 403 and — under
+      # `set -euo pipefail` — failed the job for reasons unrelated to secrets;
+      # and it silently opted the gate into every future release, including the
+      # v9 line, which removes the `detect` subcommand used below.
+      #
+      # Bump deliberately. Dependabot does not watch this because it is a curl,
+      # not an action reference.
       - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
         run: |
           set -euo pipefail
-          URL="$(curl -sSfL https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
-            | jq -r '.assets[] | select(.name | test("linux_x64\\.tar\\.gz$")) | .browser_download_url' \
-            | head -n1)"
-          test -n "$URL"
-          curl -sSfL "$URL" -o /tmp/gitleaks.tar.gz
+          curl -sSfL \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            -o /tmp/gitleaks.tar.gz
           tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
           sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
           gitleaks version

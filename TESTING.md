@@ -290,8 +290,14 @@ npm run test:all          # unit + integration + api
 
 `.github/workflows/security.yml` — `dependency-audit` (SCA), `secret-scan`
 (gitleaks), `semgrep` (SAST, report-only), `sbom`.
-`.github/workflows/codeql.yml` — `analyze` (SAST; needs GitHub Advanced Security on
-private repos).
+
+There is **no CodeQL workflow**. It was removed, not disabled temporarily: CodeQL
+requires GitHub Advanced Security, which is not available on a private repository
+under a personal account, so `github/codeql-action/init` fails before it analyses
+anything. That is a licensing boundary, not a defect in this codebase — the
+workflow itself was correct. Semgrep in `security.yml` is now the only SAST
+engine. If this repository ever moves to an organisation with GHAS, or becomes
+public, reinstating CodeQL is worthwhile; until then it can only ever report red.
 
 All test artifacts upload with `if: always()`, so a **failing** run still publishes
 its report. Any non-zero exit fails the job and the workflow.
