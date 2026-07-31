@@ -104,6 +104,45 @@
   50% { transform: rotate(4deg); }
 }
 
+/* ── Very narrow phones ─────────────────────────────────────────────────────
+   The navbar is a single flex row: 16px padding + logo + the mobile action
+   cluster (theme toggle + hamburger, 84px) + 16px padding. At the default md
+   size the logo cluster is a fixed 305px, so the row needs 405px. Below that,
+   the actions were pushed past the viewport and clipped by an ancestor's
+   overflow — measured on WebKit, the hamburger sat at 365-405px and was
+   genuinely unclickable at both 320px AND 375px (iPhone SE / 13 mini).
+
+   Shrinking here has to reduce the LAYOUT box, not just the painted result,
+   so this changes intrinsic size rather than applying a transform: `scale()`
+   would leave the flex item still reserving its original 305px and would not
+   move the hamburger back on screen.
+
+   `!important` is required, not decorative: Logo.tsx passes the icon
+   dimensions and the wordmark size as INLINE styles, which a plain class rule
+   cannot override.
+
+   At 400px and above nothing here applies and the logo is untouched. */
+@media (max-width: 400px) {
+  .logoContainer {
+    gap: 0.25rem;
+  }
+
+  /* ~305px -> ~189px, which fits 16 + 189 + 84 + 16 = 305 into a 320px viewport. */
+  .iconWrapper {
+    height: 22px !important;
+    width: 36px !important;
+  }
+
+  .textWrap {
+    font-size: 1.02rem !important;
+  }
+
+  /* The badge is decoration; the navigation is not. It returns at >=400px. */
+  .betaBadge {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .logoAnimated,
   .logoAnimated .iconWrapper,

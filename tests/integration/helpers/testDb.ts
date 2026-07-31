@@ -16,7 +16,42 @@
  * Optional:
  *   SUPABASE_TEST_SERVICE_ROLE_KEY - for setup/teardown that must bypass RLS
  */
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import {
+  createClient,
+  type SupabaseClient,
+  type SupabaseClientOptions,
+  type WebSocketLikeConstructor,
+} from '@supabase/supabase-js'
+import ws from 'ws'
+
+/**
+ * Shared options for every real-database client below.
+ *
+ * `realtime.transport` is the WebSocket fix, and it is REQUIRED, not optional
+ * tuning. createClient() always builds a RealtimeClient, and that constructor
+ * resolves its transport eagerly via
+ * `options?.transport ?? WebSocketFactory.getWebSocketConstructor()`. On Node
+ * versions below 22 there is no global WebSocket, so the factory throws
+ * "Node.js 20 detected without native WebSocket support" — from createClient
+ * itself, before a single assertion runs. Passing `ws` short-circuits the
+ * factory, which is the workaround the error message itself prescribes.
+ *
+ * This mirrors what the application already does in src/lib/supabase/server.ts
+ * (which polyfills globalThis.WebSocket for the same reason). These tests never
+ * subscribe to a realtime channel; the transport exists purely so the client
+ * can be constructed. Node 20 is the project's target runtime — see .nvmrc and
+ * package.json#engines — so this stays needed until that deliberately changes.
+ */
+const TEST_CLIENT_OPTIONS: SupabaseClientOptions<'public'> = {
+  auth: { persistSession: false, autoRefreshToken: false },
+  // The cast is an upstream typing gap, not a shortcut. Supabase declares
+  // `new (address: string | URL, subprotocols?: string | string[])`, while
+  // @types/ws also carries a `new (address: null)` overload for its server-side
+  // form; TypeScript resolves against that overload and rejects the assignment.
+  // The runtime shapes match — the same reason src/lib/supabase/server.ts casts
+  // when it assigns ws to globalThis.WebSocket.
+  realtime: { transport: ws as unknown as WebSocketLikeConstructor },
+}
 
 export interface TestDbConfig {
   url: string
@@ -50,16 +85,12 @@ export function explainSkip(suite: string): void {
 export function createAnonTestClient(): SupabaseClient {
   const config = getTestDbConfig()
   if (!config) throw new Error('No test database configured; guard with `hasTestDb` first.')
-  return createClient(config.url, config.anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  return createClient(config.url, config.anonKey, TEST_CLIENT_OPTIONS)
 }
 
 /** Service-role client for setup/teardown only. Bypasses RLS — never assert with it. */
 export function createServiceTestClient(): SupabaseClient | null {
   const config = getTestDbConfig()
   if (!config?.serviceRoleKey) return null
-  return createClient(config.url, config.serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  return createClient(config.url, config.serviceRoleKey, TEST_CLIENT_OPTIONS)
 }

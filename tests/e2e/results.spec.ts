@@ -37,8 +37,21 @@ test.describe('results page', () => {
   })
 
   test('requests eligibility from the API', async ({ page }) => {
+    /**
+     * Armed BEFORE the questionnaire is filled in, so the request cannot be
+     * missed — but that means this promise has to stay alive for the whole
+     * multi-step fill, not for one action. Without an explicit timeout it
+     * inherits `actionTimeout: 15_000` from playwright.config.ts, a budget
+     * sized for a single click, and on webkit the fill takes longer than that:
+     * the promise rejected while `completeThroughHistory` was still clicking,
+     * failing the test before the app had any chance to make the call.
+     *
+     * 45s is scoped to what this promise actually spans and still sits inside
+     * the 60s per-test timeout, so a genuinely missing request still fails.
+     */
     const eligibilityCall = page.waitForRequest(
       (r) => r.url().includes('/api/eligibility') && r.method() === 'POST',
+      { timeout: 45_000 },
     )
 
     const q = new QuestionnairePage(page)

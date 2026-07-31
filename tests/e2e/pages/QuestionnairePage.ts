@@ -43,9 +43,21 @@ export class QuestionnairePage {
     return this.page.getByRole('heading', { level: 1 })
   }
 
-  /** "Step 2 of 5" — rendered in both the mobile and desktop headers. */
+  /**
+   * "Step 2 of 5".
+   *
+   * QuestionnaireFlow renders this string TWICE — once in
+   * `.fhbq-desktop-header` and once in `.fhbq-mobile-header` — and CSS shows
+   * exactly one of them per viewport (`questionnaire.css` toggles both at the
+   * desktop breakpoint). `.first()` picked by DOM order, which is always the
+   * desktop node, and that node is `display: none` below the breakpoint. Every
+   * assertion on this locator therefore failed on the mobile-chrome project
+   * against a page that was rendering correctly.
+   *
+   * Select by what the user can actually see, not by document order.
+   */
   stepIndicator(step: number, total = 5): Locator {
-    return this.page.getByText(`Step ${step} of ${total}`).first()
+    return this.page.getByText(`Step ${step} of ${total}`).filter({ visible: true }).first()
   }
 
   get nextButton(): Locator {

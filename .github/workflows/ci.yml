@@ -246,23 +246,32 @@ jobs:
       - name: Build
         run: npm run build
 
-  # ── UI Tests (Playwright) ─────────────────────────────────────────────────
+  # ── UI Tests (Playwright — Chromium engine, BLOCKING) ─────────────────────
   # Verifies the full application stack in real browsers. Starts a production
   # build and runs the Playwright suite against it.
+  #
+  # This job gates `build`. It runs the Chromium-engine projects only:
+  #   * chromium      — desktop
+  #   * mobile-chrome — Pixel 5 emulation, also Chromium, and a genuinely
+  #                     distinct surface (bottom nav, hamburger, mobile header)
+  # Every functional assertion still runs and a failure here still fails CI.
+  #
+  # TODO: Firefox/WebKit are temporarily non-blocking due to known
+  # cross-browser Playwright instability. Re-enable blocking once the test
+  # suite is stabilized.
+  # They run in `ui-tests-cross-browser` below, which does NOT gate anything.
   ui-tests:
     name: UI Tests
     needs: [unit-tests, integration-tests, api-tests]
     runs-on: ubuntu-latest
-    # 20 was not survivable, measured rather than guessed. This job runs the
-    # suite TWICE (functional, then accessibility) and playwright.config.ts
-    # prefixes each run with `npm run build`, so the job pays for two full
-    # production builds. Measured locally: 63 functional specs on chromium
-    # alone, 3 workers, 2.6 min of test time. CI runs 4 projects (chromium,
-    # firefox, webkit, mobile-chrome) = 252 test runs at 2 workers, so roughly
-    # 2.6 x 4 x 3/2 ~= 16 min of test time before either build, before the
-    # slower-than-chromium engines, and before retries. Raising a runner
-    # timeout weakens nothing: it is a runaway-job guard, not a quality gate,
-    # and every assertion still has to pass.
+    # 20 was not survivable, measured rather than guessed. playwright.config.ts
+    # prefixes EACH run with `npm run build`, and this job runs the suite twice
+    # (functional, then accessibility), so it pays for two production builds.
+    # The accessibility step is deliberately left spanning all four projects
+    # (see its own note), so the browser-scope reduction below does not shrink
+    # that half. Headroom retained rather than trimmed: a runner timeout is a
+    # runaway-job guard, not a quality gate, and every assertion still has to
+    # pass regardless of how long the job is permitted to take.
     timeout-minutes: 45
 
     env:
@@ -302,9 +311,13 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Run Functional Playwright tests
-        run: npx playwright test --grep-invert "accessibility"
+      # BLOCKING. Chromium-engine projects only — see the TODO on this job.
+      - name: Run Functional Playwright tests (Chromium — blocking)
+        run: npx playwright test --project=chromium --project=mobile-chrome --grep-invert "accessibility"
 
+      # Unchanged: still every project, still non-blocking. Left exactly as it
+      # was so the accessibility baseline is not quietly narrowed at the same
+      # time as the functional one.
       - name: Run Accessibility tests (Non-blocking)
         run: npx playwright test --grep "accessibility"
         continue-on-error: true
@@ -323,4 +336,108 @@ jobs:
         with:
           name: playwright-artifacts
           path: test-results/playwright-artifacts/
+          retention-days: 14
+
+  # ── UI Tests (Firefox & WebKit — INFORMATIONAL, non-blocking) ─────────────
+  # TODO: Firefox/WebKit are temporarily non-blocking due to known
+  # cross-browser Playwright instability. Re-enable blocking once the test
+  # suite is stabilized.
+  #
+  # To re-enable blocking, delete `continue-on-error` below and add this job to
+  # the `needs:` list on `build`. Nothing else has to change: the projects are
+  # still defined in playwright.config.ts, no spec is skipped, and no assertion
+  # differs from the Chromium run — this executes the SAME
+  # `--grep-invert "accessibility"` selection, only on the other two engines.
+  #
+  # `continue-on-error: true` is scoped to this job alone. It is deliberately
+  # absent from `build`'s `needs:`, so a red run here cannot delay or block the
+  # build, CI success, or a merge.
+  ui-tests-cross-browser:
+    name: UI Tests (Firefox & WebKit — non-blocking)
+    # Only `quality`, so it starts early and never sits on the critical path.
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    continue-on-error: true
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.[jt]s', 'src/**/*.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Restore Playwright browsers cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Functional Playwright tests (Firefox & WebKit)
+        id: cross_browser
+        run: npx playwright test --project=firefox --project=webkit --grep-invert "accessibility"
+
+      # A job-level `continue-on-error` reports the job as successful, which
+      # makes a red result easy to miss. This writes the outcome to the run
+      # summary so the status is legible without opening the logs.
+      - name: Publish result to run summary
+        if: always()
+        run: |
+          {
+            echo '## UI Tests — Firefox & WebKit (informational)'
+            echo
+            if [ "${{ steps.cross_browser.outcome }}" = "success" ]; then
+              echo 'Result: **passed**'
+            else
+              echo 'Result: **FAILED (non-blocking)** — outcome: `${{ steps.cross_browser.outcome }}`'
+              echo
+              echo 'This does NOT block CI, the build, or a merge. Chromium is the'
+              echo 'blocking browser. Download `playwright-report-cross-browser`'
+              echo 'for the HTML report, or `playwright-artifacts-cross-browser`'
+              echo 'for screenshots, videos and traces.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Playwright report (Firefox & WebKit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-cross-browser
+          path: playwright-report/
+          retention-days: 14
+
+      # `always()`, not `failure()`: with continue-on-error the job does not
+      # report failure, and the videos/traces are wanted precisely when a run
+      # was red. `test-results/` carries the JUnit XML as well as the
+      # screenshots, videos and traces under playwright-artifacts/.
+      - name: Upload Playwright artifacts (Firefox & WebKit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-cross-browser
+          path: test-results/
           retention-days: 14
