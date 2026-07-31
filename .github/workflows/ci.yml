@@ -112,6 +112,14 @@ jobs:
       SUPABASE_TEST_URL: ${{ secrets.SUPABASE_TEST_URL }}
       SUPABASE_TEST_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY }}
       SUPABASE_TEST_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+      # Postgres connection string for the SAME test project. Required to apply
+      # migrations; the anon/service keys cannot execute DDL (they speak to
+      # PostgREST, not to Postgres).
+      #
+      # Use the SESSION POOLER string from Supabase → Settings → Database, not
+      # the "direct connection" one: direct connections are IPv6-only and
+      # GitHub-hosted runners have no IPv6 route, so they fail to connect.
+      SUPABASE_TEST_DB_URL: ${{ secrets.SUPABASE_TEST_DB_URL }}
 
     steps:
       - name: Checkout
@@ -125,6 +133,72 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      # Fail LOUDLY on the exact drift that produced PGRST205 ("Could not find
+      # the table 'public.feedback' in the schema cache"). Previously the test
+      # project was migrated BY HAND, so 0004_feedback.sql — added long after
+      # the project was provisioned — was simply never applied, and the RLS
+      # suite failed on a missing relation instead of on a policy.
+      #
+      # If the project secrets are set but the DB URL is not, we cannot migrate
+      # and would reproduce that failure with a confusing error. Say so here.
+      - name: Check migration credentials are present
+        if: env.SUPABASE_TEST_URL != '' && env.SUPABASE_TEST_DB_URL == ''
+        run: |
+          echo "::error::SUPABASE_TEST_URL is configured but SUPABASE_TEST_DB_URL is not."
+          echo "Migrations cannot be applied, so the RLS suite would fail on a missing"
+          echo "table rather than on a policy. Add SUPABASE_TEST_DB_URL (session-pooler"
+          echo "connection string for the SAME test project), or unset the other"
+          echo "SUPABASE_TEST_* secrets to let the suite skip cleanly."
+          exit 1
+
+      # Every migration, every run, in filename order. All four are idempotent
+      # by construction — `create table/index if not exists`, `create or replace
+      # function`, and `drop policy/trigger if exists` before each create — so
+      # re-applying cannot duplicate a table or a policy. `ON_ERROR_STOP=1`
+      # means a broken migration fails the job instead of being logged and
+      # ignored. psql ships preinstalled on ubuntu-latest.
+      - name: Apply migrations to the test database
+        if: env.SUPABASE_TEST_DB_URL != ''
+        run: |
+          set -euo pipefail
+          for f in supabase/migrations/*.sql; do
+            echo "── applying $f"
+            psql "$SUPABASE_TEST_DB_URL" -v ON_ERROR_STOP=1 --no-psqlrc --quiet -f "$f"
+          done
+
+      # DDL alone is not enough: PostgREST answers from a cached schema, and a
+      # brand-new table stays invisible (PGRST205) until that cache reloads.
+      # Supabase ships an event trigger that reloads it automatically, but the
+      # reload is asynchronous, so a test starting immediately after the
+      # migration can still race it. NOTIFY is the documented explicit trigger.
+      - name: Reload the PostgREST schema cache
+        if: env.SUPABASE_TEST_DB_URL != ''
+        run: |
+          set -euo pipefail
+          psql "$SUPABASE_TEST_DB_URL" -v ON_ERROR_STOP=1 --no-psqlrc \
+            -c "notify pgrst, 'reload schema';"
+
+      # Poll until PostgREST actually serves the newest table, rather than
+      # sleeping a guessed interval. 404 means the relation is still missing
+      # from the cache; any other status means it is visible (an anon SELECT is
+      # filtered by RLS to an empty array, which is a 200, not an error).
+      - name: Wait for the schema cache to expose public.feedback
+        if: env.SUPABASE_TEST_DB_URL != '' && env.SUPABASE_TEST_URL != ''
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' \
+              -H "apikey: ${SUPABASE_TEST_ANON_KEY}" \
+              "${SUPABASE_TEST_URL}/rest/v1/feedback?select=id&limit=1" || echo 000)
+            if [ "$code" != "404" ] && [ "$code" != "000" ]; then
+              echo "schema cache ready after ${i} attempt(s) (HTTP $code)"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::PostgREST still does not expose public.feedback after 60s."
+          exit 1
 
       # A non-zero exit here fails the job, and therefore the workflow.
       # Coverage thresholds live in vitest.integration.config.mts.
