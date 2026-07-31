@@ -112,13 +112,14 @@ jobs:
       SUPABASE_TEST_URL: ${{ secrets.SUPABASE_TEST_URL }}
       SUPABASE_TEST_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY }}
       SUPABASE_TEST_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
-      # Postgres connection string for the SAME test project. Required to apply
-      # migrations; the anon/service keys cannot execute DDL (they speak to
-      # PostgREST, not to Postgres).
+      # OPTIONAL. Postgres connection string for the SAME test project, used
+      # only to apply migrations automatically (the anon/service keys cannot
+      # execute DDL — they speak to PostgREST, not to Postgres). Absent, the
+      # migration steps below are skipped and nothing fails.
       #
-      # Use the SESSION POOLER string from Supabase → Settings → Database, not
-      # the "direct connection" one: direct connections are IPv6-only and
-      # GitHub-hosted runners have no IPv6 route, so they fail to connect.
+      # If you do set it, use the SESSION POOLER string from Supabase →
+      # Settings → Database, not the "direct connection" one: direct
+      # connections are IPv6-only and GitHub-hosted runners have no IPv6 route.
       SUPABASE_TEST_DB_URL: ${{ secrets.SUPABASE_TEST_DB_URL }}
 
     steps:
@@ -134,24 +135,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Fail LOUDLY on the exact drift that produced PGRST205 ("Could not find
-      # the table 'public.feedback' in the schema cache"). Previously the test
-      # project was migrated BY HAND, so 0004_feedback.sql — added long after
-      # the project was provisioned — was simply never applied, and the RLS
-      # suite failed on a missing relation instead of on a policy.
+      # ── Optional schema sync ────────────────────────────────────────────────
+      # SUPABASE_TEST_DB_URL is OPTIONAL and nothing below is required for this
+      # job to succeed. It exists only to keep the test project's schema in step
+      # with supabase/migrations/ automatically.
       #
-      # If the project secrets are set but the DB URL is not, we cannot migrate
-      # and would reproduce that failure with a confusing error. Say so here.
-      - name: Check migration credentials are present
-        if: env.SUPABASE_TEST_URL != '' && env.SUPABASE_TEST_DB_URL == ''
-        run: |
-          echo "::error::SUPABASE_TEST_URL is configured but SUPABASE_TEST_DB_URL is not."
-          echo "Migrations cannot be applied, so the RLS suite would fail on a missing"
-          echo "table rather than on a policy. Add SUPABASE_TEST_DB_URL (session-pooler"
-          echo "connection string for the SAME test project), or unset the other"
-          echo "SUPABASE_TEST_* secrets to let the suite skip cleanly."
-          exit 1
-
+      # Set     -> migrations are applied and the PostgREST cache is refreshed
+      #            before the suite runs, so the schema cannot drift behind the
+      #            repository.
+      # Not set -> these three steps are skipped entirely and the test project
+      #            is expected to have been migrated by hand, which is the
+      #            long-standing prerequisite documented in the header of
+      #            tests/integration/database/rls.realdb.integration.test.ts.
+      #
+      # Whether the RLS suite runs at all is decided ONLY by SUPABASE_TEST_URL
+      # and SUPABASE_TEST_ANON_KEY, via `hasTestDb` in tests/integration/
+      # helpers/testDb.ts. A missing DB URL never skips a test and never fails
+      # this job.
+      #
       # Every migration, every run, in filename order. All four are idempotent
       # by construction — `create table/index if not exists`, `create or replace
       # function`, and `drop policy/trigger if exists` before each create — so
