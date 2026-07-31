@@ -259,7 +259,7 @@ const VISIBLE_LIMIT = 8
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 function deriveFlagCode(s: ApiScheme): string {
   const states = (s.applicable_states || '').toUpperCase()
-  const level = (s.level || '').toUpperCase()
+  const level  = (s.level || '').toUpperCase()
   const federal =
     level.includes('FEDERAL') || level.includes('NATIONAL') ||
     /ALL STATES|ALL TERRITORIES|NATION|AUSTRALIA[- ]WIDE/.test(states)

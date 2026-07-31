@@ -432,6 +432,143 @@ export function Footer() {
               throughout Australia and their continuing connection to land, waters and community.
             </p>
           </div>
+
+          {/* Bottom row: copyright + store badges + legal toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
+                © 2026 FirstNest AI. All rights reserved.
+              </span>
+              {[
+                { label: 'Google Play', sublabel: 'Get it on', href: '#', icon: <GooglePlayIcon /> },
+                { label: 'App Store',   sublabel: 'Download on the', href: '#', icon: <AppleIcon /> },
+              ].map(({ label, sublabel, href, icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: '4px 10px 4px 7px',
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.14)',
+                    borderRadius: 7,
+                    textDecoration: 'none',
+                    transition: 'background 150ms, border-color 150ms',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.28)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>
+                  <span style={{ lineHeight: 1 }}>
+                    <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.5rem', color: 'rgba(255,255,255,0.5)', fontWeight: 400, marginBottom: 1 }}>
+                      {sublabel}
+                    </span>
+                    <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
+                      {label}
+                    </span>
+                  </span>
+                </a>
+              ))}
+              {/* Social icons */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {[
+                  { label: 'Facebook',    href: '#', color: '#1877F2', svg: FACEBOOK_PATH },
+                  { label: 'YouTube',     href: '#', color: '#FF0000', svg: YOUTUBE_PATH },
+                  { label: 'X (Twitter)', href: '#', color: '#000000', svg: X_PATH },
+                  { label: 'LinkedIn',    href: '#', color: '#0A66C2', svg: LINKEDIN_PATH },
+                ].map(({ label, href, color, svg }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      width: 28, height: 28,
+                      background: color,
+                      borderRadius: 7,
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      transition: 'opacity 150ms, transform 150ms',
+                      flexShrink: 0,
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.opacity = '0.85'
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.opacity = '1'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                    }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d={svg} />
+                    </svg>
+                  </a>
+                ))}
+                <a
+                  href="mailto:hello@firstnest.com.au"
+                  aria-label="Email us"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 28, height: 28,
+                    background: '#F5E642',
+                    borderRadius: 7,
+                    color: '#111111',
+                    textDecoration: 'none',
+                    transition: 'opacity 150ms, transform 150ms',
+                    flexShrink: 0,
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.opacity = '0.85'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.opacity = '1'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect width="20" height="16" x="2" y="4" rx="2"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLegalOpen(o => !o)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', fontWeight: 500,
+                color: 'rgba(255,255,255,0.45)',
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                transition: 'color 150ms',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.75)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+            >
+              Legal
+              <ChevronDown
+                size={13}
+                style={{
+                  transition: 'transform 300ms ease',
+                  transform: legalOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                }}
+              />
+            </button>
+          </div>
+
         </div>
       </div>
     </footer>

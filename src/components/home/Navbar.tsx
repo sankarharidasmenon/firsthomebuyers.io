@@ -252,7 +252,7 @@ export function Navbar() {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: pathname === '/ads' && activeHash !== '#ai-guidance' ? 700 : 500,
                   fontSize: '0.9375rem',
-                  color: pathname === '/ads' && activeHash !== '#ai-guidance' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                  color: pathname === '/ads' && activeHash !== '#ai-guidance' ? '#111111' : 'var(--secondary-foreground)',
                   textDecoration: 'none',
                   paddingBottom: 2,
                   borderBottom: pathname === '/ads' && activeHash !== '#ai-guidance' ? '2px solid var(--primary-hover)' : '2px solid transparent',
