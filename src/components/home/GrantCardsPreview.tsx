@@ -118,7 +118,8 @@ export const GrantCardsPreview = () => {
             </h2>
             <p className="text-[15px] md:text-base font-light text-muted-foreground leading-relaxed">
               {/* Explore the federal and state government grants, schemes, and concessions available to help you buy your first home sooner. */}
-              FirstNest scans all available federal and state grants in real-time and shows you exactly which ones apply to your situation no jargon, no guesswork.
+              {/* FirstNest scans all available federal and state grants in real-time and shows you exactly which ones apply to your situation no jargon, no guesswork. */}
+              We review this table in real time against federal & state revenue office announcements and update as of August 2026
             </p>
           </div>
           {/* <Link

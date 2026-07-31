@@ -219,7 +219,7 @@ export function QuestionnaireFlow() {
                         answers. It never gates Next, is not part of `errors`, and no
                         rule reads it — PPR (asked on the previous step) and
                         citizenship are still scored exactly as before. */}
-                    <Cond open={a.ppr === 'No' && a.citizenship === 'Other'}>
+                    <Cond open={ a.citizenship === 'Other'}>
                       <div className="fhbq-notice" role="status" aria-live="polite">
                         <AlertTriangle size={15} className="ic" aria-hidden="true" />
                         <p>

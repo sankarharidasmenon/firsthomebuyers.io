@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X } from 'lucide-react'
+import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X, Cpu } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Logo } from '@/components/ui/logo/Logo'
 
@@ -60,6 +60,48 @@ function AdsIcon() {
         AD
       </div>
     </div>
+  )
+}
+
+function AiIcon({ size = 20, strokeWidth = 2 }: { size?: number, strokeWidth?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <path d="M3 8H0" />
+      <path d="M3 16H0" />
+      <path d="M21 8h3" />
+      <path d="M21 16h3" />
+      <path d="M8 3V0" />
+      <path d="M16 3V0" />
+      <path d="M8 21v3" />
+      <path d="M16 21v3" />
+      <rect x="6.5" y="6.5" width="11" height="11" rx="1.5" ry="1.5" fill="currentColor" stroke="none" />
+      <text
+        x="12"
+        y="12.5"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="var(--background)"
+        stroke="none"
+        style={{
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 800,
+          fontSize: '6.5px',
+          letterSpacing: '0.2px',
+        }}
+      >
+        AI
+      </text>
+    </svg>
   )
 }
 
@@ -220,6 +262,22 @@ export function Navbar() {
               >
                 <AdsIcon />
               </Link>
+              <Link
+                href="/ask-ai"
+                aria-label="Ask AI"
+                title="Ask AI"
+                className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150"
+                style={{
+                  width: 36,
+                  height: 36,
+                  color: pathname === '/ask-ai' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                  background: pathname === '/ask-ai' ? 'var(--secondary)' : 'none',
+                  textDecoration: 'none',
+                  transform: 'translateX(8px)',
+                }}
+              >
+                <AiIcon size={22} strokeWidth={pathname === '/ask-ai' ? 2.5 : 1.8} />
+              </Link>
               <div style={{ transform: 'translateX(8px)' }}>
                 <ThemeToggle />
               </div>
@@ -264,6 +322,19 @@ export function Navbar() {
             >
               <AdsIcon />
               <span style={{ fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>Advertise</span>
+            </Link>
+            <Link
+              href="/ask-ai"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-lg transition-colors"
+              style={{
+                background: pathname === '/ask-ai' ? 'var(--secondary)' : 'transparent',
+                color: pathname === '/ask-ai' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                textDecoration: 'none'
+              }}
+            >
+              <AiIcon size={20} strokeWidth={1.8} />
+              <span style={{ fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>Ask AI</span>
             </Link>
           </div>
         </div>

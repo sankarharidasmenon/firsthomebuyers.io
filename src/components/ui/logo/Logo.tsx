@@ -36,7 +36,7 @@ export function Logo({
         animated && styles.logoAnimated,
         className
       )}
-      aria-label="FirstNest"
+      aria-label="FirstHomeBuyers"
       role="img"
     >
       <LogoIcon height={height} />

@@ -47,7 +47,7 @@ export function AITeaser() {
             margin: '0 auto 16px',
           }}
         >
-          Got questions? Ask FirstNest AI.
+          Got questions? Ask FirstHomeBuyers AI.
         </h2>
 
         {/* Sub-copy */}

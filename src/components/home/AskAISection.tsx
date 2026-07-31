@@ -108,7 +108,9 @@ export default function AskAISection() {
             <Sparkles className="w-3.5 h-3.5" />
             Sample Preview
           </div> */}
-          <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>Ask <em style={{ fontStyle: 'italic', color: '#C4A000' }}>FirstNest</em> AI</h2>
+          <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>Ask
+            FirstHomeBuyers AI</h2>
+
           {/* <p className="text-muted-foreground max-w-xl mx-auto text-base leading-relaxed">
             Get personalised guidance for grants, borrowing capacity, and buying readiness in plain English.
           </p> */}

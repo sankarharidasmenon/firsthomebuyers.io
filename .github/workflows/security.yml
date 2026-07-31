@@ -1,0 +1,186 @@
+name: Security
+
+# Supply-chain and secret hygiene. Runs alongside CI on every change, plus a
+# weekly sweep so newly-disclosed advisories surface without a code change.
+on:
+  push:
+    branches: [main, v6]
+  pull_request:
+    branches: [main, v6]
+  schedule:
+    # Mondays 07:00 UTC.
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ── SCA: dependency vulnerability audit ───────────────────────────────────
+  dependency-audit:
+    name: Dependency Audit (SCA)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # BLOCKING GATE.
+      # Threshold is `critical` because the production tree currently carries
+      # 12 high advisories (Next.js, exceljs→archiver→glob, sharp, postcss).
+      # Gating at `high` today would fail every run before remediation lands.
+      #
+      # RATCHET: once those are cleared, change --audit-level to `high`.
+      - name: Fail on critical vulnerabilities (production dependencies)
+        run: npm audit --omit=dev --audit-level=critical
+
+      # Non-blocking visibility. Writes the full picture to the run summary so
+      # the debt stays in front of reviewers instead of needing a local run.
+      - name: Report all advisories
+        if: always()
+        run: |
+          {
+            echo '## Dependency audit'
+            echo
+            echo '### Production dependencies'
+            echo '```'
+            npm audit --omit=dev || true
+            echo '```'
+            echo '### All dependencies (incl. dev)'
+            echo '```'
+            npm audit || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── Secret scanning ───────────────────────────────────────────────────────
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # fetch-depth: 0 so the scan covers full history, not just the tip commit.
+      # A secret committed and later deleted is still a leaked secret.
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Installed as a native binary — not gitleaks-action (which requires a
+      # paid GITLEAKS_LICENSE for organisation-owned repositories) and not a
+      # container image (project policy: no container images anywhere).
+      #
+      # The asset URL is resolved from the releases API rather than pinned, so
+      # a stale version pin cannot 404 the job. HARDENING: pin an exact version
+      # and verify its checksum once you have a known-good release.
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          URL="$(curl -sSfL https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | jq -r '.assets[] | select(.name | test("linux_x64\\.tar\\.gz$")) | .browser_download_url' \
+            | head -n1)"
+          test -n "$URL"
+          curl -sSfL "$URL" -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      # To silence an accepted finding, add its fingerprint to .gitleaksignore
+      # at the repo root — never disable the job.
+      - name: Run gitleaks
+        run: gitleaks detect --source=. --redact --verbose --exit-code=1
+
+  # ── SAST (secondary engine) ───────────────────────────────────────────────
+  # CodeQL (.github/workflows/codeql.yml) is the primary SAST engine, but it
+  # needs GitHub Advanced Security on private repos. Semgrep needs no licence
+  # and no token for registry rulesets, so it provides SAST coverage either way.
+  #
+  # REPORT-ONLY for now: this is a new scanner against a legacy codebase and
+  # its finding count is unknown. Triage the first runs, add a `.semgrepignore`
+  # or inline `nosemgrep` for accepted findings, then remove continue-on-error
+  # and add `--error` to make it blocking.
+  semgrep:
+    name: Semgrep (SAST, report-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Installed via pipx (preinstalled on GitHub runners) rather than the
+      # semgrep container image — project policy: no container images.
+      - name: Install Semgrep
+        run: |
+          set -euo pipefail
+          pipx install semgrep
+          export PATH="$HOME/.local/bin:$PATH"
+          semgrep --version
+
+      - name: Run Semgrep
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          semgrep scan \
+            --config=p/typescript \
+            --config=p/react \
+            --config=p/secrets \
+            --metrics=off \
+            --oss-only \
+            --text 2>&1 | tee semgrep.log || true
+          {
+            echo '## Semgrep (report-only)'
+            echo '```'
+            tail -n 100 semgrep.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── SBOM ──────────────────────────────────────────────────────────────────
+  sbom:
+    name: SBOM
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Production tree only — an SBOM should describe what ships, not the
+      # toolchain used to build it.
+      - name: Install production dependencies
+        run: npm ci --omit=dev
+
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          artifact-name: firstnest-sbom.cyclonedx.json
+          output-file: firstnest-sbom.cyclonedx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: firstnest-sbom.cyclonedx.json
+          retention-days: 90

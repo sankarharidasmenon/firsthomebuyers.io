@@ -67,7 +67,7 @@ export function HeroVideo() {
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
         <iframe
           className="fn-shorts-iframe"
-          title="FirstNest intro video"
+          title="FirstHomeBuyers intro video"
           src={`https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&playlist=${VIDEO_ID}&playsinline=1`}
           allow="autoplay; encrypted-media"
           allowFullScreen={false}

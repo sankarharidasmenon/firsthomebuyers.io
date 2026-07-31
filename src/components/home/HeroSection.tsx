@@ -347,7 +347,7 @@ export function HeroSection() {
                   </h1>
                   <p className="fn-hero-sub -mt-3">
                     {/* Your first home, made easier — in about 3 minutes. */}
-                   FirstNest identifies every Australian government grant and scheme you qualify for, federal and state, then builds your personalised roadmap to homeownership.
+                   FirstHomeBuyers identifies every Australian government grant and scheme you qualify for, federal and state, then builds your personalised roadmap to homeownership.
                   </p>
                   {/* Primary: grants (black card), Secondary: borrowing (outline card) */}
                   <div className="fn-hero-paths">

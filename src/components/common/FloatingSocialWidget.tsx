@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Share2, X } from 'lucide-react'
 import { SOCIAL_LINKS } from './socialLinks'
+import { ContactUsModal } from './ContactUsModal'
 
 const STORAGE_KEY = 'firstnest_social_widget_pos'
 
@@ -61,6 +62,7 @@ export function FloatingSocialWidget() {
      so nothing is rendered server-side and there is no hydration mismatch. */
   const [pos, setPos] = useState<Pos | null>(null)
   const [open, setOpen] = useState(false)
+  const [contactOpen, setContactOpen] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [expandUp, setExpandUp] = useState(true)
 
@@ -189,11 +191,12 @@ export function FloatingSocialWidget() {
   if (!pos) return null
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed select-none"
-      style={{ left: pos.x, top: pos.y, width: LAUNCHER, height: LAUNCHER, zIndex: 40 }}
-    >
+    <>
+      <div
+        ref={containerRef}
+        className="fixed select-none"
+        style={{ left: pos.x, top: pos.y, width: LAUNCHER, height: LAUNCHER, zIndex: 40 }}
+      >
       {/* Panel — anchored to whichever side has room */}
       <div
         className="absolute left-0 flex w-full justify-center"
@@ -219,20 +222,41 @@ export function FloatingSocialWidget() {
             transition: 'opacity 200ms ease, transform 200ms ease, visibility 200ms',
           }}
         >
-          {SOCIAL_LINKS.map(({ label, href, background, foreground, icon }) => (
-            <a
-              key={label}
-              href={href}
-              target={href.startsWith('mailto:') ? undefined : '_blank'}
-              rel={href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-              aria-label={label}
-              tabIndex={open ? 0 : -1}
-              className="flex h-11 w-11 items-center justify-center rounded-full no-underline transition-transform duration-200 hover:-translate-y-0.5"
-              style={{ background, color: foreground }}
-            >
-              {icon}
-            </a>
-          ))}
+          {SOCIAL_LINKS.map(({ label, href, background, foreground, icon }) => {
+            if (href.startsWith('mailto:')) {
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  aria-label={label}
+                  tabIndex={open ? 0 : -1}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setOpen(false)
+                    setContactOpen(true)
+                  }}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border-none cursor-pointer transition-transform duration-200 hover:-translate-y-0.5"
+                  style={{ background, color: foreground, padding: 0 }}
+                >
+                  {icon}
+                </button>
+              )
+            }
+            return (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                tabIndex={open ? 0 : -1}
+                className="flex h-11 w-11 items-center justify-center rounded-full no-underline transition-transform duration-200 hover:-translate-y-0.5"
+                style={{ background, color: foreground }}
+              >
+                {icon}
+              </a>
+            )
+          })}
         </div>
       </div>
 
@@ -287,6 +311,8 @@ export function FloatingSocialWidget() {
           }}
         />
       </button>
-    </div>
+      </div>
+      <ContactUsModal open={contactOpen} onOpenChange={setContactOpen} />
+    </>
   )
 }

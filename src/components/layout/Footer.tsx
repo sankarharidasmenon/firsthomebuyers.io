@@ -233,7 +233,7 @@ export function Footer() {
                 <>
                   <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, margin: 0 }}>
-                    FirstNest provides general information only and does not constitute financial, legal or taxation advice.
+                    FirstHomeBuyers provides general information only and does not constitute financial, legal or taxation advice.
                     All borrowing estimates and grant eligibility results are indicative only and may not reflect your actual
                     circumstances. Grant values and eligibility criteria change frequently — always verify with the relevant
                     state or federal authority. Consult a licensed financial adviser or mortgage broker before making any
@@ -270,7 +270,7 @@ export function Footer() {
             {/* Left/Center Group: Copyright + Stores + Socials */}
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-10">
               <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
-                © 2026 FirstNest AI. All rights reserved.
+                © 2026 FirstHomeBuyers. All rights reserved.
               </span>
               
               <div className="flex flex-wrap items-center justify-center gap-6">
@@ -428,7 +428,7 @@ export function Footer() {
               </svg>
             </div>
             <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: 0 }}>
-              FirstNest acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
+              FirstHomeBuyers acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
               throughout Australia and their continuing connection to land, waters and community.
             </p>
           </div>

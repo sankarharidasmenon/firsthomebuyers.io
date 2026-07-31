@@ -18,7 +18,7 @@ export function LogoText({ fontSize }: LogoTextProps) {
         className={styles.textNest} 
         style={{ fontWeight: 600, color: 'var(--color-logo-gold, #D8BC4A)', transition: 'color 0.25s ease' }}
       >
-        Nest
+        HomeBuyers
       </span>
     </div>
   )

@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer'
 import { GlobalBackButton } from '@/components/navigation/GlobalBackButton'
 import { Navbar } from '@/components/home/Navbar'
 import { FloatingSocialWidget } from '@/components/common/FloatingSocialWidget'
+import { FeedbackWidget } from '@/components/feedback/FeedbackWidget'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { Toaster } from 'sonner'
 
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <BottomNav />
           <FloatingSocialWidget />
+          <FeedbackWidget />
           <Toaster
             position="bottom-center"
             toastOptions={{
