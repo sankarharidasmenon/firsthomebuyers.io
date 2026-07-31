@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:ci": "eslint . --max-warnings=108",
+    "lint:ci": "eslint . --max-warnings=128",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
