@@ -67,7 +67,13 @@
       "WebFetch(domain:www.revenuesa.sa.gov.au)",
       "Bash(curl -sL -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/126.0 Safari/537.36\" -o /dev/null -w \"%{http_code} %{url_effective}\\\\n\" \"https://www.revenuesa.sa.gov.au/grants-and-concessions/first-home-owners\")",
       "Bash(./fetch.sh \"https://www.revenuesa.sa.gov.au/first-home-owners-grant\")",
-      "Bash(awk 'NR>250' fhog.txt)"
+      "Bash(awk 'NR>250' fhog.txt)",
+      "Bash(node chips.mjs)",
+      "Bash(node measure-chips.mjs)",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{const m=JSON.parse\\(d\\)[0].messages;console.log\\('baseline findings:',m.length\\);m.forEach\\(x=>console.log\\(' ',x.line+':'+x.column,x.severity===2?'ERROR':'warn',x.ruleId\\)\\)}\\)\")",
+      "Bash(NODE_OPTIONS=--max-old-space-size=4096 npx tsx scripts/regression-baseline.ts)",
+      "Bash(node warn.mjs)",
+      "Bash(echo \"typecheck-exit:$?\")"
     ],
     "additionalDirectories": [
       "f:\\firstnest-v3"

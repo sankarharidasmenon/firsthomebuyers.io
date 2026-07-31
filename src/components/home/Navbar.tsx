@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { Logo } from '@/components/ui/logo/Logo'
 
 // Icon-only links shown on the right side of the desktop navbar
 const ICON_LINKS = [
@@ -157,16 +158,8 @@ export function Navbar() {
         <div className="fn-nav max-w-[1150px] mx-auto h-full flex items-center justify-between px-4 lg:px-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 no-underline" aria-label="FirstNest home">
-            <div
-              className="flex items-center justify-center rounded-sm shrink-0"
-              style={{ width: 32, height: 32, background: 'var(--primary)' }}
-            >
-              <Home size={17} style={{ color: 'var(--primary-foreground)' }} strokeWidth={2.5} />
-            </div>
-            <span style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 600, fontSize: '1.0625rem', color: 'var(--foreground)', letterSpacing: '-0.02em' }}>
-              FirstNest
-            </span>
+          <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: 'var(--foreground)' }}>
+            <Logo size="md" animated showBadge />
           </Link>
 
 

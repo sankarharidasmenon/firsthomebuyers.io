@@ -10,12 +10,26 @@ import {
   type Scheme,
   RegionFlag,
   GROUP_ORDER,
-  REGION_LABELS,
   ALL_TAB,
   CategoryFilter,
   schemeCategory,
   type CategoryFilterValue
 } from './GrantCards'
+
+/**
+ * Chip label for the Home grants filter — official abbreviations rather than
+ * full state names.
+ *
+ * Display only. `code` stays the value used for grouping, filtering, counts and
+ * every lookup, and it is already the abbreviation ('NSW', 'ACT', …), so this
+ * introduces no second copy of the state list to drift. Only the two non-state
+ * pseudo-codes need spelling out.
+ *
+ * REGION_LABELS (the full names) is deliberately untouched — the /schemes
+ * directory still renders those.
+ */
+const CHIP_LABELS: Record<string, string> = { [ALL_TAB]: 'All', AU: 'Federal' }
+const chipLabel = (code: string) => CHIP_LABELS[code] ?? code
 
 export const GrantCardsPreview = () => {
   const [schemes, setSchemes] = useState<Scheme[]>([])
@@ -153,8 +167,18 @@ export const GrantCardsPreview = () => {
         {status === 'ready' && (
           <div className="animate-in fade-in duration-500">
             {/* Filter Chips */}
+            {/* All ten chips sit on one row from xl up. The content column is
+                capped at 1150px (64px of padding → 1086px usable) and is shared
+                with the cards grid and footer, so it must not be widened; the
+                room comes from tighter padding and gaps instead, which brings
+                the row to ~1071px.
+                nowrap starts at xl, not lg: the column only reaches its 1086px
+                cap at a 1280px viewport. At lg (960px of column) the row genuinely
+                does not fit, so it must stay wrapped there — forcing nowrap would
+                turn it into a horizontal scrollbar on a small laptop. Mobile keeps
+                its existing nowrap + scroll. */}
             <div
-              className="flex flex-nowrap md:flex-wrap gap-2.5 md:gap-x-3 md:gap-y-3 mb-1 md:mb-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
+              className="flex flex-nowrap md:flex-wrap xl:flex-nowrap gap-2.5 md:gap-x-3 md:gap-y-3 lg:gap-x-2 mb-1 md:mb-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
               style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
             >
               {groups.map(code => (
@@ -162,8 +186,9 @@ export const GrantCardsPreview = () => {
                   key={code}
                   type="button"
                   className={`
-                    shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200
+                    shrink-0 inline-flex items-center gap-2 lg:gap-1.5 px-4 lg:px-3 py-2.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200
                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background min-h-[44px]
+                    ${code === ALL_TAB ? '' : 'lg:min-w-[102px] lg:justify-center'}
                     ${code === activeTab
                       ? 'bg-foreground text-background shadow-md border border-transparent'
                       : 'bg-background border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-muted/40'}
@@ -171,7 +196,7 @@ export const GrantCardsPreview = () => {
                   onClick={() => setActiveTab(code)}
                 >
                   {code !== ALL_TAB && <RegionFlag code={code} />}
-                  {code === ALL_TAB ? 'All' : REGION_LABELS[code] ?? code}
+                  {chipLabel(code)}
                   <span className={`text-[11px] font-normal ml-0.5 ${code === activeTab ? 'opacity-80' : 'opacity-60'}`}>
                     {code === ALL_TAB ? allTiles.length : grouped[code].length}
                   </span>

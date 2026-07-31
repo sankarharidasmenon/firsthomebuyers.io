@@ -198,6 +198,15 @@
 .fhbq-tag.co { color: var(--q-purple); background: var(--q-surface); }
 .fhbq-tag.state { color: var(--q-state-tag); background: var(--q-state-tag-bg); }
 
+/* Informational notice shown beneath a question — guidance only, never a
+   validation error (those are .fhbq-err, red, and gate the step). Reuses the
+   amber --q-state-* tokens, which are already redefined for .dark, so the
+   notice follows the theme with no extra overrides. Solid border rather than
+   the dashed .fhbq-block rule so it reads as a message, not a container. */
+.fhbq-notice { display: flex; align-items: flex-start; gap: 9px; padding: 11px 13px; border-radius: var(--q-radius); background: var(--q-state-bg); border: 1px solid var(--q-state-border); }
+.fhbq-notice .ic { flex-shrink: 0; margin-top: 1px; color: var(--q-state-tag); }
+.fhbq-notice p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--q-grey); }
+
 /* ── location combobox ── */
 .fhbq-combo { position: relative; }
 .fhbq-combo-btn {

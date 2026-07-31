@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Sparkles, CheckCircle2, Home, Landmark, PiggyBank, Check, Lock, ShieldCheck, Gift, Wallet, MapPin, Building, Info, ArrowRight } from 'lucide-react'
 import * as Slider from '@radix-ui/react-slider'
 import { Button } from '@/components/ui/button'
-import { fetchEligibility, type EligibilityResult } from '@/lib/schemes/eligibilityClient'
+import { fetchGrantCalculator, type CalculatorResult } from '@/lib/calculator/calculatorClient'
 import {
   Select,
   SelectContent,
@@ -50,35 +50,34 @@ export function GrantCalculatorSection() {
   const [state, setState] = useState('VIC')
   const [propertyType, setPropertyType] = useState<'house' | 'townhouse' | 'apartment' | 'offplan'>('offplan')
   const [propertyPrice, setPropertyPrice] = useState(700000)
-  const [depositAmount, setDepositAmount] = useState(70000)
-  const [buyingWith, setBuyingWith] = useState<'solo' | 'partner'>('solo')
 
-  const [result, setResult] = useState<EligibilityResult | null>(null)
+  const [result, setResult] = useState<CalculatorResult | null>(null)
   const [calcError, setCalcError] = useState(false)
 
-  // Eligibility is computed by the database via the Phase 2A API. Debounced so
-  // slider drags don't spam the network; stale responses are ignored.
+  // Computed by the calculator's own engine via /api/grant-calculator — NOT the
+  // questionnaire engine, which needs answers this screen never collects and so
+  // returned "check required" for everything. Debounced so slider drags don't
+  // spam the network; stale responses are ignored.
   useEffect(() => {
     let cancelled = false
     const timer = setTimeout(() => {
-      fetchEligibility({
-        state,
-        firstHomeBuyer: true,
-        income: 90000 + (buyingWith === 'partner' ? 90000 : 0),
-        hasPartner: buyingWith === 'partner',
-        propertyPrice,
-        deposit: depositAmount,
-        propertyType,
-        singleParent: buyingWith === 'partner' ? false : undefined,
-      })
+      fetchGrantCalculator({ state, propertyType, propertyPrice })
         .then((res) => { if (!cancelled) { setResult(res); setCalcError(false) } })
-        .catch(() => { if (!cancelled) setCalcError(true) })
+        .catch(() => { if (!cancelled) { setResult(null); setCalcError(true) } })
     }, 300)
     return () => { cancelled = true; clearTimeout(timer) }
-  }, [state, propertyType, propertyPrice, depositAmount, buyingWith])
+  }, [state, propertyType, propertyPrice])
 
-  const totalSavings = result ? result.cashGrantsTotal + result.taxSavingsTotal : 0
-  const eligibleGrants = result ? result.items.filter((i) => i.eg.status === 'eligible').map((i) => i.eg) : []
+  const totalSavings = result?.totalValue ?? 0
+  const duty = result?.duty ?? null
+  // Cash grants first, then the duty saving, then the non-cash schemes.
+  const lines: { key: string; name: string; value: number | string }[] = [
+    ...(result?.grants ?? []).map((g) => ({ key: g.id, name: g.name, value: g.value })),
+    ...(duty?.calculable && (duty.saving ?? 0) > 0
+      ? [{ key: 'stamp-duty', name: 'Stamp duty saving', value: duty.saving as number }]
+      : []),
+    ...(result?.schemes ?? []).map((s) => ({ key: s.id, name: s.name, value: s.value })),
+  ]
 
   return (
     <section id="grant-calculator" className="relative w-full overflow-hidden scroll-mt-20 lg:scroll-mt-24 bg-[#FEFCE8] dark:bg-background py-10 lg:py-12 border-y border-border/40">
@@ -101,7 +100,7 @@ export function GrantCalculatorSection() {
                 </div> */}
 
                 <h2 className="text-3xl mb-4 max-w-[320px] lg:max-w-none" style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>
-                  Grant <em style={{ fontStyle: 'italic', color: '#C4A000' }}>Calculator</em>
+                  Grant Calculator
                   {/* <br className="hidden lg:inline" /> could <span className="pr-1">unlock,</span> <br className="hidden lg:inline" /> right now */}
                 </h2>
 
@@ -243,15 +242,15 @@ export function GrantCalculatorSection() {
                 </div>
 
                 <div className="flex flex-col w-full gap-3.5 mb-2 min-h-[180px]">
-                  {eligibleGrants.map((eg, i) => (
-                    <div key={i} className="flex items-start sm:items-center justify-between gap-3 sm:gap-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      <span className="font-medium text-[0.875rem] text-foreground leading-snug">{eg.grant.name}</span>
-                      <span className={`text-[#16A34A] font-bold tracking-tight mt-0.5 sm:mt-0 tabular-nums ${typeof eg.value === 'number' ? 'text-[0.9375rem] shrink-0' : 'text-right text-[0.75rem] sm:text-[0.8125rem] max-w-[55%] sm:max-w-none leading-tight'}`}>
-                        {typeof eg.value === 'number' ? <AnimatedNumber value={eg.value} /> : eg.value}
+                  {lines.map((line, i) => (
+                    <div key={`${line.key}-${i}`} className="flex items-start sm:items-center justify-between gap-3 sm:gap-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      <span className="font-medium text-[0.875rem] text-foreground leading-snug">{line.name}</span>
+                      <span className={`text-[#16A34A] font-bold tracking-tight mt-0.5 sm:mt-0 tabular-nums ${typeof line.value === 'number' ? 'text-[0.9375rem] shrink-0' : 'text-right text-[0.75rem] sm:text-[0.8125rem] max-w-[55%] sm:max-w-none leading-tight'}`}>
+                        {typeof line.value === 'number' ? <AnimatedNumber value={line.value} /> : line.value}
                       </span>
                     </div>
                   ))}
-                  {eligibleGrants.length === 0 && (
+                  {lines.length === 0 && (
                     <div className="py-2 text-center text-[0.875rem] text-muted-foreground italic" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {calcError ? 'Unable to estimate right now — please try again.' : 'Adjust values to see eligible grants.'}
                     </div>

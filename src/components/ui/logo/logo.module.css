@@ -1,0 +1,120 @@
+.logoContainer {
+  --color-logo-gold: #D8BC4A;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  cursor: pointer;
+  transform: translateZ(0);
+}
+
+.logoContainer:hover {
+  --color-logo-gold: #CFAF35;
+}
+
+.logoAnimated {
+  animation: logoFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes logoFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Base interactive transitions */
+.iconWrapper, .textFirst, .textNest {
+  transform-origin: center;
+}
+
+.plant {
+  transform-origin: bottom center;
+}
+
+/* Shared BETA Badge - Single source of truth, one crisp border, subtle shadow, zero double outline */
+.betaBadge {
+  background: linear-gradient(180deg, #FFF5C9 0%, #F3D56A 55%, #E2BF45 100%);
+  border: 1px solid #D4A42B;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  border-radius: 9999px;
+  color: #3A2A00;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  line-height: 1;
+  padding: 3px 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.45rem;
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+  transition: transform 220ms ease, filter 220ms ease;
+  transform-origin: center;
+}
+
+/* Hover Effects - Subtle Apple/Stripe-style lift */
+.logoContainer:hover .betaBadge {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+/* Entry & Continuous Animations */
+/* Because the parent (.logoAnimated) fades in, we can safely loop the bounce infinitely */
+.logoAnimated .iconWrapper {
+  animation: waveBounce 2s infinite ease-in-out;
+}
+
+.logoAnimated .textFirst {
+  animation: waveBounce 2s infinite ease-in-out 0.15s;
+}
+
+.logoAnimated .textNest {
+  animation: waveBounce 2s infinite ease-in-out 0.3s;
+}
+
+.logoAnimated .plant {
+  animation: plantSway 2s infinite ease-in-out 0.2s;
+}
+
+.logoAnimated .betaBadge {
+  animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 150ms both;
+}
+
+/* Keyframes */
+@keyframes waveBounce {
+  0%, 100% { transform: translateY(0); }
+  15% { transform: translateY(-4px); }
+  30% { transform: translateY(0); }
+}
+
+@keyframes badgePop {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes plantSway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logoAnimated,
+  .logoAnimated .iconWrapper,
+  .logoAnimated .plant,
+  .logoAnimated .textFirst,
+  .logoAnimated .textNest,
+  .logoAnimated .betaBadge,
+  .logoContainer:hover .betaBadge {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

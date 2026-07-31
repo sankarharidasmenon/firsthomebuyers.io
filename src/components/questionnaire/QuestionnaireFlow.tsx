@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, ShieldAlert, Home, Lock, Calculator, TrendingUp, Gift, Landmark, CheckCircle2, AlertCircle, BadgeDollarSign, Info, Users, MapPin, Clock, Building, FileText, CheckCircle, XCircle, Search, HelpCircle, DollarSign, Wallet } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ShieldAlert, Home, Lock, Calculator, TrendingUp, Gift, Landmark, CheckCircle2, AlertCircle, AlertTriangle, BadgeDollarSign, Info, Users, MapPin, Clock, Building, FileText, CheckCircle, XCircle, Search, HelpCircle, DollarSign, Wallet } from 'lucide-react'
 import './questionnaire.css'
 import {
   EMPTY_ANSWERS, STEP_META, INPUT_STEPS,
@@ -171,6 +171,20 @@ export function QuestionnaireFlow() {
                     <Q label="Will this be your Principal Place of Residence (PPR)?" help="Most first-home buyer grants and concessions require you to live in the property as your main residence for a specified period." error={errors.ppr}>
                       <Segmented options={YES_NO} value={a.ppr} onChange={(v) => set('ppr', v)} />
                     </Q>
+                    {/* Presentation only — mirrors the existing `ppr` soft stop so the
+                        user hears about it here rather than only on the results page.
+                        It never gates Next and no rule reads it. */}
+                    <Cond open={a.ppr === 'No'}>
+                      <div className="fhbq-notice" role="status" aria-live="polite">
+                        <AlertTriangle size={15} className="ic" aria-hidden="true" />
+                        <p>
+                          You may not be eligible for some government grants and home buyer
+                          schemes. Most first-home grants and stamp-duty concessions require you
+                          to live in the property as your principal place of residence. Your
+                          results will still be assessed based on your answers.
+                        </p>
+                      </div>
+                    </Cond>
                     <Cond open={showMoveIn(a)}>
                       <Q label="Will you move in within the required government timeframe?" help="Most schemes require you to move in within 12 months of settlement and live there continuously." error={errors.moveIn}>
                         <Segmented options={YES_NO} value={a.moveIn} onChange={(v) => set('moveIn', v)} />
@@ -201,6 +215,21 @@ export function QuestionnaireFlow() {
                     <Q label="What is your citizenship or residency status?" help="Most government grants require you to be an Australian citizen or permanent resident, though some states offer exceptions." error={errors.citizenship}>
                       <Rows options={CITIZENSHIP_OPTIONS} value={a.citizenship} onChange={(v) => set('citizenship', v)} />
                     </Q>
+                    {/* Presentation only: a heads-up for the weakest combination of
+                        answers. It never gates Next, is not part of `errors`, and no
+                        rule reads it — PPR (asked on the previous step) and
+                        citizenship are still scored exactly as before. */}
+                    <Cond open={a.ppr === 'No' && a.citizenship === 'Other'}>
+                      <div className="fhbq-notice" role="status" aria-live="polite">
+                        <AlertTriangle size={15} className="ic" aria-hidden="true" />
+                        <p>
+                          Based on your current selections, you may not be eligible for some
+                          government grants and home buyer schemes. Eligibility often depends on
+                          your citizenship/residency status and intended occupancy. Your results
+                          will still be assessed based on your answers.
+                        </p>
+                      </div>
+                    </Cond>
                     <Cond open={isJoint(a)}>
                       <div className="fhbq-block co">
                         <span className="fhbq-tag co">👥 Co-buyer details</span>

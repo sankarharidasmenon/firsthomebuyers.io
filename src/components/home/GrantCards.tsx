@@ -339,18 +339,54 @@ const ACCENTS = {
   },
 } as const
 
+/* Shared chip shape for the category / coverage / program-type badges. */
+const BADGE_BASE =
+  'inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold tracking-wider uppercase border'
+
+/* The jurisdiction chip is tertiary: below the GRANT/SCHEME category chip and
+   below the coverage/type chips. It has to stay findable without ever becoming
+   the loudest thing on the card, so the recession is carried by the border and
+   shadow rather than the fill — a low-alpha gold rule and a near-flat shadow
+   let the chip sit ON the card instead of floating above it.
+   Its box is deliberately identical to BADGE_BASE's: 15px line box + 4px padding
+   + 1px border = 25px, so every chip in the row shares one height and baseline.
+   leading-[15px] is load-bearing — the 11px type would otherwise inherit a 1.5
+   line-height (16.5px) and stand 1.5px proud of its neighbours. Only the fill
+   distinguishes it from them.
+   Shares the LogoBadge ("BETA") vocabulary so the two read as one system: same
+   #3A2A00 ink, same 135deg gold ramp, same rgba(184,134,11) border family, same
+   220ms lift + brightness(1.02) hover.
+   #3A2A00 measures 12.9:1 / 10.3:1 / 8.5:1 across the three stops — past AAA
+   over the whole ramp, on the cream, green and near-black card surfaces alike,
+   hence no dark-theme override (matching how accent.chip is handled). */
+const STATE_BADGE =
+  'inline-flex items-center px-3 py-1 rounded-full border ' +
+  'text-[11px] font-bold tracking-[0.4px] uppercase leading-[15px] ' +
+  'bg-[linear-gradient(135deg,#FFF6D9_0%,#F4DD86_55%,#E9C85B_100%)] ' +
+  'text-[#3A2A00] border-[rgba(184,134,11,0.22)] ' +
+  'shadow-[0_1px_2px_rgba(0,0,0,0.06)] ' +
+  'transition-[transform,filter] duration-[220ms] ease-out ' +
+  'hover:-translate-y-px hover:brightness-[1.02] motion-reduce:transition-none motion-reduce:hover:translate-y-0'
+
 export function SchemeRow({ s }: { s: Scheme }): ReactNode {
   const accent = ACCENTS[schemeCategory(s)]
 
-  /* Category → coverage → program type, in priority order. Empty values are
-     dropped and repeated text is shown once — the sheet's Type is often the
-     same word as the derived category (e.g. both "Grant"). */
+  /* Category → coverage → program type → jurisdiction, in priority order.
+     Empty values are dropped and repeated text is shown once — the sheet's Type
+     is often the same word as the derived category (e.g. both "Grant").
+     The jurisdiction chip reuses the flagCode already derived for the region
+     tabs, so it is blank for federal ('AU') schemes, which apply nationwide. */
   const badges = [
-    { text: accent.label, style: accent.chip },
-    { text: s.coverageLabel, style: accent.badge },
+    { text: accent.label, className: `${BADGE_BASE} ${accent.chip}` },
+    { text: s.coverageLabel, className: `${BADGE_BASE} ${accent.badge}` },
     {
       text: s.typeLabel,
-      style: 'bg-transparent text-muted-foreground border-foreground/20',
+      className: `${BADGE_BASE} bg-transparent text-muted-foreground border-foreground/20`,
+    },
+    {
+      text: s.flagCode === 'AU' ? '' : s.flagCode,
+      className: STATE_BADGE,
+      title: s.flagLabel,
     },
   ].filter(
     (badge, i, all) =>
@@ -370,11 +406,8 @@ export function SchemeRow({ s }: { s: Scheme }): ReactNode {
           </p>
         )}
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
-          {badges.map(({ text, style }) => (
-            <span
-              key={text}
-              className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold tracking-wider uppercase border ${style}`}
-            >
+          {badges.map(({ text, className, title }) => (
+            <span key={text} title={title} className={className}>
               {text}
             </span>
           ))}

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Home, ExternalLink, ChevronDown } from 'lucide-react'
+import { Logo } from '@/components/ui/logo/Logo'
 
 function GooglePlayIcon() {
   return (
@@ -126,19 +127,9 @@ export function Footer() {
 
         {/* Brand */}
         <div className="flex flex-col items-start gap-4">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{
-              width: 32, height: 32, background: 'var(--primary)', borderRadius: 6,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}>
-              <Home size={17} style={{ color: 'var(--primary-foreground)' }} strokeWidth={2.5} />
-            </div>
-            <span style={{
-              fontFamily: '"Plus Jakarta Sans", sans-serif',
-              fontWeight: 800, fontSize: '1.0625rem',
-              color: '#FFFFFF', letterSpacing: '-0.01em',
-            }}>FirstNest</span>
-          </div>
+          <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: '#FFFFFF' }}>
+            <Logo size="md" showBadge />
+          </Link>
           <p style={{
             fontFamily: 'Inter, sans-serif', fontWeight: 400,
             fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)',
