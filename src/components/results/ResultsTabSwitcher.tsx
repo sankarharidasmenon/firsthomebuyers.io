@@ -28,7 +28,7 @@ export function ResultsTabSwitcher() {
         >
            Grants & Schemes {isGrants ? '✓' : ''}
         </Link>
-        <Link
+        {/* <Link
           href="/results/borrowing"
           role="tab"
           aria-selected={!isGrants}
@@ -41,7 +41,7 @@ export function ResultsTabSwitcher() {
           style={{ fontFamily: 'Inter, sans-serif' }}
         >
           Borrowing Capacity
-        </Link>
+        </Link> */}
       </div>
     </div>
   )

@@ -1,12 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { categoryDisplay, taxDisplay, type EligibilitySummary } from '@/lib/schemes/summary'
 
 interface TotalSavingsHeroProps {
-  cashGrantsTotal: number
-  taxSavingsTotal: number
-  eligibleSchemesCount: number
-  totalEligibleCount: number
+  /** Derived from the same items that render the scheme cards below. */
+  summary: EligibilitySummary
   state: string
 }
 
@@ -30,15 +29,22 @@ function useCountUp(target: number, duration = 900) {
   return current
 }
 
-export function TotalSavingsHero({
-  cashGrantsTotal,
-  taxSavingsTotal,
-  eligibleSchemesCount,
-  totalEligibleCount,
-  state,
-}: TotalSavingsHeroProps) {
-  const animatedCash = useCountUp(cashGrantsTotal)
-  const animatedTax = useCountUp(taxSavingsTotal)
+export function TotalSavingsHero({ summary, state }: TotalSavingsHeroProps) {
+  const cash = categoryDisplay(summary.cash, {
+    costed: 'direct payment', uncosted: 'amount varies', none: 'none eligible yet',
+  })
+  const tax = taxDisplay(summary)
+  const eligibleSchemesCount = summary.schemes.eligibleCount
+  const totalEligibleCount = summary.totalEligible
+
+  // Count up only where there is a figure to count to; "Available" and "—" are
+  // rendered as-is.
+  const animatedCash = useCountUp(summary.cash.total)
+  const animatedTax = useCountUp(summary.duty?.calculable ? summary.duty.saving ?? 0 : summary.tax.total)
+  const cashValue = summary.cash.total > 0
+    ? `$${animatedCash.toLocaleString('en-AU')}${summary.cash.uncostedCount > 0 ? ` + ${summary.cash.uncostedCount} more` : ''}`
+    : cash.value
+  const taxValue = summary.tax.total > 0 ? `$${animatedTax.toLocaleString('en-AU')}` : tax.value
 
   return (
     <div
@@ -64,16 +70,16 @@ export function TotalSavingsHero({
         <div className="flex flex-col items-center text-center px-2 py-1">
           <span style={{ fontSize: '1rem', marginBottom: 8, opacity: 0.85 }}>💰</span>
           <p
-            className={cashGrantsTotal > 0 ? 'text-[#16A34A]' : 'text-[#CCCCCC] dark:text-muted-foreground/40'}
+            className={cash.muted ? 'text-[#CCCCCC] dark:text-muted-foreground/40' : 'text-[#16A34A]'}
             style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1rem, 3.5vw, 1.375rem)', lineHeight: 1, marginBottom: 6, letterSpacing: '-0.01em' }}
           >
-            {cashGrantsTotal > 0 ? `$${animatedCash.toLocaleString('en-AU')}` : '—'}
+            {cashValue}
           </p>
           <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.625rem', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 3, lineHeight: 1.25 }}>
-            Cash Grants
+            Grants
           </p>
           <p className="text-[#CCCCCC] dark:text-muted-foreground/40" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.625rem', lineHeight: 1.3 }}>
-            {cashGrantsTotal > 0 ? 'direct payment' : 'none eligible yet'}
+            {cash.note}
           </p>
         </div>
 
@@ -81,16 +87,16 @@ export function TotalSavingsHero({
         <div className="flex flex-col items-center text-center px-2 py-1 border-l border-[rgba(0,0,0,0.07)] dark:border-border">
           <span style={{ fontSize: '1rem', marginBottom: 8, opacity: 0.85 }}>🧾</span>
           <p
-            className={taxSavingsTotal > 0 ? 'text-[#111111] dark:text-foreground' : 'text-[#CCCCCC] dark:text-muted-foreground/40'}
+            className={tax.muted ? 'text-[#CCCCCC] dark:text-muted-foreground/40' : 'text-[#111111] dark:text-foreground'}
             style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1rem, 3.5vw, 1.375rem)', lineHeight: 1, marginBottom: 6, letterSpacing: '-0.01em' }}
           >
-            {taxSavingsTotal > 0 ? `$${animatedTax.toLocaleString('en-AU')}` : '—'}
+            {taxValue}
           </p>
           <p className="text-[#AAAAAA] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.625rem', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 3, lineHeight: 1.25 }}>
             Tax &amp; Duty Savings
           </p>
           <p className="text-[#CCCCCC] dark:text-muted-foreground/40" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.625rem', lineHeight: 1.3 }}>
-            {taxSavingsTotal > 0 ? 'stamp duty reduction' : 'not eligible'}
+            {tax.note}
           </p>
         </div>
 

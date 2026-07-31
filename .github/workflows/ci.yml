@@ -1,0 +1,518 @@
+name: CI
+
+# Blocking quality gate. Runs on every push to a long-lived branch and on every
+# pull request targeting one. Nothing here deploys or mutates external state.
+on:
+  push:
+    branches: [main, v6]
+  pull_request:
+    branches: [main, v6]
+  workflow_dispatch:
+
+# Superseded runs on the same ref are cancelled to save runner minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: this workflow only ever reads the repository.
+permissions:
+  contents: read
+
+jobs:
+  # ── Static analysis: fastest signal, fails first ───────────────────────────
+  quality:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # Single source of truth — keep .nvmrc and package.json#engines aligned.
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Uses lint:ci, which caps warnings at the documented legacy baseline.
+      # Any NEW lint violation pushes the count over budget and fails here.
+      # See the LEGACY BASELINE block in eslint.config.mjs.
+      - name: Lint
+        run: npm run lint:ci
+
+      # tsconfig has strict: true. Until now this was only enforced as a side
+      # effect of `next build`; here it is a first-class gate.
+      - name: Typecheck
+        run: npm run typecheck
+
+  # ── Unit tests ────────────────────────────────────────────────────────────
+  # Separate job so a test failure is distinguishable at a glance from a lint
+  # or type failure, and so it runs in parallel with them.
+  #
+  # Needs no secrets and no services: these are pure-logic tests in a `node`
+  # environment with no network, filesystem or database access.
+  unit-tests:
+    name: Unit Tests
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Coverage thresholds live in vitest.config.mts and fail the run on their
+      # own, so no extra gate step is needed here.
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+
+      # Retained so a reviewer can open the HTML report for a failing PR
+      # without reproducing the run locally.
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: coverage/
+          retention-days: 14
+
+  # ── Integration tests ─────────────────────────────────────────────────────
+  # Exercises modules wired together: the master-data upload pipeline, the
+  # admin Server Action's authorization path, and the scheme repository feeding
+  # the real grant calculator. Only the Supabase driver is mocked.
+  #
+  # No Docker and no local Supabase are involved. The `*.realdb.*` suites, which
+  # verify Row Level Security against a real database, SKIP THEMSELVES unless
+  # the SUPABASE_TEST_* secrets below are configured — so this job is green on a
+  # fork or before a test project exists, and gains real RLS coverage the moment
+  # one is added. No workflow change needed to switch them on.
+  integration-tests:
+    name: Integration Tests
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Absent -> the RLS suites skip with a printed reason.
+      # MUST point at a DEDICATED test project: these tests insert rows.
+      SUPABASE_TEST_URL: ${{ secrets.SUPABASE_TEST_URL }}
+      SUPABASE_TEST_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY }}
+      SUPABASE_TEST_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+      # OPTIONAL. Postgres connection string for the SAME test project, used
+      # only to apply migrations automatically (the anon/service keys cannot
+      # execute DDL — they speak to PostgREST, not to Postgres). Absent, the
+      # migration steps below are skipped and nothing fails.
+      #
+      # If you do set it, use the SESSION POOLER string from Supabase →
+      # Settings → Database, not the "direct connection" one: direct
+      # connections are IPv6-only and GitHub-hosted runners have no IPv6 route.
+      SUPABASE_TEST_DB_URL: ${{ secrets.SUPABASE_TEST_DB_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Optional schema sync ────────────────────────────────────────────────
+      # SUPABASE_TEST_DB_URL is OPTIONAL and nothing below is required for this
+      # job to succeed. It exists only to keep the test project's schema in step
+      # with supabase/migrations/ automatically.
+      #
+      # Set     -> migrations are applied and the PostgREST cache is refreshed
+      #            before the suite runs, so the schema cannot drift behind the
+      #            repository.
+      # Not set -> these three steps are skipped entirely and the test project
+      #            is expected to have been migrated by hand, which is the
+      #            long-standing prerequisite documented in the header of
+      #            tests/integration/database/rls.realdb.integration.test.ts.
+      #
+      # Whether the RLS suite runs at all is decided ONLY by SUPABASE_TEST_URL
+      # and SUPABASE_TEST_ANON_KEY, via `hasTestDb` in tests/integration/
+      # helpers/testDb.ts. A missing DB URL never skips a test and never fails
+      # this job.
+      #
+      # Every migration, every run, in filename order. All four are idempotent
+      # by construction — `create table/index if not exists`, `create or replace
+      # function`, and `drop policy/trigger if exists` before each create — so
+      # re-applying cannot duplicate a table or a policy. `ON_ERROR_STOP=1`
+      # means a broken migration fails the job instead of being logged and
+      # ignored. psql ships preinstalled on ubuntu-latest.
+      - name: Apply migrations to the test database
+        if: env.SUPABASE_TEST_DB_URL != ''
+        run: |
+          set -euo pipefail
+          for f in supabase/migrations/*.sql; do
+            echo "── applying $f"
+            psql "$SUPABASE_TEST_DB_URL" -v ON_ERROR_STOP=1 --no-psqlrc --quiet -f "$f"
+          done
+
+      # DDL alone is not enough: PostgREST answers from a cached schema, and a
+      # brand-new table stays invisible (PGRST205) until that cache reloads.
+      # Supabase ships an event trigger that reloads it automatically, but the
+      # reload is asynchronous, so a test starting immediately after the
+      # migration can still race it. NOTIFY is the documented explicit trigger.
+      - name: Reload the PostgREST schema cache
+        if: env.SUPABASE_TEST_DB_URL != ''
+        run: |
+          set -euo pipefail
+          psql "$SUPABASE_TEST_DB_URL" -v ON_ERROR_STOP=1 --no-psqlrc \
+            -c "notify pgrst, 'reload schema';"
+
+      # Poll until PostgREST actually serves the newest table, rather than
+      # sleeping a guessed interval. 404 means the relation is still missing
+      # from the cache; any other status means it is visible (an anon SELECT is
+      # filtered by RLS to an empty array, which is a 200, not an error).
+      - name: Wait for the schema cache to expose public.feedback
+        if: env.SUPABASE_TEST_DB_URL != '' && env.SUPABASE_TEST_URL != ''
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' \
+              -H "apikey: ${SUPABASE_TEST_ANON_KEY}" \
+              "${SUPABASE_TEST_URL}/rest/v1/feedback?select=id&limit=1" || echo 000)
+            if [ "$code" != "404" ] && [ "$code" != "000" ]; then
+              echo "schema cache ready after ${i} attempt(s) (HTTP $code)"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::PostgREST still does not expose public.feedback after 60s."
+          exit 1
+
+      # A non-zero exit here fails the job, and therefore the workflow.
+      # Coverage thresholds live in vitest.integration.config.mts.
+      - name: Run integration tests with coverage
+        run: npm run test:integration:coverage
+
+      # `always()` so a FAILING run still uploads its report — that is precisely
+      # when the JUnit XML is worth having.
+      - name: Upload integration test report (JUnit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: test-results/
+          retention-days: 14
+
+      - name: Upload integration coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-coverage
+          path: coverage/integration/
+          retention-days: 14
+
+  # ── API tests ─────────────────────────────────────────────────────────────
+  # Exercises every Route Handler under src/app/api/ at the HTTP contract level:
+  # status codes, response bodies, headers, validation, authorization and rate
+  # limiting. The handlers are imported and invoked with real Request objects —
+  # no server is started, no browser is involved, and nothing is containerised.
+  #
+  # Needs no secrets: the Supabase driver and nodemailer are mocked as external
+  # services, and no route is reached over the network.
+  api-tests:
+    name: API Tests
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Non-zero exit fails the job and therefore the workflow.
+      # Coverage thresholds live in vitest.api.config.mts.
+      - name: Run API tests with coverage
+        run: npm run test:api:coverage
+
+      # `always()` so a FAILING run still publishes its report.
+      - name: Upload API test report (JUnit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: test-results/api-junit.xml
+          retention-days: 14
+
+      - name: Upload API coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-coverage
+          path: coverage/api/
+          retention-days: 14
+
+  # ── Production build ──────────────────────────────────────────────────────
+  build:
+    name: Build
+    needs: ui-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # `next build` prerenders /admin/login, which constructs a Supabase
+      # browser client and throws if these are unset — so the build cannot run
+      # without them. Both are PUBLIC values (the anon key is protected by RLS).
+      # The placeholders are deliberately NOT credential-shaped: the client is
+      # only constructed, never called, during prerender, so an arbitrary
+      # non-empty string compiles fine and nothing resembling a real key is
+      # committed (which would also trip the secret scanner).
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+      # Never inject SUPABASE_SERVICE_ROLE_KEY into a build: it bypasses RLS and
+      # no build-time code path needs it.
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Next's build cache. Keyed on the lockfile plus source hash so an
+      # unchanged source tree restores a warm cache; the restore-keys fallback
+      # still gives a partial hit when only source changed.
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.[jt]s', 'src/**/*.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Build
+        run: npm run build
+
+  # ── UI Tests (Playwright — Chromium engine, BLOCKING) ─────────────────────
+  # Verifies the full application stack in real browsers. Starts a production
+  # build and runs the Playwright suite against it.
+  #
+  # This job gates `build`. It runs the Chromium-engine projects only:
+  #   * chromium      — desktop
+  #   * mobile-chrome — Pixel 5 emulation, also Chromium, and a genuinely
+  #                     distinct surface (bottom nav, hamburger, mobile header)
+  # Every functional assertion still runs and a failure here still fails CI.
+  #
+  # TODO: Firefox/WebKit are temporarily non-blocking due to known
+  # cross-browser Playwright instability. Re-enable blocking once the test
+  # suite is stabilized.
+  # They run in `ui-tests-cross-browser` below, which does NOT gate anything.
+  ui-tests:
+    name: UI Tests
+    needs: [unit-tests, integration-tests, api-tests]
+    runs-on: ubuntu-latest
+    # 20 was not survivable, measured rather than guessed. playwright.config.ts
+    # prefixes EACH run with `npm run build`, and this job runs the suite twice
+    # (functional, then accessibility), so it pays for two production builds.
+    # The accessibility step is deliberately left spanning all four projects
+    # (see its own note), so the browser-scope reduction below does not shrink
+    # that half. Headroom retained rather than trimmed: a runner timeout is a
+    # runaway-job guard, not a quality gate, and every assertion still has to
+    # pass regardless of how long the job is permitted to take.
+    timeout-minutes: 45
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.[jt]s', 'src/**/*.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Restore Playwright browsers cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      # BLOCKING. Chromium-engine projects only — see the TODO on this job.
+      - name: Run Functional Playwright tests (Chromium — blocking)
+        run: npx playwright test --project=chromium --project=mobile-chrome --grep-invert "accessibility"
+
+      # Unchanged: still every project, still non-blocking. Left exactly as it
+      # was so the accessibility baseline is not quietly narrowed at the same
+      # time as the functional one.
+      - name: Run Accessibility tests (Non-blocking)
+        run: npx playwright test --grep "accessibility"
+        continue-on-error: true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: test-results/playwright-artifacts/
+          retention-days: 14
+
+  # ── UI Tests (Firefox & WebKit — INFORMATIONAL, non-blocking) ─────────────
+  # TODO: Firefox/WebKit are temporarily non-blocking due to known
+  # cross-browser Playwright instability. Re-enable blocking once the test
+  # suite is stabilized.
+  #
+  # To re-enable blocking, delete `continue-on-error` below and add this job to
+  # the `needs:` list on `build`. Nothing else has to change: the projects are
+  # still defined in playwright.config.ts, no spec is skipped, and no assertion
+  # differs from the Chromium run — this executes the SAME
+  # `--grep-invert "accessibility"` selection, only on the other two engines.
+  #
+  # `continue-on-error: true` is scoped to this job alone. It is deliberately
+  # absent from `build`'s `needs:`, so a red run here cannot delay or block the
+  # build, CI success, or a merge.
+  ui-tests-cross-browser:
+    name: UI Tests (Firefox & WebKit — non-blocking)
+    # Only `quality`, so it starts early and never sits on the critical path.
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    continue-on-error: true
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.[jt]s', 'src/**/*.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Restore Playwright browsers cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Functional Playwright tests (Firefox & WebKit)
+        id: cross_browser
+        run: npx playwright test --project=firefox --project=webkit --grep-invert "accessibility"
+
+      # A job-level `continue-on-error` reports the job as successful, which
+      # makes a red result easy to miss. This writes the outcome to the run
+      # summary so the status is legible without opening the logs.
+      - name: Publish result to run summary
+        if: always()
+        run: |
+          {
+            echo '## UI Tests — Firefox & WebKit (informational)'
+            echo
+            if [ "${{ steps.cross_browser.outcome }}" = "success" ]; then
+              echo 'Result: **passed**'
+            else
+              echo 'Result: **FAILED (non-blocking)** — outcome: `${{ steps.cross_browser.outcome }}`'
+              echo
+              echo 'This does NOT block CI, the build, or a merge. Chromium is the'
+              echo 'blocking browser. Download `playwright-report-cross-browser`'
+              echo 'for the HTML report, or `playwright-artifacts-cross-browser`'
+              echo 'for screenshots, videos and traces.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Playwright report (Firefox & WebKit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-cross-browser
+          path: playwright-report/
+          retention-days: 14
+
+      # `always()`, not `failure()`: with continue-on-error the job does not
+      # report failure, and the videos/traces are wanted precisely when a run
+      # was red. `test-results/` carries the JUnit XML as well as the
+      # screenshots, videos and traces under playwright-artifacts/.
+      - name: Upload Playwright artifacts (Firefox & WebKit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-cross-browser
+          path: test-results/
+          retention-days: 14

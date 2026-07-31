@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+# JUnit output from the integration suite (uploaded as a CI artifact instead)
+/test-results
 
 # next.js
 /.next/
@@ -32,6 +34,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the committed template, which holds names + placeholders only,
+# never real values. Keep this negation below the .env* rule.
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +44,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.agents
+
+/docs/
+
+/data-extractor/
+
+/scripts/
+
+/scratch-act-audit.ts
+/scratch-impact.ts
+/scratch-multi.ts
+/scratch-others.ts
+/tmp-trace.ts
+/tmp-verify-live.ts

@@ -128,38 +128,42 @@ export function StepWrapper({
           />
         </div>
 
-        {/* Controls row */}
-        <div
-          className="flex items-center justify-between max-w-300 mx-auto px-12 py-3"
-          style={{ borderBottom: '1px solid var(--border)' }}
-        >
-          <button
-            type="button"
-            onClick={handleBack}
-            className="flex items-center gap-1.5 transition-colors cursor-pointer border-none bg-transparent hover:text-foreground"
-            aria-label="Go back"
-            style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.875rem', color: 'var(--muted-foreground)', padding: 0 }}
+        {/* Controls row — shares the form's container (max-w-360 / px-10 / xl:px-16)
+            so the divider below starts and ends exactly at the form's edges.
+            The border sits on the inner element, inside the padding. */}
+        <div className="w-full max-w-360 mx-auto px-10 xl:px-16">
+          <div
+            className="flex items-center justify-between py-3"
+            style={{ borderBottom: '1px solid var(--border)' }}
           >
-            <ChevronLeft size={16} strokeWidth={2.5} />
-            Back
-          </button>
-
-          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: 'var(--muted-foreground)' }}>
-            Step {currentStep} of {totalSteps}
-          </span>
-
-          {showSave ? (
             <button
               type="button"
-              onClick={handleSaveExit}
-              className="hover:text-foreground transition-colors"
-              style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: 'var(--muted-foreground)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              onClick={handleBack}
+              className="flex items-center gap-1.5 transition-colors cursor-pointer border-none bg-transparent hover:text-foreground"
+              aria-label="Go back"
+              style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.875rem', color: 'var(--muted-foreground)', padding: 0 }}
             >
-              Exit
+              <ChevronLeft size={16} strokeWidth={2.5} />
+              Back
             </button>
-          ) : (
-            <div className="w-16" />
-          )}
+
+            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: 'var(--muted-foreground)' }}>
+              Step {currentStep} of {totalSteps}
+            </span>
+
+            {showSave ? (
+              <button
+                type="button"
+                onClick={handleSaveExit}
+                className="hover:text-foreground transition-colors"
+                style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: 'var(--muted-foreground)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                Exit
+              </button>
+            ) : (
+              <div className="w-16" />
+            )}
+          </div>
         </div>
       </div>
 
@@ -170,8 +174,10 @@ export function StepWrapper({
         style={{ paddingTop: 112, minHeight: '100vh' }}
       >
         <div className="w-full max-w-360 mx-auto px-10 xl:px-16 pt-8 pb-14">
+          {/* items-stretch: both columns take the row height, so their top and
+              bottom edges align regardless of which side is taller. */}
           <div
-            className="grid items-start"
+            className="grid items-stretch"
             style={{ gridTemplateColumns: '3fr 2fr', gap: '3.5rem' }}
           >
 
@@ -186,8 +192,11 @@ export function StepWrapper({
               {children}
             </div>
 
-            {/* ── RIGHT: sticky info panel ── */}
-            <div className="flex flex-col gap-3" style={{ position: 'sticky', top: 124 }}>
+            {/* ── RIGHT: info panel ──
+                Stretched by the grid; justify-between spreads the surplus height
+                evenly between the cards. Not sticky: a stretched column fills the
+                row, leaving sticky no travel room. */}
+            <div className="flex flex-col justify-between gap-3">
 
               {/* 1 — Header + checklist */}
               <div

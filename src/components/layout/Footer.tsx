@@ -1,10 +1,9 @@
 'use client'
 
-'use client'
-
 import { useState } from 'react'
 import Link from 'next/link'
 import { Home, ExternalLink, ChevronDown } from 'lucide-react'
+import { Logo } from '@/components/ui/logo/Logo'
 
 function GooglePlayIcon() {
   return (
@@ -19,7 +18,7 @@ function GooglePlayIcon() {
 
 function AppleIcon() {
   return (
-    <svg viewBox="0 0 384 512" width="12" height="12" fill="currentColor" aria-hidden="true">
+    <svg viewBox="0 0 384 512" width="12" height="12" fill="#FFFFFF" aria-hidden="true">
       <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
     </svg>
   )
@@ -85,7 +84,6 @@ const CAT: React.CSSProperties = {
   display: 'block',
 }
 
-
 export function Footer() {
   const [legalOpen, setLegalOpen] = useState(false)
   const [selectedLegal, setSelectedLegal] = useState<string | null>(null)
@@ -125,27 +123,17 @@ export function Footer() {
       `}</style>
 
       {/* ── Main section: Brand + compact links ── */}
-      <div className="max-w-275 mx-auto px-5 lg:px-12 pt-10 pb-8 flex flex-col gap-8">
+      <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8 w-full pt-12 md:pt-14 pb-10 flex flex-col gap-10">
 
         {/* Brand */}
-        <div className="flex flex-col items-center lg:items-start gap-4">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{
-              width: 32, height: 32, background: 'var(--primary)', borderRadius: 6,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}>
-              <Home size={17} style={{ color: 'var(--primary-foreground)' }} strokeWidth={2.5} />
-            </div>
-            <span style={{
-              fontFamily: '"Plus Jakarta Sans", sans-serif',
-              fontWeight: 800, fontSize: '1.0625rem',
-              color: '#FFFFFF', letterSpacing: '-0.01em',
-            }}>FirstNest</span>
-          </div>
+        <div className="flex flex-col items-start gap-4">
+          <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: '#FFFFFF' }}>
+            <Logo size="md" showBadge />
+          </Link>
           <p style={{
             fontFamily: 'Inter, sans-serif', fontWeight: 400,
             fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)',
-            lineHeight: 1.65, maxWidth: '100%', whiteSpace: 'nowrap',
+            lineHeight: 1.65, maxWidth: '100%', whiteSpace: 'normal',
           }}>
             Australia&apos;s free first home buyer tool - Know your Eligibility &amp; Government Support
           </p>
@@ -169,7 +157,7 @@ export function Footer() {
                   border: '1px solid rgba(255,255,255,0.12)',
                   borderRadius: 9999,
                   padding: '5px 12px',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: 'normal', textAlign: 'center',
                   transition: 'background 150ms, border-color 150ms',
                 }}
                 onMouseEnter={e => {
@@ -191,8 +179,8 @@ export function Footer() {
       </div>
 
       {/* ── Bottom bar ── */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <div className="max-w-275 mx-auto px-5 lg:px-12 py-4">
+      <div className="-mb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8 w-full py-5">
 
           {/* Collapsible legal panel */}
           <div
@@ -245,35 +233,204 @@ export function Footer() {
                 <>
                   <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, margin: 0 }}>
-                    FirstNest provides general information only and does not constitute financial, legal or taxation advice.
+                    FirstHomeBuyers provides general information only and does not constitute financial, legal or taxation advice.
                     All borrowing estimates and grant eligibility results are indicative only and may not reflect your actual
                     circumstances. Grant values and eligibility criteria change frequently — always verify with the relevant
                     state or federal authority. Consult a licensed financial adviser or mortgage broker before making any
                     property or borrowing decisions.
                   </p>
-                  <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <div style={{ display: 'flex', gap: 6, flexShrink: 0, paddingTop: 2 }}>
-                      <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
-                        <rect width="24" height="8" fill="#111111"/>
-                        <rect y="8" width="24" height="8" fill="#CC0000"/>
-                        <circle cx="12" cy="8" r="3.5" fill="#FFCC00"/>
-                      </svg>
-                      <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
-                        <rect width="24" height="16" fill="#006341"/>
-                        <rect y="4" width="24" height="1.5" fill="#FFFFFF"/>
-                        <rect y="10.5" width="24" height="1.5" fill="#FFFFFF"/>
-                        <circle cx="12" cy="8" r="2" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
-                      </svg>
-                    </div>
-                    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: 0 }}>
-                      FirstNest acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
-                      throughout Australia and their continuing connection to land, waters and community.
-                    </p>
-                  </div>
                 </>
               )}
             </div>
+          </div>
+
+          {/* <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 20 }}>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0, paddingTop: 2 }}>
+              <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
+                <rect width="24" height="8" fill="#111111"/>
+                <rect y="8" width="24" height="8" fill="#CC0000"/>
+                <circle cx="12" cy="8" r="3.5" fill="#FFCC00"/>
+              </svg>
+              <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
+                <rect width="24" height="16" fill="#006341"/>
+                <rect y="4" width="24" height="1.5" fill="#FFFFFF"/>
+                <rect y="10.5" width="24" height="1.5" fill="#FFFFFF"/>
+                <circle cx="12" cy="8" r="2" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
+              </svg>
+            </div>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: 0 }}>
+              FirstNest acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
+              throughout Australia and their continuing connection to land, waters and community.
+            </p>
+          </div> */}
+
+          {/* Bottom row: copyright + store badges + legal toggle */}
+          <div className="flex flex-col md:flex-row items-center md:justify-between gap-6">
+            
+            {/* Left/Center Group: Copyright + Stores + Socials */}
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-10">
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+                © 2026 FirstHomeBuyers. All rights reserved.
+              </span>
+              
+              <div className="flex flex-wrap items-center justify-center gap-6">
+                {/* Store Buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {[
+                    { label: 'Google Play', sublabel: 'Get it on', href: '#', icon: <GooglePlayIcon /> },
+                    { label: 'App Store',   sublabel: 'Download on the', href: '#', icon: <AppleIcon /> },
+                  ].map(({ label, sublabel, href, icon }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        padding: '4px 10px 4px 7px',
+                        background: 'rgba(255,255,255,0.08)',
+                        border: '1px solid rgba(255,255,255,0.14)',
+                        borderRadius: 7,
+                        textDecoration: 'none',
+                        transition: 'background 150ms, border-color 150ms',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.28)'
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>
+                      <span style={{ lineHeight: 1 }}>
+                        <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.5rem', color: 'rgba(255,255,255,0.5)', fontWeight: 400, marginBottom: 1 }}>
+                          {sublabel}
+                        </span>
+                        <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
+                          {label}
+                        </span>
+                      </span>
+                    </a>
+                  ))}
+                </div>
+
+                {/* Social icons */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {[
+                    { label: 'Facebook',    href: '#', color: '#1877F2', svg: FACEBOOK_PATH },
+                    { label: 'YouTube',     href: '#', color: '#FF0000', svg: YOUTUBE_PATH },
+                    { label: 'X (Twitter)', href: '#', color: '#000000', svg: X_PATH },
+                    { label: 'LinkedIn',    href: '#', color: '#0A66C2', svg: LINKEDIN_PATH },
+                  ].map(({ label, href, color, svg }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 28, height: 28,
+                        background: color,
+                        borderRadius: 7,
+                        color: '#ffffff',
+                        textDecoration: 'none',
+                        transition: 'opacity 150ms, transform 150ms',
+                        flexShrink: 0,
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.opacity = '0.85'
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.opacity = '1'
+                        e.currentTarget.style.transform = 'translateY(0)'
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d={svg} />
+                      </svg>
+                    </a>
+                  ))}
+                  <a
+                    href="mailto:hello@firstnest.com.au"
+                    aria-label="Email us"
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      width: 28, height: 28,
+                      background: '#F5E642',
+                      borderRadius: 7,
+                      color: '#111111',
+                      textDecoration: 'none',
+                      transition: 'opacity 150ms, transform 150ms',
+                      flexShrink: 0,
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.opacity = '0.85'
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.opacity = '1'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                    }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect width="20" height="16" x="2" y="4" rx="2"/>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Legal Toggle */}
+            <div className="flex justify-center md:justify-end">
+              <button
+                type="button"
+                onClick={() => setLegalOpen(o => !o)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', fontWeight: 500,
+                  color: 'rgba(255,255,255,0.45)',
+                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                  transition: 'color 150ms',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.75)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+              >
+                Legal
+                <ChevronDown
+                  size={13}
+                  style={{
+                    transition: 'transform 300ms ease',
+                    transform: legalOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
+                />
+              </button>
+            </div>
+            
+          </div>
+     <div className="mt-4 -mb-8" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 20 }}>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0, paddingTop: 2 }}>
+              <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
+                <rect width="24" height="8" fill="#111111"/>
+                <rect y="8" width="24" height="8" fill="#CC0000"/>
+                <circle cx="12" cy="8" r="3.5" fill="#FFCC00"/>
+              </svg>
+              <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
+                <rect width="24" height="16" fill="#006341"/>
+                <rect y="4" width="24" height="1.5" fill="#FFFFFF"/>
+                <rect y="10.5" width="24" height="1.5" fill="#FFFFFF"/>
+                <circle cx="12" cy="8" r="2" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
+              </svg>
+            </div>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: 0 }}>
+              FirstHomeBuyers acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
+              throughout Australia and their continuing connection to land, waters and community.
+            </p>
           </div>
 
           {/* Bottom row: copyright + store badges + legal toggle */}
@@ -417,4 +574,3 @@ export function Footer() {
     </footer>
   )
 }
-

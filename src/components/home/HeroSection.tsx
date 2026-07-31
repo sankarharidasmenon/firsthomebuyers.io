@@ -56,14 +56,19 @@ export function HeroSection() {
         }
         .dark .fn-hero { background: var(--background); border-bottom-color: var(--border); }
 
+        /* Container mirrors the grants section + footer: max-w-[1150px] with
+           px-4 / sm:px-6 / lg:px-8 so every section shares one content edge. */
         .fn-hero-inner {
           width: 100%;
-          max-width: 1100px;
+          max-width: 1150px;
           margin: 0 auto;
-          padding: 48px 20px 56px;
+          padding: 24px 16px 32px;
+        }
+        @media (min-width: 640px) {
+          .fn-hero-inner { padding-left: 24px; padding-right: 24px; }
         }
         @media (min-width: 1024px) {
-          .fn-hero-inner { padding: 88px 24px 96px; }
+          .fn-hero-inner { padding: 48px 32px 48px; }
         }
 
         .fn-hero-grid {
@@ -82,18 +87,23 @@ export function HeroSection() {
 
         /* ── Eyebrow ── */
         .fn-hero-eyebrow {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 11px;
           font-weight: 600;
-          letter-spacing: 0.18em;
+          line-height: 1.45;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
           color: #C4A000;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
+
+        /* Trailing trust note — same treatment, no bottom margin so it
+           doesn't add a phantom gap above the section divider. */
+        .fn-hero-note { margin-bottom: 0; }
 
         /* ── Title ── */
         .fn-hero-title {
-          font-family: var(--font-display, 'Fraunces'), serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 500;
           font-size: clamp(34px, 4.8vw, 58px);
           line-height: 1.1;
@@ -102,14 +112,17 @@ export function HeroSection() {
           margin-bottom: 18px;
         }
         .dark .fn-hero-title { color: var(--foreground); }
-        .fn-hero-title em {
-          font-style: italic;
-          color: #C4A000;
-        }
+        /* The default-flow h1 currently renders no copy; drop its trailing
+           margin so it doesn't leave dead space. Self-cancels once it has text. */
+        .fn-hero-title:empty { margin-bottom: 0; }
+        // .fn-hero-title em {
+        //   font-style: italic;
+        //   color: #C4A000;
+        // }
 
         /* ── Sub ── */
         .fn-hero-sub {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 16px;
           font-weight: 300;
           line-height: 1.7;
@@ -123,32 +136,49 @@ export function HeroSection() {
         .fn-hero-paths {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 12px;
-          margin-bottom: 20px;
+          gap: 14px;
+          margin-bottom: 24px;
         }
         @media (min-width: 560px) {
           .fn-hero-paths { grid-template-columns: 1fr 1fr; }
         }
 
+        /* Row: stacked kicker + title on the left, arrow pinned right and
+           vertically centred against the whole card. */
         .fn-path {
           display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 6px;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          width: 100%;
           text-align: left;
-          padding: 22px 20px;
+          padding: 14px 18px;
           border-radius: 14px;
+          overflow: hidden;
           cursor: pointer;
-          transition: border-color 0.2s, background 0.2s, transform 0.15s;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          transition: border-color 0.2s, filter 0.2s, transform 0.15s;
+          font-family: var(--font-body, 'Inter'), sans-serif;
         }
         .fn-path:active { transform: scale(0.99); }
 
-        .fn-path-primary {
-          background: #111111;
-          border: 1px solid #111111;
+        .fn-path-body {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 5px;
+          min-width: 0;
         }
-        .fn-path-primary:hover { background: #262626; border-color: #262626; }
+
+        /* --brand-dark-surface is static across themes, so these stay dark
+           cards in both. In dark mode the page background is near-black, so a
+           border is needed to separate the card from it. */
+        .fn-path-primary {
+          background: var(--brand-dark-surface);
+          border: 1px solid var(--brand-dark-surface);
+        }
+        .fn-path-primary:hover { filter: brightness(1.4); }
+        .dark .fn-path-primary { border-color: var(--border); }
 
         .fn-path-secondary {
           background: transparent;
@@ -159,22 +189,38 @@ export function HeroSection() {
         .dark .fn-path-secondary:hover { border-color: var(--foreground); background: transparent; }
 
         .fn-path-kicker {
-          font-size: 10.5px;
+          font-size: 10px;
           font-weight: 600;
-          letter-spacing: 0.14em;
+          line-height: 1.1;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
         }
-        .fn-path-primary .fn-path-kicker { color: #F5E642; }
+        .fn-path-primary .fn-path-kicker { color: var(--primary); }
         .fn-path-secondary .fn-path-kicker { color: #C4A000; }
 
+        /* Single line by design. The lg step down is deliberate: at 1024–1280
+           the left column is at its narrowest, so the label needs to be smaller
+           there than it is on mobile, where the card spans the full width. */
         .fn-path-title {
-          font-family: var(--font-display, 'Fraunces'), serif;
-          font-weight: 500;
-          font-size: 19px;
+          font-family: var(--font-body, 'Inter'), sans-serif;
+          font-weight: 600;
+          font-size: 15px;
           letter-spacing: -0.3px;
-          line-height: 1.2;
+          line-height: 1.25;
+          white-space: normal;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
-        .fn-path-primary .fn-path-title { color: #FFFFFF; }
+        @media (min-width: 1024px) {
+          .fn-path-title { font-size: 13.5px; }
+        }
+        @media (min-width: 1280px) {
+          .fn-path-title { font-size: 15px; }
+        }
+        /* Sits on the static dark surface, so it stays white in both themes. */
+        .fn-path-primary .fn-path-title { color: var(--color-white); }
         .fn-path-secondary .fn-path-title { color: #111111; }
         .dark .fn-path-secondary .fn-path-title { color: var(--foreground); }
 
@@ -187,22 +233,18 @@ export function HeroSection() {
         .fn-path-secondary .fn-path-desc { color: #444444; }
         .dark .fn-path-secondary .fn-path-desc { color: var(--muted-foreground); }
 
-        .fn-path-arrow {
-          margin-top: 8px;
-          font-size: 13.5px;
-          font-weight: 500;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
+        /* Standalone arrow pinned to the card's right edge. */
+        .fn-path-icon {
+          flex-shrink: 0;
+          transition: transform 0.2s;
         }
-        .fn-path-primary .fn-path-arrow { color: #FFFFFF; }
-        .fn-path-secondary .fn-path-arrow { color: #C4A000; }
-        .fn-path-arrow svg { transition: transform 0.2s; }
-        .fn-path:hover .fn-path-arrow svg { transform: translateX(4px); }
+        .fn-path-primary .fn-path-icon { color: var(--color-white); }
+        .fn-path-secondary .fn-path-icon { color: #C4A000; }
+        .fn-path:hover .fn-path-icon { transform: translateX(4px); }
 
         /* ── Trust line ── */
         .fn-hero-trust {
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 12.5px;
           color: #888888;
         }
@@ -213,7 +255,7 @@ export function HeroSection() {
           border: 1px solid rgba(17,17,17,0.15);
           border-radius: 9999px;
           padding: 7px 16px;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-weight: 400;
           font-size: 0.8125rem;
           color: #444444;
@@ -224,7 +266,7 @@ export function HeroSection() {
           display: inline-flex; align-items: center; gap: 8px;
           background: #111111; color: #FFFFFF;
           padding: 15px 28px; border-radius: 50px;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 15px; font-weight: 500;
           border: none; cursor: pointer;
           transition: background 0.25s, transform 0.15s;
@@ -237,7 +279,7 @@ export function HeroSection() {
           display: inline-flex; align-items: center; gap: 8px;
           background: transparent; color: #111111;
           padding: 15px 24px; border-radius: 50px;
-          font-family: var(--font-sans, 'DM Sans'), sans-serif;
+          font-family: var(--font-body, 'Inter'), sans-serif;
           font-size: 15px; font-weight: 500;
           border: 1px solid rgba(17,17,17,0.22); cursor: pointer;
           transition: border-color 0.2s, background 0.2s;
@@ -265,7 +307,7 @@ export function HeroSection() {
                 <div>
                   <div className="fn-hero-eyebrow">Welcome back, {firstName}</div>
                   <h1 className="fn-hero-title">
-                    Pick up where<br />you <em>left off</em>
+                    Pick up where<br />you left off
                   </h1>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
                     {[
@@ -286,7 +328,7 @@ export function HeroSection() {
                       Start fresh
                     </button>
                   </div>
-                  <p style={{ fontFamily: 'var(--font-sans, "DM Sans"), sans-serif', fontSize: 12.5, color: '#AAAAAA' }}>
+                  <p style={{ fontFamily: 'var(--font-body, "Inter"), sans-serif', fontSize: 12.5, color: '#AAAAAA' }}>
                     or{' '}
                     <button type="button"
                       onClick={() => { clearAllData(); window.location.href = '/' }}
@@ -297,34 +339,42 @@ export function HeroSection() {
                 </div>
               ) : (
                 <div>
-                  <div className="fn-hero-eyebrow">For Australian first home buyers</div>
-                  <h1 className="fn-hero-title"></h1>
-                  {/* The two things the product does — as the primary CTAs */}
+                  {/* <div className="fn-hero-eyebrow">For Australian first home buyers</div> */}
+                  <h1 className="fn-hero-title max-w-2xl " style={{ fontSize: 'clamp(24px, 3.2vw, 40px)' }}>
+                    {/* Australia <br/> */}
+                     {/* Smarter<br /> */}
+               Australian First Home Buyers 
+                  </h1>
+                  <p className="fn-hero-sub -mt-3">
+                    {/* Your first home, made easier — in about 3 minutes. */}
+                   FirstHomeBuyers identifies every Australian government grant and scheme you qualify for, federal and state, then builds your personalised roadmap to homeownership.
+                  </p>
+                  {/* Primary: grants (black card), Secondary: borrowing (outline card) */}
                   <div className="fn-hero-paths">
                     <button type="button" className="fn-path fn-path-primary"
                       onClick={() => router.push('/onboarding?flow=grants')}>
-                      <span className="fn-path-kicker">Eligibility</span>
-                      <span className="fn-path-arrow">
-                        Check your eligibility & next steps
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                        </svg>
+                      <span className="fn-path-body">
+                        <span className="fn-path-kicker">Eligibility</span>
+                        <span className="fn-path-title">Check my grants &amp; schemes</span>
                       </span>
+                      <svg className="fn-path-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                      </svg>
                     </button>
 
                     <button type="button" className="fn-path fn-path-primary"
                       onClick={() => router.push('/grant-calculator')}>
-                      <span className="fn-path-kicker">Government support</span>
-                      <span className="fn-path-arrow">
-                        Research about Grants/Schemes
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                        </svg>
+                      <span className="fn-path-body">
+                        <span className="fn-path-kicker">Government support</span>
+                        <span className="fn-path-title">Check my grant calculator</span>
                       </span>
+                      <svg className="fn-path-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                      </svg>
                     </button>
                   </div>
 
-                  <p className="fn-hero-eyebrow">Free · No sign-up · No credit check</p>
+                  <p className="fn-hero-trust ml-3 -mt-3"> No credit check</p>
                 </div>
               )}
             </div>

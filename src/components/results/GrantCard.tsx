@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { ChevronDown, Check, X, ExternalLink } from 'lucide-react'
 import type { EvaluatedGrant } from '@/lib/schemes/types'
+import { formatDuty, type DutyOutcome } from '@/lib/schemes/stampDuty'
 
 const STATUS_COLOURS: Record<string, string> = {
   eligible: '#22C55E',
@@ -26,9 +27,22 @@ interface GrantCardProps {
   evaluatedGrant: EvaluatedGrant
   hidden?: boolean
   variant?: 'grant' | 'scheme'
+  /**
+   * Calculated duty for a duty scheme the applicant is eligible for. Supplied by
+   * the page from the same calculator the summary card uses, so the card and the
+   * header can never show different savings.
+   */
+  duty?: DutyOutcome | null
+  /**
+   * 1-based position of this card in the visible list, counted across every
+   * section rather than restarting per section. Presentation only — the page
+   * derives it from the render order, nothing derives it from eligibility.
+   * Omitted (undefined) renders no numeral, so existing callers are unchanged.
+   */
+  index?: number
 }
 
-export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }: GrantCardProps) {
+export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant', duty = null, index }: GrantCardProps) {
   const [open, setOpen] = useState(false)
   const { grant, status, value, criteria, reason, alternative } = evaluatedGrant
 
@@ -72,6 +86,25 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
         aria-expanded={open}
         className="w-full flex items-start justify-between gap-3 px-5 pt-7 pb-4 text-left cursor-pointer bg-none border-none"
       >
+        {/* Sequential position in the visible list. Decorative — the accessible
+            name of the card is the scheme name, so this is hidden from screen
+            readers rather than read out as part of it. */}
+        {index !== undefined && (
+          <span
+            aria-hidden="true"
+            className="shrink-0 tabular-nums select-none text-[#9CA3AF] dark:text-muted-foreground/60"
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 600,
+              fontSize: '0.8125rem',
+              lineHeight: '1.375rem',
+              minWidth: 16,
+            }}
+          >
+            {index}
+          </span>
+        )}
+
         {/* Name + optional benefit line for schemes */}
         <div className="flex-1 pr-4">
           <span
@@ -121,6 +154,46 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant' }:
       {/* Expanded content */}
       {open && (
         <div className="px-5 pb-5 border-t border-grey-light" style={{ borderTopColor: 'rgba(0,0,0,0.05)' }}>
+          {duty && (
+            <div
+              className="bg-[#F9FAFB] dark:bg-muted/20 rounded-xl px-4 py-3"
+              style={{ marginTop: 12, fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}
+            >
+              {duty.calculable && duty.payable !== null && duty.saving !== null ? (
+                <>
+                  <div className="flex justify-between" style={{ marginBottom: 6 }}>
+                    <span className="text-[#666666] dark:text-muted-foreground">Normal duty</span>
+                    <span className="text-[#111111] dark:text-foreground" style={{ fontWeight: 600 }}>
+                      ${formatDuty(duty.standard)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between" style={{ marginBottom: 6 }}>
+                    <span className="text-[#666666] dark:text-muted-foreground">Duty payable</span>
+                    <span className="text-[#111111] dark:text-foreground" style={{ fontWeight: 600 }}>
+                      ${formatDuty(duty.payable)}
+                    </span>
+                  </div>
+                  <div
+                    className="flex justify-between pt-2"
+                    style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
+                  >
+                    <span className="text-[#111111] dark:text-foreground" style={{ fontWeight: 600 }}>You save</span>
+                    <span className="text-[#16A34A]" style={{ fontWeight: 700, fontSize: '0.9375rem' }}>
+                      ${formatDuty(duty.saving)}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between">
+                  <span className="text-[#666666] dark:text-muted-foreground">Duty saving</span>
+                  <span className="text-[#B45309]" style={{ fontWeight: 600 }}>Check required</span>
+                </div>
+              )}
+              <p className="text-[#999999] dark:text-muted-foreground/60" style={{ fontSize: '0.75rem', marginTop: 8 }}>
+                {duty.note}
+              </p>
+            </div>
+          )}
           <p className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', marginTop: 12, marginBottom: 12 }}>
             {grant.description}
           </p>

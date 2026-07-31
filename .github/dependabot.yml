@@ -1,0 +1,80 @@
+version: 2
+
+updates:
+  # ── Application dependencies ──────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Etc/UTC
+    # Keep the review queue small; security PRs are exempt from this limit.
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+
+    groups:
+      # Routine minor/patch churn arrives as ONE reviewable PR per area.
+      react-ecosystem:
+        patterns:
+          - react
+          - react-dom
+          - '@types/react'
+          - '@types/react-dom'
+        update-types: [minor, patch]
+      tailwind:
+        patterns:
+          - tailwindcss
+          - '@tailwindcss/*'
+          - tw-animate-css
+        update-types: [minor, patch]
+      supabase:
+        patterns:
+          - '@supabase/*'
+        update-types: [minor, patch]
+      linting:
+        patterns:
+          - eslint
+          - eslint-*
+          - typescript
+        update-types: [minor, patch]
+      minor-and-patch:
+        patterns: ['*']
+        update-types: [minor, patch]
+
+    ignore:
+      # Next.js and React majors are coordinated migrations, not drive-by PRs.
+      # Security patches within the current major still come through, because
+      # Dependabot security updates bypass `ignore` rules for the affected
+      # version — e.g. next 16.2.9 → 16.2.12 will still be proposed.
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+
+  # ── GitHub Actions used by the workflows in .github/workflows ─────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      actions:
+        patterns: ['*']

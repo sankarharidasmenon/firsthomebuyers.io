@@ -272,15 +272,15 @@ export default function ProfilePageContent() {
   const [draftS4, setDraftS4] = useState<Step4Data | null>(null)
 
   useEffect(() => {
+    // react-hooks/set-state-in-effect reports once per effect, on the first
+    // setState below — one directive covers the whole block. The four extra
+    // directives that used to sit on the calls beneath it were unused, and
+    // ESLint reports unused disable directives as warnings.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setStep1State(getStep1())
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStep2State(getStep2())
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStep3State(getStep3())
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStep4State(getStep4())
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 

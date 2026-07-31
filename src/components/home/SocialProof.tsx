@@ -5,7 +5,7 @@ import React from 'react'
 const STATS = [
   { value: '$41,800', label: 'Average grant savings for eligible VIC buyers' },
   { value: '5%', label: 'Minimum deposit with First Home Guarantee' },
-  { value: '~3 min', label: 'Average time to complete your assessment' },
+  { value: '~few min', label: 'Average time to complete your assessment' },
 ]
 
 export function SocialProof() {

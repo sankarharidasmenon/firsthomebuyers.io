@@ -26,7 +26,7 @@ export function TapCardGroup({ options, value, onChange, className = '' }: TapCa
           onClick={() => onChange(opt.value)}
           style={{ fontFamily: 'Inter, sans-serif' }}
           className={[
-            'flex items-center gap-2.5 px-4 py-3 rounded-[10px] border transition-all duration-150 cursor-pointer text-left',
+            'flex items-center gap-2.5 px-4 py-2 rounded-[10px] border transition-all duration-150 cursor-pointer text-left',
             value === opt.value
               ? 'bg-primary border-primary-hover border-[1.5px]'
               : 'bg-card border-border border-[1.5px] hover:border-muted-foreground',

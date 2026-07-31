@@ -3,12 +3,13 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Share2, Mail, BookOpen, Newspaper, MessageSquare } from 'lucide-react'
+import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X, Cpu } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { Logo } from '@/components/ui/logo/Logo'
 
 // Icon-only links shown on the right side of the desktop navbar
 const ICON_LINKS = [
-  { href: '/schemes',  label: 'Grants/Schemes Directory', Icon: BookOpen },
+  { href: '/map',      label: 'Grants Map',        Icon: Map },
   { href: '/articles', label: 'Articles',          Icon: Newspaper },
   { href: '/forums',   label: 'Forums',            Icon: MessageSquare },
 ]
@@ -62,6 +63,48 @@ function AdsIcon() {
   )
 }
 
+function AiIcon({ size = 20, strokeWidth = 2 }: { size?: number, strokeWidth?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <path d="M3 8H0" />
+      <path d="M3 16H0" />
+      <path d="M21 8h3" />
+      <path d="M21 16h3" />
+      <path d="M8 3V0" />
+      <path d="M16 3V0" />
+      <path d="M8 21v3" />
+      <path d="M16 21v3" />
+      <rect x="6.5" y="6.5" width="11" height="11" rx="1.5" ry="1.5" fill="currentColor" stroke="none" />
+      <text
+        x="12"
+        y="12.5"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="var(--background)"
+        stroke="none"
+        style={{
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 800,
+          fontSize: '6.5px',
+          letterSpacing: '0.2px',
+        }}
+      >
+        AI
+      </text>
+    </svg>
+  )
+}
+
 function InstagramIcon({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -82,21 +125,21 @@ const SOCIAL: { path?: string; icon?: React.ElementType; label: string; color: s
 
 /* Social items shown in the floating dropdown — dark square style matching design reference */
 type FloatingSocialItem =
-  | { type: 'svg'; path: string; label: string }
-  | { type: 'lucide'; icon: React.ElementType; label: string }
+  | { type: 'svg'; path: string; label: string; color: string; iconColor?: string }
+  | { type: 'lucide'; icon: React.ElementType; label: string; color: string; iconColor?: string }
 
 const FLOATING_SOCIAL: FloatingSocialItem[] = [
-  { type: 'svg', path: LINKEDIN_PATH, label: 'LinkedIn' },
-  { type: 'svg', path: X_PATH, label: 'X (Twitter)' },
-  { type: 'svg', path: FACEBOOK_PATH, label: 'Facebook' },
-  { type: 'lucide', icon: Mail, label: 'Email' },
+  { type: 'svg', path: LINKEDIN_PATH, label: 'LinkedIn', color: '#0A66C2', iconColor: '#ffffff' },
+  { type: 'svg', path: X_PATH, label: 'X (Twitter)', color: '#000000', iconColor: '#ffffff' },
+  { type: 'svg', path: FACEBOOK_PATH, label: 'Facebook', color: '#1877F2', iconColor: '#ffffff' },
+  { type: 'lucide', icon: Mail, label: 'Email', color: '#F5E642', iconColor: '#111111' },
 ]
 
 export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const [activeHash, setActiveHash] = useState('')
-  const [socialOpen, setSocialOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     setActiveHash(window.location.hash)
@@ -106,7 +149,9 @@ export function Navbar() {
   }, [])
 
   // Close on route change
-  useEffect(() => { setSocialOpen(false) }, [pathname])
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
 
   // Scroll to an in-page section, offset by the fixed navbar height so the
   // target heading isn't hidden underneath it. Used for all hash anchors.
@@ -119,18 +164,18 @@ export function Navbar() {
   }
 
   // Click handler for any nav link that points to a same-page hash section.
-  const handleHashClick = (e: React.MouseEvent, id: string) => {
-    e.preventDefault()
-    setMenuOpen(false)
-    setActiveHash(`#${id}`)
-    if (pathname === '/') {
-      window.history.pushState(null, '', `#${id}`)
-      scrollToSection(id)
-    } else {
-      router.push('/')
-      setTimeout(() => scrollToSection(id), 450)
-    }
-  }
+  // const handleHashClick = (e: React.MouseEvent, id: string) => {
+  //   e.preventDefault()
+  //   setMenuOpen(false)
+  //   setActiveHash(`#${id}`)
+  //   if (pathname === '/') {
+  //     window.history.pushState(null, '', `#${id}`)
+  //     scrollToSection(id)
+  //   } else {
+  //     router.push('/')
+  //     setTimeout(() => scrollToSection(id), 450)
+  //   }
+  // }
 
 
 
@@ -139,10 +184,10 @@ export function Navbar() {
       <nav
         className="fixed top-0 left-0 right-0 z-50 h-14 lg:h-[72px]"
         style={{
-          background: 'rgba(255,255,255,0.90)',
+          backgroundColor: 'color-mix(in srgb, var(--background) 90%, transparent)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderBottom: '1px solid rgba(17,17,17,0.08)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <style>{`
@@ -155,16 +200,8 @@ export function Navbar() {
         <div className="fn-nav max-w-[1150px] mx-auto h-full flex items-center justify-between px-4 lg:px-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 no-underline" aria-label="FirstNest home">
-            <div
-              className="flex items-center justify-center rounded-sm shrink-0"
-              style={{ width: 32, height: 32, background: '#F5E642' }}
-            >
-              <Home size={17} style={{ color: '#111111' }} strokeWidth={2.5} />
-            </div>
-            <span style={{ fontFamily: "var(--font-display, 'Fraunces'), serif", fontWeight: 600, fontSize: '1.0625rem', color: '#111111', letterSpacing: '-0.02em' }}>
-              FirstNest
-            </span>
+          <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: 'var(--foreground)' }}>
+            <Logo size="md" animated showBadge />
           </Link>
 
 
@@ -172,78 +209,15 @@ export function Navbar() {
           <div className="flex lg:hidden items-center gap-1 sm:gap-2">
             <ThemeToggle />
 
-            <div className="relative" style={{ position: 'relative' }}>
-              <button
-                type="button"
-                onClick={() => setSocialOpen(o => !o)}
-                aria-label="Follow us on social media"
-                aria-expanded={socialOpen}
-                className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150"
-                style={{ width: 40, height: 40, color: 'var(--foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                <Share2 size={18} strokeWidth={2} />
-              </button>
-
-              {socialOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    style={{ background: 'transparent' }}
-                    onClick={() => setSocialOpen(false)}
-                  />
-                  <div
-                    className="absolute right-0 z-50 rounded-xl overflow-hidden"
-                    style={{
-                      top: 46,
-                      minWidth: 180,
-                      background: 'var(--card)',
-                      border: '1px solid var(--border)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    }}
-                  >
-                    <div style={{ padding: '6px 0' }}>
-                      {FLOATING_SOCIAL.map((item) => (
-                        <a
-                          key={item.label}
-                          href="#"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={item.label}
-                          onClick={() => setSocialOpen(false)}
-                          className="flex items-center gap-3 transition-colors"
-                          style={{
-                            padding: '10px 16px',
-                            textDecoration: 'none',
-                            color: 'var(--foreground)',
-                          }}
-                          onMouseEnter={e => (e.currentTarget.style.background = 'var(--secondary)')}
-                          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                        >
-                          <span
-                            className="flex items-center justify-center flex-shrink-0"
-                            style={{
-                              width: 30,
-                              height: 30,
-                              background: '#111111',
-                              color: '#fff',
-                              borderRadius: 8,
-                            }}
-                          >
-                            {item.type === 'lucide'
-                              ? <item.icon size={15} />
-                              : <SvgIcon path={item.path} />}
-                          </span>
-                          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9rem' }}>
-                            {item.label}
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
+            <button
+              type="button"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="Toggle mobile menu"
+              className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150 ml-1"
+              style={{ width: 40, height: 40, color: 'var(--foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              {menuOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
+            </button>
           </div>
 
           {/* Right side - Desktop */}
@@ -260,7 +234,7 @@ export function Navbar() {
                   style={{
                     width: 36,
                     height: 36,
-                    color: pathname === href ? '#111111' : 'var(--secondary-foreground)',
+                    color: pathname === href ? 'var(--foreground)' : 'var(--secondary-foreground)',
                     background: pathname === href ? 'var(--secondary)' : 'none',
                     textDecoration: 'none',
                   }}
@@ -281,86 +255,90 @@ export function Navbar() {
                   color: pathname === '/ads' && activeHash !== '#ai-guidance' ? '#111111' : 'var(--secondary-foreground)',
                   textDecoration: 'none',
                   paddingBottom: 2,
-                  borderBottom: pathname === '/ads' && activeHash !== '#ai-guidance' ? '2px solid #D4C400' : '2px solid transparent',
+                  borderBottom: pathname === '/ads' && activeHash !== '#ai-guidance' ? '2px solid var(--primary-hover)' : '2px solid transparent',
                   transition: 'color 150ms, border-color 150ms, opacity 150ms',
                   transform: 'translateX(8px)',
                 }}
               >
                 <AdsIcon />
               </Link>
+              <Link
+                href="/ask-ai"
+                aria-label="Ask AI"
+                title="Ask AI"
+                className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150"
+                style={{
+                  width: 36,
+                  height: 36,
+                  color: pathname === '/ask-ai' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                  background: pathname === '/ask-ai' ? 'var(--secondary)' : 'none',
+                  textDecoration: 'none',
+                  transform: 'translateX(8px)',
+                }}
+              >
+                <AiIcon size={22} strokeWidth={pathname === '/ask-ai' ? 2.5 : 1.8} />
+              </Link>
               <div style={{ transform: 'translateX(8px)' }}>
                 <ThemeToggle />
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
-              {/* Social floating panel trigger — desktop */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setSocialOpen(o => !o)}
-                  aria-label="Follow us on social media"
-                  aria-expanded={socialOpen}
-                  className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150"
-                  style={{ width: 40, height: 40, color: 'var(--foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  <Share2 size={18} strokeWidth={2} />
-                </button>
-
-                {socialOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      style={{ background: 'transparent' }}
-                      onClick={() => setSocialOpen(false)}
-                    />
-                    <div
-                      className="absolute right-0 z-50 rounded-xl overflow-hidden"
-                      style={{
-                        top: 46,
-                        minWidth: 180,
-                        background: 'var(--card)',
-                        border: '1px solid var(--border)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                      }}
-                    >
-                      <div style={{ padding: '6px 0' }}>
-                        {FLOATING_SOCIAL.map((item) => (
-                          <a
-                            key={item.label}
-                            href="#"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={item.label}
-                            onClick={() => setSocialOpen(false)}
-                            className="flex items-center gap-3 transition-colors"
-                            style={{ padding: '10px 16px', textDecoration: 'none', color: 'var(--foreground)' }}
-                            onMouseEnter={e => (e.currentTarget.style.background = 'var(--secondary)')}
-                            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                          >
-                            <span
-                              className="flex items-center justify-center flex-shrink-0"
-                              style={{ width: 30, height: 30, background: '#111111', color: '#fff', borderRadius: 8 }}
-                            >
-                              {item.type === 'lucide'
-                                ? <item.icon size={15} />
-                                : <SvgIcon path={item.path} />}
-                            </span>
-                            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.9rem' }}>
-                              {item.label}
-                            </span>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-            </div>
           </div>
         </div>
       </nav>
+
+      {/* Mobile Menu Dropdown */}
+      {menuOpen && (
+        <div 
+          className="fixed inset-0 z-40 lg:hidden flex flex-col"
+          style={{ top: '56px', background: 'var(--background)', borderTop: '1px solid var(--border)' }}
+        >
+          <div className="flex flex-col p-4 gap-2">
+            {NAV_LINKS.map(({ href, label, Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 p-3 rounded-lg transition-colors"
+                style={{
+                  background: pathname === href ? 'var(--secondary)' : 'transparent',
+                  color: pathname === href ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                  textDecoration: 'none'
+                }}
+              >
+                <Icon size={20} />
+                <span style={{ fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{label}</span>
+              </Link>
+            ))}
+            <Link
+              href="/ads"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-lg transition-colors"
+              style={{
+                background: pathname === '/ads' ? 'var(--secondary)' : 'transparent',
+                color: pathname === '/ads' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                textDecoration: 'none'
+              }}
+            >
+              <AdsIcon />
+              <span style={{ fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>Advertise</span>
+            </Link>
+            <Link
+              href="/ask-ai"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-lg transition-colors"
+              style={{
+                background: pathname === '/ask-ai' ? 'var(--secondary)' : 'transparent',
+                color: pathname === '/ask-ai' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                textDecoration: 'none'
+              }}
+            >
+              <AiIcon size={20} strokeWidth={1.8} />
+              <span style={{ fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>Ask AI</span>
+            </Link>
+          </div>
+        </div>
+      )}
 
     </>
   )

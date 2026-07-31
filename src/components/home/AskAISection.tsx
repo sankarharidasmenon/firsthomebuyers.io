@@ -108,7 +108,9 @@ export default function AskAISection() {
             <Sparkles className="w-3.5 h-3.5" />
             Sample Preview
           </div> */}
-          <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-display, 'Fraunces'), serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>Ask <em style={{ fontStyle: 'italic', color: '#C4A000' }}>FirstNest</em> AI</h2>
+          <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>Ask
+            FirstHomeBuyers AI</h2>
+
           {/* <p className="text-muted-foreground max-w-xl mx-auto text-base leading-relaxed">
             Get personalised guidance for grants, borrowing capacity, and buying readiness in plain English.
           </p> */}
@@ -137,7 +139,7 @@ export default function AskAISection() {
             {/* Card surface — sits above the gradient */}
             <div className="relative bg-card rounded-[23px] h-full flex flex-col p-6 lg:p-8 z-10">
 
-              <h3 className="text-xl font-bold mb-1.5" style={{ fontFamily: "var(--font-display, 'Fraunces'), serif", fontWeight: 500, color: '#111111' }}>What do you want to know?</h3>
+              <h3 className="text-xl font-bold mb-1.5" style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 500, color: '#111111' }}>What do you want to know?</h3>
               <p className="text-sm text-muted-foreground mb-4">Choose a topic or type your own question below.</p>
 
               {/* Quick prompts — grid layout for balanced fill */}
