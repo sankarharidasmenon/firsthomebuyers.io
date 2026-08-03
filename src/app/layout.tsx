@@ -25,7 +25,7 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: 'FirstNest — Know Your Budget. Know Your Grants.',
+  title: 'FirstHomeBuyers — Know Your Budget. Know Your Grants.',
   description: "Australia's smartest first home buyer tool — free, fast, no login needed.",
 }
 

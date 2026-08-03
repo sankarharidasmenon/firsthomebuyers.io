@@ -2,7 +2,7 @@ import { Navbar } from '@/components/home/Navbar'
 import { AustraliaGrantMap } from '@/components/map/AustraliaGrantMap'
 
 export const metadata = {
-  title: "Australia's First Home Grants Map | FirstNest",
+  title: "Australia's First Home Grants Map | FirstHomeBuyers",
   description: 'Interactive map showing first home buyer grants and schemes by state across Australia.',
 }
 
