@@ -1,0 +1,175 @@
+name: Deploy to Lightsail
+
+# Runs only after the CI workflow finishes successfully on the production
+# branch (main). This is deliberately NOT a plain `on: push` trigger: without
+# this gate, a push that fails lint/typecheck/tests/build would still kick off
+# a parallel deploy and could ship a broken build to production. Gating on
+# CI's conclusion is what makes "push to production branch" reliable rather
+# than just automatic. See docs/deployment/CI_CD.md for the full rationale.
+#
+# `workflow_dispatch` is kept as an escape hatch for a manual re-deploy (e.g.
+# retrying after a transient SSH failure) without needing a new commit.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to deploy (branch, tag, or SHA)'
+        required: false
+        default: 'main'
+
+# Never cancel a deploy mid-flight: cancelling between `git pull` and
+# `pm2 reload` on the server could leave the app half-updated. A second push
+# waits for the first deploy to finish instead of interrupting it.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Lightsail
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Skip (not fail) when workflow_run's conclusion wasn't success, i.e. CI
+    # itself failed or was cancelled — there is nothing to deploy.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+
+    env:
+      # Overridable via GitHub Secrets without editing this file. Defaults
+      # match the current production server (see docs/deployment/CI_CD.md).
+      DEPLOY_PATH: ${{ secrets.LIGHTSAIL_DEPLOY_PATH || '/home/ubuntu/firstnestai-v3' }}
+      PM2_APP_NAME: ${{ secrets.LIGHTSAIL_PM2_APP_NAME || 'firstnest' }}
+      PRODUCTION_URL: https://firsthomebuyers.io
+
+    steps:
+      # Checked out on the runner purely so the job records exactly which
+      # commit was deployed (visible in the Actions run + step summary below).
+      # The actual build happens on the server in the SSH step, per the
+      # git-pull + pm2-reload architecture already in use.
+      - name: Checkout deployed commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.event.workflow_run.head_sha }}
+
+      - name: Verify required secrets are configured
+        run: |
+          missing=()
+          [ -z "${{ secrets.LIGHTSAIL_HOST }}" ] && missing+=("LIGHTSAIL_HOST")
+          [ -z "${{ secrets.LIGHTSAIL_USERNAME }}" ] && missing+=("LIGHTSAIL_USERNAME")
+          [ -z "${{ secrets.LIGHTSAIL_SSH_KEY }}" ] && missing+=("LIGHTSAIL_SSH_KEY")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required GitHub Secrets: ${missing[*]}. Add them under Settings > Secrets and variables > Actions, then re-run this workflow."
+            exit 1
+          fi
+          echo "All required secrets are present."
+
+      - name: Deploy over SSH (git pull, npm install, build, pm2 reload)
+        id: deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USERNAME }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          port: ${{ secrets.LIGHTSAIL_SSH_PORT || 22 }}
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
+            PM2_APP_NAME="${{ env.PM2_APP_NAME }}"
+
+            if [[ "$DEPLOY_PATH" = /* ]]; then
+              TARGET_DIR="$DEPLOY_PATH"
+            else
+              TARGET_DIR="$HOME/$DEPLOY_PATH"
+            fi
+
+            echo "==> [1/5] cd $TARGET_DIR"
+            cd "$TARGET_DIR" || {
+              echo "::error::Deploy directory not found: $TARGET_DIR. Check the LIGHTSAIL_DEPLOY_PATH secret matches where the repo is checked out on the server."
+              exit 1
+            }
+
+            echo "==> [2/5] git pull"
+            if ! git pull origin main; then
+              echo "::error::git pull failed in $TARGET_DIR. Check for local uncommitted changes, a detached HEAD, or a merge conflict on the server."
+              exit 1
+            fi
+
+            echo "==> [3/5] npm install"
+            if ! npm install; then
+              echo "::error::npm install failed. Check the npm log above for the failing package or a registry/network error."
+              exit 1
+            fi
+
+            echo "==> [4/5] npm run build"
+            if ! npm run build; then
+              echo "::error::next build failed on the server. Check the compiler output above for the failing file/route."
+              exit 1
+            fi
+
+            echo "==> [5/5] pm2 reload (graceful, zero-downtime)"
+            if ! command -v pm2 >/dev/null 2>&1; then
+              echo "::error::pm2 not found on PATH for this SSH session. If PM2 is installed, the non-interactive shell may not be loading nvm/PATH — check ~/.bashrc or use an absolute path to pm2."
+              exit 1
+            fi
+
+            if ! pm2 describe "$PM2_APP_NAME" >/dev/null 2>&1; then
+              echo "::error::PM2 process '$PM2_APP_NAME' not found. Check the LIGHTSAIL_PM2_APP_NAME secret against 'pm2 list' output on the server."
+              exit 1
+            fi
+
+            if pm2 reload "$PM2_APP_NAME" --update-env; then
+              echo "pm2 reload succeeded (zero-downtime)."
+            else
+              echo "::warning::pm2 reload failed, falling back to pm2 restart"
+              if ! pm2 restart "$PM2_APP_NAME"; then
+                echo "::error::pm2 restart also failed after reload failed. The app may be down — run 'pm2 logs $PM2_APP_NAME' on the server."
+                exit 1
+              fi
+            fi
+
+            pm2 save
+            echo "==> Server-side deploy steps completed."
+
+      - name: Diagnose SSH/connection failure
+        if: failure() && steps.deploy.outcome == 'failure'
+        run: |
+          echo "::error::The SSH deploy step failed. Scroll up to the last '==>' stage marker to see which step failed. If no stage marker appears at all, the failure was before the remote script ran — most likely: (1) LIGHTSAIL_HOST/LIGHTSAIL_USERNAME secret is wrong, (2) the public key for LIGHTSAIL_SSH_KEY is missing from ~/.ssh/authorized_keys on the server (permission denied / publickey), or (3) the Lightsail firewall (networking tab) is blocking port ${{ secrets.LIGHTSAIL_SSH_PORT || 22 }} from GitHub-hosted runners."
+
+      - name: Health check — verify production site is live
+        if: success()
+        run: |
+          set +e
+          MAX_ATTEMPTS=6
+          SLEEP_SECONDS=10
+          http_code="000"
+          for i in $(seq 1 "$MAX_ATTEMPTS"); do
+            http_code=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 15 "$PRODUCTION_URL")
+            if [ "$http_code" = "200" ]; then
+              echo "Health check passed on attempt $i/$MAX_ATTEMPTS — $PRODUCTION_URL returned HTTP 200."
+              exit 0
+            fi
+            echo "Attempt $i/$MAX_ATTEMPTS: $PRODUCTION_URL returned HTTP $http_code — retrying in ${SLEEP_SECONDS}s"
+            sleep "$SLEEP_SECONDS"
+          done
+          echo "::error::Health check FAILED — $PRODUCTION_URL did not return HTTP 200 after $MAX_ATTEMPTS attempts (last status: $http_code). The server-side deploy steps succeeded, but the site is not responding correctly. Check: nginx ('sudo systemctl status nginx'), 'pm2 status', and 'pm2 logs ${{ env.PM2_APP_NAME }}' on the server."
+          exit 1
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          {
+            echo "## Deploy to Lightsail"
+            echo
+            echo "- Commit: \`${{ github.sha }}\`"
+            echo "- Triggered by: ${{ github.event_name }}"
+            echo "- SSH deploy step: \`${{ steps.deploy.outcome || 'skipped' }}\`"
+            echo "- Target: $PRODUCTION_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
