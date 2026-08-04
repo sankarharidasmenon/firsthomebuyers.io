@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X, Cpu } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Logo } from '@/components/ui/logo/Logo'
+import { AustralianFlag } from '@/components/ui/flag/AustralianFlag'
 
 // Icon-only links shown on the right side of the desktop navbar
 const ICON_LINKS = [
@@ -182,12 +183,16 @@ export function Navbar() {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 h-14 lg:h-[72px]"
+        className="fixed top-0 left-0 right-0 z-50"
         style={{
           backgroundColor: 'color-mix(in srgb, var(--background) 90%, transparent)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid var(--border)',
+          // Extends the bar's background up under the status bar / notch /
+          // Dynamic Island on iOS; resolves to 0 outside a native safe-area
+          // context (all browsers, desktop), so desktop height is unchanged.
+          paddingTop: 'env(safe-area-inset-top)',
         }}
       >
         <style>{`
@@ -197,12 +202,16 @@ export function Navbar() {
           .fn-nav-login { background: #111111; color: #F5E642 !important; transition: background 0.25s, transform 0.2s; }
           .fn-nav-login:hover { background: #222222 !important; transform: translateY(-1px); }
         `}</style>
-        <div className="fn-nav max-w-[1150px] mx-auto h-full flex items-center justify-between px-4 lg:px-4">
+        <div className="fn-nav max-w-[1150px] mx-auto h-14 lg:h-[72px] flex items-center justify-between px-4 lg:px-4">
 
-          {/* Logo */}
-          <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: 'var(--foreground)' }}>
-            <Logo size="md" animated showBadge />
-          </Link>
+          {/* Flag + Logo — flag is a purely decorative accent to the left of
+              the (unmodified) logo; see AustralianFlag.tsx */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* <AustralianFlag /> */}
+            <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: 'var(--foreground)' }}>
+              <Logo size="md" animated showBadge />
+            </Link>
+          </div>
 
 
           {/* Right side - Mobile */}
@@ -291,7 +300,7 @@ export function Navbar() {
       {menuOpen && (
         <div 
           className="fixed inset-0 z-40 lg:hidden flex flex-col"
-          style={{ top: '56px', background: 'var(--background)', borderTop: '1px solid var(--border)' }}
+          style={{ top: 'calc(56px + env(safe-area-inset-top))', background: 'var(--background)', borderTop: '1px solid var(--border)' }}
         >
           <div className="flex flex-col p-4 gap-2">
             {NAV_LINKS.map(({ href, label, Icon }) => (

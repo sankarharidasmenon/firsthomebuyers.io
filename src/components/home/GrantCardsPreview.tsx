@@ -3,10 +3,10 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { ArrowRight, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
-import { 
-  SchemeRow, 
-  SkeletonRow, 
-  toCard, 
+import {
+  SchemeRow,
+  SkeletonRow,
+  toCard,
   type Scheme,
   RegionFlag,
   GROUP_ORDER,
@@ -43,14 +43,14 @@ export const GrantCardsPreview = () => {
       const res = await fetch('/api/schemes/featured?limit=60', { cache: 'no-store' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
-      
+
       const list: Scheme[] = (data.schemes ?? []).map(toCard)
-      if (list.length === 0) { 
+      if (list.length === 0) {
         setSchemes([])
         setStatus('empty')
-        return 
+        return
       }
-      
+
       setSchemes(list)
       setStatus('ready')
     } catch {
@@ -58,8 +58,8 @@ export const GrantCardsPreview = () => {
     }
   }, [])
 
-  useEffect(() => { 
-    load() 
+  useEffect(() => {
+    load()
   }, [load])
 
   /* Apply the type filter before grouping so the region tabs, their counts and
@@ -74,7 +74,7 @@ export const GrantCardsPreview = () => {
     if (!grouped[s.flagCode]) grouped[s.flagCode] = []
     grouped[s.flagCode].push(s)
   }
-  
+
   for (const code of Object.keys(grouped)) {
     const seenTitles = new Set<string>()
     const seenDescriptions = new Set<string>()
@@ -82,7 +82,7 @@ export const GrantCardsPreview = () => {
       const titleKey = s.heroTitle.toLowerCase().trim()
       if (seenTitles.has(titleKey)) return false
       seenTitles.add(titleKey)
-      
+
       if (s.description) {
         const descKey = s.description.toLowerCase().trim()
         if (seenDescriptions.has(descKey)) return false
@@ -114,7 +114,7 @@ export const GrantCardsPreview = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 md:mb-12 gap-6 md:gap-10">
           <div className="max-w-2xl">
             <h2 className="text-foreground tracking-[-0.02em] leading-[1.1] mb-3 md:mb-4" style={{ fontSize: 'clamp(24px, 3.2vw, 40px)', fontWeight: 500 }}>
-             Australian Grants &amp; Schemes 2026
+              Grants &amp; Schemes 2026
             </h2>
             <p className="text-[15px] md:text-base font-light text-muted-foreground leading-relaxed">
               {/* Explore the federal and state government grants, schemes, and concessions available to help you buy your first home sooner. */}
@@ -132,7 +132,7 @@ export const GrantCardsPreview = () => {
 
         {status === 'loading' && (
           <div className="animate-in fade-in duration-500">
-            <div 
+            <div
               className="flex flex-nowrap md:flex-wrap gap-2.5 md:gap-x-3 md:gap-y-3 mb-8 md:mb-10 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden"
               style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
             >
@@ -149,8 +149,8 @@ export const GrantCardsPreview = () => {
         {status === 'error' && (
           <div className="py-12 px-6 text-center border border-dashed border-border rounded-2xl bg-muted/10">
             <p className="text-muted-foreground text-sm mb-4">We couldn&apos;t load the grants preview right now.</p>
-            <button 
-              onClick={load} 
+            <button
+              onClick={load}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-border/60 bg-background px-5 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
             >
               <RotateCcw className="w-4 h-4" /> Try again

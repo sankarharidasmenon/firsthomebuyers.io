@@ -433,8 +433,8 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Bottom row: copyright + store badges + legal toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+      
+          {/* <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
               <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
                 © 2026 FirstNest AI. All rights reserved.
@@ -478,7 +478,7 @@ export function Footer() {
                   </span>
                 </a>
               ))}
-              {/* Social icons */}
+     
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 {[
                   { label: 'Facebook',    href: '#', color: '#1877F2', svg: FACEBOOK_PATH },
@@ -545,6 +545,8 @@ export function Footer() {
                 </a>
               </div>
             </div>
+
+
             <button
               type="button"
               onClick={() => setLegalOpen(o => !o)}
@@ -567,7 +569,7 @@ export function Footer() {
                 }}
               />
             </button>
-          </div>
+          </div> */}
 
         </div>
       </div>
