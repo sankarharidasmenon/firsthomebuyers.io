@@ -22,6 +22,7 @@ export interface EligibilityAnswers {
   income: number
   hasPartner: boolean
   propertyPrice: number
+  landPrice?: number | null
   deposit: number | null
   propertyType: string
   /**

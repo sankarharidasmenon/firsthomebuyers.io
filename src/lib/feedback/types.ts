@@ -3,6 +3,8 @@
  * feedback categories. Imported by the widget (client) and the API route
  * (server), so this module must stay free of browser/node-only imports.
  */
+import type { FeedbackAttachment } from './attachments';
+export type { FeedbackAttachment } from './attachments';
 
 export const FEEDBACK_TYPES = [
   {
@@ -48,6 +50,8 @@ export interface FeedbackSubmission {
   screenResolution?: string;
   theme?: ThemeName;
   submittedAt?: string;
+  /** Screenshots already uploaded to S3 via the presigned-url flow. */
+  attachments?: FeedbackAttachment[];
   /**
    * Honeypot. Hidden from real users; bots that fill every field trip it and
    * the submission is dropped.
@@ -64,7 +68,10 @@ export type FeedbackApiResponse =
   | { ok: true }
   | { ok: false; error: string; fieldErrors?: FeedbackFieldErrors };
 
-/** Shape of a `public.feedback` row (see supabase/migrations/0004_feedback.sql). */
+/**
+ * Shape of a `public.feedback` row (see supabase/migrations/0004_feedback.sql
+ * and 0005_feedback_attachments.sql).
+ */
 export interface FeedbackRow {
   id: string;
   feedback_type: FeedbackType;
@@ -77,6 +84,8 @@ export interface FeedbackRow {
   user_id: string | null;
   user_name: string | null;
   user_email: string | null;
+  /** S3 object keys only — never signed/public URLs. */
+  attachments: FeedbackAttachment[] | null;
   created_at: string;
 }
 

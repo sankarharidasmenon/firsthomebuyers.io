@@ -128,7 +128,7 @@ export function Footer() {
         {/* Brand */}
         <div className="flex flex-col items-start gap-4">
           <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: '#FFFFFF' }}>
-            <Logo size="md" showBadge />
+            <Logo size="md" showBadge theme="dark" />
           </Link>
           <p style={{
             fontFamily: 'Inter, sans-serif', fontWeight: 400,

@@ -225,7 +225,7 @@ export function calculateGrants(schemes: CalculatorScheme[], input: CalculatorIn
   // stamp duty figure it relates to.
   schemeLines.sort((a, b) => Number(b.kind === 'concession') - Number(a.kind === 'concession'))
 
-  const duty = supportsDuty(state) && propertyPrice > 0 ? firstHomeDuty(state, propertyPrice) : null
+  const duty = supportsDuty(state) && propertyPrice > 0 ? firstHomeDuty({ state: state as any, propertyPrice }) : null
   const stampDutySaving = duty?.calculable ? duty.saving ?? 0 : 0
   const cashGrantsTotal = grants.reduce((sum, g) => sum + (typeof g.value === 'number' ? g.value : 0), 0)
 

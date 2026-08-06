@@ -11,6 +11,7 @@ interface LogoProps {
   showBadge?: boolean
   className?: string
   variant?: 'icon' | 'full'
+  theme?: 'light' | 'dark'
 }
 
 const sizes = {
@@ -25,7 +26,8 @@ export function Logo({
   animated = false,
   showBadge = false,
   className,
-  variant = 'full'
+  variant = 'full',
+  theme = 'light'
 }: LogoProps) {
   const { height, text } = sizes[size]
   
@@ -39,11 +41,11 @@ export function Logo({
       aria-label="FirstHomeBuyers"
       role="img"
     >
-      <LogoIcon height={height} />
+      <LogoIcon height={height} theme={theme} />
 
       {variant === 'full' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-          <LogoText fontSize={text} />
+          <LogoText fontSize={text} theme={theme} />
           {showBadge && <LogoBadge fontSize={text} />}
         </div>
       )}

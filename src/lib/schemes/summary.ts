@@ -82,16 +82,18 @@ export function dutySavingFor(
   items: EligibilityItem[],
   state: string,
   price: number,
+  propertyCategory?: string,
+  landPrice?: number | null,
 ): DutyOutcome | null {
   if (!supportsDuty(state) || !Number.isFinite(price) || price <= 0) return null
   const eligibleDuty = items.filter((i) => i.category === 'tax' && i.bucket === 'yes')
   if (eligibleDuty.length === 0) return null
-  return firstHomeDuty(state, price)
+  return firstHomeDuty({ state: state as any, propertyPrice: price, propertyCategory, landPrice })
 }
 
 export function summariseEligibility(
   items: EligibilityItem[],
-  context?: { state?: string; price?: number },
+  context?: { state?: string; price?: number; propertyCategory?: string; landPrice?: number | null },
 ): EligibilitySummary {
   const cash = summariseCategory(items, 'cash')
   const tax = summariseCategory(items, 'tax')
@@ -99,7 +101,7 @@ export function summariseEligibility(
 
   // Replace the unpriced duty benefit with the calculated saving when we can.
   const duty = context?.state && context?.price
-    ? dutySavingFor(items, context.state, context.price)
+    ? dutySavingFor(items, context.state, context.price, context.propertyCategory, context.landPrice)
     : null
   if (duty && duty.calculable && duty.saving !== null && duty.saving > 0) {
     tax.total = duty.saving

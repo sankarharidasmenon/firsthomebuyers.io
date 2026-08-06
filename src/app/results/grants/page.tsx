@@ -3,11 +3,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { RotateCcw } from 'lucide-react'
 import { TotalSavingsHero } from '@/components/results/TotalSavingsHero'
 import { ResultsTabSwitcher } from '@/components/results/ResultsTabSwitcher'
 import { GrantCard } from '@/components/results/GrantCard'
 import { HideIneligibleToggle } from '@/components/results/HideIneligibleToggle'
+import { AIChatCard } from '@/components/ask-ai'
+const AIChatModal = dynamic(() => import('@/components/ask-ai').then(mod => mod.AIChatModal), { ssr: false })
 import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/home/Navbar'
 import { getStep1, getStep2, getStep3 } from '@/lib/localStorage'
@@ -56,14 +59,36 @@ const CATEGORY_META = {
   tax: { icon: '🧾', title: 'Tax & Duty Savings', description: 'Reductions in government taxes on your purchase' },
 } as const
 
+/**
+ * When "Show Non Eligible Schemes" is on, a Not Eligible card is only worth
+ * showing if it could realistically apply to this applicant. Two of the
+ * engine's own criteria already say "this scheme is not for you" rather than
+ * "you don't currently qualify": rule 1's fast-fail when the scheme belongs to
+ * another state/territory, and rule 13's single-parent gate when the
+ * applicant is part of a couple. Both are read straight off the criteria text
+ * `evaluateScheme` already returns — no re-evaluation, no new business rule.
+ */
+const IRRELEVANT_REASON_PATTERNS: RegExp[] = [
+  /^Scheme is for .+, not .+$/i, // wrong state/territory
+  /is not a single parent \(applying with partner\)/i, // couple applying to a single-parent-only scheme
+]
+
+function isRelevantNonEligible(item: { status: string; ruleResults: { met: boolean; text: string; isCheck?: boolean }[] }): boolean {
+  if (item.status !== 'ineligible') return true
+  return !item.ruleResults.some(
+    (r) => !r.met && !r.isCheck && IRRELEVANT_REASON_PATTERNS.some((re) => re.test(r.text))
+  )
+}
+
 export default function GrantsResultsPage() {
   const router = useRouter()
-  const [showIneligible, setShowIneligible] = useState(true)
+  const [showIneligible, setShowIneligible] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const [result, setResult] = useState<EligibilityResult | null>(null)
   const [loadState, setLoadState] = useState<'loading' | 'error' | 'empty' | 'ready'>('loading')
-  const [display, setDisplay] = useState<{ state: string; firstName: string; targetPropertyPrice: number }>({
+  const [display, setDisplay] = useState<{ state: string; firstName: string; targetPropertyPrice: number; landPrice?: number | null; propertyCategory?: string }>({
     state: DUMMY_USER.state, firstName: DUMMY_USER.firstName, targetPropertyPrice: DUMMY_USER.targetPropertyPrice,
   })
 
@@ -78,11 +103,18 @@ export default function GrantsResultsPage() {
         return
       }
 
-      setDisplay({ state: answers.state || 'VIC', firstName: answers.name, targetPropertyPrice: answers.price || 0 })
-
       // Answers go to the engine exactly as the questionnaire mapped them. Every
       // caller must send the identical payload, or two pages will disagree.
-      const res = await fetchEligibility(toEligibilityAnswers(answers))
+      const eligibilityAnswers = toEligibilityAnswers(answers)
+      setDisplay({ 
+        state: answers.state || 'VIC', 
+        firstName: answers.name, 
+        targetPropertyPrice: eligibilityAnswers.propertyPrice,
+        landPrice: eligibilityAnswers.landPrice,
+        propertyCategory: eligibilityAnswers.propertyCategory
+      })
+
+      const res = await fetchEligibility(eligibilityAnswers)
 
       setResult(res)
       setLoadState(res.items.length ? 'ready' : 'empty')
@@ -119,6 +151,8 @@ export default function GrantsResultsPage() {
   const summary = summariseEligibility(result?.items ?? [], {
     state: display.state,
     price: display.targetPropertyPrice,
+    propertyCategory: display.propertyCategory,
+    landPrice: display.landPrice,
   })
   const sidebarCash = categoryDisplay(summary.cash, { costed: '', uncosted: '', none: '' })
   const sidebarTax = taxDisplay(summary)
@@ -132,8 +166,15 @@ export default function GrantsResultsPage() {
     // order the engine returned them in — no scheme is reprioritised, only
     // repositioned. `.sort()` mutates, so it runs on the array `.map()` just
     // produced, never on `result.items` itself.
+    // Toggle OFF: Not Eligible items are dropped entirely. Toggle ON: Not
+    // Eligible items are kept only when they're relevant to this applicant
+    // (own state/territory + federal, own relationship profile) — see
+    // isRelevantNonEligible. Filtering happens on the flat list, before
+    // grouping, so a scheme excluded here never contributes a stray section
+    // header either. Eligible and Check items are never touched.
     const flatItems: Item[] = result.items
       .map((i) => ({ ...i, status: i.eg.status }))
+      .filter((item) => (showIneligible ? isRelevantNonEligible(item) : item.status !== 'ineligible'))
       .sort((a, b) =>
         (STATUS_PRI[a.status] ?? 3) - (STATUS_PRI[b.status] ?? 3) ||
         (CATEGORY_PRI[a.category] ?? 9) - (CATEGORY_PRI[b.category] ?? 9))
@@ -146,7 +187,7 @@ export default function GrantsResultsPage() {
       if (last && last.status === item.status && last.category === item.category) last.items.push(item)
       else blocks.push({ status: item.status, category: item.category, items: [item] })
     }
-    const visibleBlocks = showIneligible ? blocks : blocks.filter((b) => b.status !== 'ineligible')
+    const visibleBlocks = blocks
 
     // Card numbering — presentation only. Counts the cards actually rendered, in
     // render order, continuing across section headers instead of restarting.
@@ -258,6 +299,9 @@ export default function GrantsResultsPage() {
                 />
                 <ResultsTabSwitcher />
                 <HideIneligibleToggle showIneligible={showIneligible} onChange={setShowIneligible} />
+                <div className="px-5 pt-5 pb-1">
+                  <AIChatCard onClick={() => setIsChatOpen(true)} />
+                </div>
                 <CardList />
                 <ActionButtons />
               </>
@@ -279,6 +323,9 @@ export default function GrantsResultsPage() {
                 />
                 <ResultsTabSwitcher />
                 <HideIneligibleToggle showIneligible={showIneligible} onChange={setShowIneligible} />
+                <div className="px-5 pt-5 pb-1">
+                  <AIChatCard onClick={() => setIsChatOpen(true)} />
+                </div>
                 <CardList />
               </div>
 
@@ -344,6 +391,18 @@ export default function GrantsResultsPage() {
           )}
         </div>
       </main>
+
+      {/* ── AI Chat Modal ── */}
+      <AIChatModal 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)}
+        eligibilityProfile={{
+          state: display.state,
+          targetPropertyPrice: display.targetPropertyPrice,
+          eligibleSchemes: result?.items.filter(i => i.eg.status === 'eligible').map(i => i.eg.grant.id) || [],
+          ineligibleSchemes: result?.items.filter(i => i.eg.status === 'ineligible').map(i => i.eg.grant.id) || []
+        }}
+      />
     </div>
   )
 }

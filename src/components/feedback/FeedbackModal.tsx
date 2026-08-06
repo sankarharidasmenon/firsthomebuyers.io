@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { FeedbackTypeSelector } from './FeedbackTypeSelector'
+import { AttachmentUploader } from './AttachmentUploader'
+import { useAttachmentUpload } from '@/hooks/feedback/useAttachmentUpload'
 import {
   MESSAGE_MAX_LENGTH,
   validateFeedback,
@@ -58,6 +60,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [errors, setErrors] = useState<FeedbackFieldErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [status, setStatus] = useState<Status>('idle')
+  const attachmentUpload = useAttachmentUpload()
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
@@ -95,8 +98,11 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
       setErrors({})
       setFormError(null)
       setStatus('idle')
+      attachmentUpload.reset()
     }, RESET_DELAY_MS)
     return () => window.clearTimeout(timer)
+    // attachmentUpload's actions are stable (useCallback with fixed deps); only `open` should retrigger this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
   const clearError = useCallback((field: keyof FeedbackFieldErrors) => {
@@ -128,9 +134,31 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
       return
     }
 
+    // A lone per-card retry can still be in flight even though the form
+    // itself isn't submitting yet — don't start a second, overlapping upload
+    // attempt for the same file.
+    if (attachmentUpload.isUploading) return
+
     setStatus('submitting')
 
+    // Step 2+3 — nothing has touched S3 before this point. Attachments were
+    // only ever File objects sitting in the uploader's state; the presign +
+    // upload happens now, for the first time, concurrently.
+    const uploadResult = await attachmentUpload.uploadAll()
+
+    if (!uploadResult.ok) {
+      // Step 4 — leave whatever succeeded as 'uploaded' (so a retry doesn't
+      // re-upload it) and whatever failed as 'error' with its retry button
+      // live. Nothing is submitted.
+      const errorMessage = 'One or more attachments failed to upload. Retry or remove them, then send again.'
+      setFormError(errorMessage)
+      toast.error(errorMessage)
+      setStatus('idle')
+      return
+    }
+
     try {
+      // Step 5 — every attachment is now actually in S3; submit their keys.
       const response = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -139,6 +167,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
           message,
           email,
           website: honeypot,
+          attachments: uploadResult.attachments,
           // Auto-captured context — never shown as editable fields.
           pageUrl: window.location.href,
           userAgent: navigator.userAgent,
@@ -151,6 +180,10 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
       const result = (await response.json().catch(() => null)) as FeedbackApiResponse | null
 
       if (!response.ok || !result?.ok) {
+        // Step 6 — the upload succeeded but the row never got written.
+        // Delete what was just uploaded so it doesn't outlive the failed
+        // submission, and reset those cards so retrying re-uploads fresh keys.
+        attachmentUpload.cleanupUploaded(uploadResult.attachments.map((a) => a.key))
         const errorMessage =
           (result && !result.ok && result.error) ||
           'We could not send your feedback. Please try again.'
@@ -163,6 +196,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
 
       setStatus('success')
     } catch {
+      attachmentUpload.cleanupUploaded(uploadResult.attachments.map((a) => a.key))
       const errorMessage = 'Network error — please check your connection and try again.'
       setFormError(errorMessage)
       toast.error(errorMessage)
@@ -193,12 +227,12 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
         onInteractOutside={(event) => {
           if (submitting) event.preventDefault()
         }}
-        className="flex flex-col gap-0 p-0 w-full sm:max-w-[520px] max-h-[90dvh] overflow-hidden rounded-[24px] bg-card ring-0 border border-border shadow-[var(--shadow-modal)]"
+        className="flex flex-col gap-0 p-0 w-full sm:max-w-[520px] max-h-[min(94dvh,780px)] overflow-hidden rounded-[24px] bg-card ring-0 border border-border shadow-[var(--shadow-modal)]"
         /* Radix/tw-animate enter animation: fade + scale 0.96 → 1 */
         style={{ '--tw-enter-scale': 0.96 } as React.CSSProperties}
       >
         {/* ── Header ── */}
-        <div className="relative flex items-center gap-2.5 border-b border-border/70 px-4 py-2.5 pr-12">
+        <div className="relative flex items-center gap-2.5 border-b border-border/70 px-4 py-2 pr-12">
           <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/15 text-primary-hover dark:text-primary">
             <MessageSquareText size={20} strokeWidth={1.75} aria-hidden="true" />
             <Sparkles
@@ -231,7 +265,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
           <SuccessPanel onClose={() => onOpenChange(false)} />
         ) : (
           <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-col">
-            <div className="flex min-h-0 flex-col gap-2.5 overflow-y-auto px-4 py-3">
+            <div className="flex min-h-0 flex-col gap-2 overflow-y-auto px-4 py-2.5">
               {/* ── Feedback type ── */}
               <div className="flex flex-col gap-1.5" ref={typeGroupRef}>
                 <span className="text-[0.875rem] font-semibold text-foreground">
@@ -348,6 +382,16 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                 )}
               </div>
 
+              {/* ── Attachments (optional) ── */}
+              <AttachmentUploader
+                attachments={attachmentUpload.attachments}
+                validationError={attachmentUpload.validationError}
+                onFilesSelected={attachmentUpload.addFiles}
+                onRemove={attachmentUpload.removeAttachment}
+                onRetry={attachmentUpload.retryUpload}
+                disabled={submitting}
+              />
+
               {/* Honeypot — hidden from people, irresistible to bots. */}
               <div aria-hidden="true" className="hidden">
                 <label htmlFor="fn-feedback-website">Website</label>
@@ -374,16 +418,25 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
             </div>
 
             {/* ── Footer ── */}
-            <div className="flex flex-col gap-2 border-t border-border/70 px-4 py-3">
+            <div className="flex flex-col gap-1.5 border-t border-border/70 px-4 py-2.5">
               <Button
                 type="submit"
                 variant="primary"
                 size="md"
                 fullWidth
-                disabled={submitting}
+                disabled={submitting || attachmentUpload.isUploading}
                 aria-busy={submitting}
               >
-                {submitting ? (
+                {attachmentUpload.isUploading ? (
+                  // Checked before `submitting`: during a submit, uploadAll() runs
+                  // first and both flags are true together — this is the phase
+                  // that should read "uploading", not "sending". It also covers a
+                  // standalone per-card retry outside of a submit.
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" strokeWidth={2} aria-hidden="true" />
+                    Uploading attachments…
+                  </>
+                ) : submitting ? (
                   <>
                     <Loader2 size={16} className="mr-2 animate-spin" strokeWidth={2} aria-hidden="true" />
                     Sending…

@@ -11,6 +11,7 @@ import {
   type FeedbackSubmission,
   type FeedbackType,
 } from './types';
+import { sanitizeAttachments, type FeedbackAttachment } from './attachments';
 
 export const MESSAGE_MAX_LENGTH = 1000;
 export const MESSAGE_MIN_LENGTH = 5;
@@ -51,6 +52,17 @@ export function sanitizeMetadata(value: unknown): string | null {
 
 export function isFeedbackType(value: unknown): value is FeedbackType {
   return typeof value === 'string' && (FEEDBACK_TYPE_VALUES as readonly string[]).includes(value);
+}
+
+/**
+ * Defensive re-validation of the attachment metadata a submission claims to
+ * have uploaded. Anything that doesn't look like our own presigned-url route
+ * produced it (bad key shape, oversized, too many) is silently dropped rather
+ * than failing the whole submission — a stray bad entry shouldn't block
+ * otherwise-good feedback text.
+ */
+export function sanitizeFeedbackAttachments(value: unknown): FeedbackAttachment[] {
+  return sanitizeAttachments(value);
 }
 
 /**
