@@ -69,7 +69,7 @@ jobs:
           fi
           echo "All required secrets are present."
 
-      - name: Deploy over SSH (git pull, npm install, build, pm2 reload)
+      - name: Deploy over SSH (sync, build, pm2 reload, health check)
         id: deploy
         uses: appleboy/ssh-action@v1
         with:
@@ -79,10 +79,11 @@ jobs:
           port: ${{ secrets.LIGHTSAIL_SSH_PORT || 22 }}
           command_timeout: 15m
           script: |
-            set -euo pipefail
+            set -Eeuo pipefail
 
             DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
             PM2_APP_NAME="${{ env.PM2_APP_NAME }}"
+            DEPLOY_SHA="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.event.workflow_run.head_sha }}"
 
             if [[ "$DEPLOY_PATH" = /* ]]; then
               TARGET_DIR="$DEPLOY_PATH"
@@ -90,31 +91,46 @@ jobs:
               TARGET_DIR="$HOME/$DEPLOY_PATH"
             fi
 
-            echo "==> [1/5] cd $TARGET_DIR"
+            echo "==> [1/6] cd $TARGET_DIR"
             cd "$TARGET_DIR" || {
               echo "::error::Deploy directory not found: $TARGET_DIR. Check the LIGHTSAIL_DEPLOY_PATH secret matches where the repo is checked out on the server."
               exit 1
             }
 
-            echo "==> [2/5] git pull"
-            if ! git pull origin main; then
-              echo "::error::git pull failed in $TARGET_DIR. Check for local uncommitted changes, a detached HEAD, or a merge conflict on the server."
+            echo "==> [2/6] Sync git repository to exact commit"
+            git fetch origin
+            # Ensure we are on main branch
+            git checkout main
+            # Hard reset to the specific commit to ensure clean state
+            git reset --hard "$DEPLOY_SHA"
+            # Clean untracked/ignored files, but explicitly preserve persistent data
+            git clean -fdx -e .env -e uploads/ -e logs/
+            
+            # Print deployed commit SHA
+            CURRENT_SHA=$(git rev-parse HEAD)
+            echo "Current deployed commit is: $CURRENT_SHA"
+
+            echo "==> [3/6] Clean install dependencies"
+            if ! npm ci; then
+              echo "::error::npm ci failed. Ensure package-lock.json is committed and valid."
               exit 1
             fi
 
-            echo "==> [3/5] npm install"
-            if ! npm install; then
-              echo "::error::npm install failed. Check the npm log above for the failing package or a registry/network error."
-              exit 1
-            fi
-
-            echo "==> [4/5] npm run build"
+            echo "==> [4/6] Build Next.js application"
+            rm -rf .next
             if ! npm run build; then
               echo "::error::next build failed on the server. Check the compiler output above for the failing file/route."
               exit 1
             fi
+            
+            # Verify build output
+            if [ ! -d ".next" ] || [ ! -f ".next/BUILD_ID" ]; then
+              echo "::error::Build verification failed: .next directory or BUILD_ID not found."
+              exit 1
+            fi
+            echo "Build verified successfully."
 
-            echo "==> [5/5] pm2 reload (graceful, zero-downtime)"
+            echo "==> [5/6] pm2 reload (graceful, zero-downtime)"
             if ! command -v pm2 >/dev/null 2>&1; then
               echo "::error::pm2 not found on PATH for this SSH session. If PM2 is installed, the non-interactive shell may not be loading nvm/PATH — check ~/.bashrc or use an absolute path to pm2."
               exit 1
@@ -136,6 +152,33 @@ jobs:
             fi
 
             pm2 save
+            
+            echo "==> [6/6] Local health check"
+            # Use PORT from .env or default to 3000
+            LOCAL_PORT=$(grep -E '^PORT=' .env | cut -d '=' -f2 || echo "3000")
+            LOCAL_URL="http://localhost:$LOCAL_PORT"
+            echo "Pinging local server at $LOCAL_URL..."
+            
+            set +e
+            MAX_ATTEMPTS=12
+            SLEEP_SECONDS=5
+            local_http_code="000"
+            for i in $(seq 1 "$MAX_ATTEMPTS"); do
+              local_http_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$LOCAL_URL")
+              if [ "$local_http_code" = "200" ]; then
+                echo "Local health check passed on attempt $i/$MAX_ATTEMPTS — HTTP 200."
+                break
+              fi
+              echo "Attempt $i/$MAX_ATTEMPTS: Local HTTP $local_http_code — retrying in ${SLEEP_SECONDS}s"
+              sleep "$SLEEP_SECONDS"
+            done
+            set -Eeuo pipefail
+            
+            if [ "$local_http_code" != "200" ]; then
+              echo "::error::Local health check FAILED — process is not responding correctly locally (last status: $local_http_code). Check 'pm2 logs $PM2_APP_NAME'."
+              exit 1
+            fi
+
             echo "==> Server-side deploy steps completed."
 
       - name: Diagnose SSH/connection failure
