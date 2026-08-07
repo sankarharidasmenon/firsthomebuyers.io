@@ -7,11 +7,11 @@ import { Home, Megaphone, BookOpen, Library, MessageSquare } from 'lucide-react'
 
 /* ─── Tab definitions ────────────────────────────────────────────────────── */
 const TABS = [
-  { href: '/',          label: 'Home',     Icon: Home },
-  { href: '/schemes',   label: 'Grants/Schemes', Icon: Library },
-  { href: '/articles',  label: 'Articles', Icon: BookOpen },
-  { href: '/forums',    label: 'Forums',   Icon: MessageSquare },
-  { href: '/ads',       label: 'Ads',      Icon: Megaphone },
+  { href: '/', label: 'Home', Icon: Home },
+  { href: '/schemes', label: 'Grants/Schemes', Icon: Library },
+  // { href: '/articles',  label: 'Articles', Icon: BookOpen },
+  // { href: '/forums',    label: 'Forums',   Icon: MessageSquare },
+  { href: '/ads', label: 'Ads', Icon: Megaphone },
 ] as const
 
 /* ─── Component ─────────────────────────────────────────────────────────── */
@@ -42,7 +42,7 @@ export function BottomNav() {
         style={{
           height: 68,
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
+          gridTemplateColumns: `repeat(${TABS.length}, 1fr)`,
           maxWidth: 480,
           margin: '0 auto',
         }}
