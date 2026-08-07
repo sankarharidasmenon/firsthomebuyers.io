@@ -55,6 +55,8 @@ export interface Answers {
   // ── Property ──
   propertyType: PropertyType | ''        // C12
   price: number | null                   // C13
+  landPrice: number | null               // Land + Build only
+  buildPrice: number | null              // Land + Build only
   suburb: string                         // C14
   postcode: string                       // C14
   state: StateCode | ''                  // C14 (inferred from postcode)
@@ -97,6 +99,8 @@ export const EMPTY_ANSWERS: Answers = {
   priorBenefit: '',
   propertyType: '',
   price: null,
+  landPrice: null,
+  buildPrice: null,
   deposit: null,
   suburb: '',
   postcode: '',

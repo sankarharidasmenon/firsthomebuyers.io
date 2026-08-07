@@ -394,6 +394,13 @@ export interface DutyOutcome {
   note: string
 }
 
+export interface DutyContext {
+  state: DutyState
+  propertyPrice: number
+  propertyCategory?: string
+  landPrice?: number | null
+}
+
 /**
  * Duty for a first home buyer who the rules engine has already found ELIGIBLE
  * for that state's first home duty benefit.
@@ -402,35 +409,54 @@ export interface DutyOutcome {
  * returns `calculable: false` so the caller can show "Check Required" instead of
  * a fabricated number.
  */
-export function firstHomeDuty(state: DutyState, price: number): DutyOutcome {
-  const standard = standardDuty(state, price)
-  const base = { state, price, standard, calculable: true as boolean }
+export function firstHomeDuty(ctx: DutyContext): DutyOutcome {
+  const { state, propertyPrice, propertyCategory, landPrice } = ctx
+  const isVacantLand = propertyCategory === 'land' && typeof landPrice === 'number' && landPrice > 0
+  const dutiableValue = isVacantLand ? landPrice : propertyPrice
+
+  const standard = standardDuty(state, dutiableValue)
+  const base = { state, price: dutiableValue, standard, calculable: true as boolean }
 
   if (state === 'NSW') {
-    if (price <= 800000) {
-      return { ...base, payable: 0, saving: standard, note: 'Full exemption — no transfer duty payable up to $800,000.' }
+    const exemptTo = isVacantLand ? 350000 : 800000
+    const cap = isVacantLand ? 450000 : 1000000
+
+    if (dutiableValue <= exemptTo) {
+      return { ...base, payable: 0, saving: standard, note: `Full exemption — no transfer duty payable up to $${exemptTo.toLocaleString()}.` }
     }
-    if (price < 1000000) {
+    if (dutiableValue < cap) {
+      if (isVacantLand) {
+        // Taper for vacant land from $350k to $450k (approximate or refer to calculator).
+        // Since we don't have the exact formula for NSW taper (which they do publish for land, but usually it's best to check calculator),
+        // we'll return "Check Required" for the taper, consistent with completed homes.
+        return {
+          ...base, payable: null, saving: null, calculable: false,
+          note: `A concessional rate applies between $350,000 and $450,000 for vacant land. Confirm the exact amount with the Revenue NSW FHBAS calculator.`,
+        }
+      }
+      
       // Revenue NSW publishes a concessional rate for $800,001–$999,999 but not
       // the formula behind it; the FHBAS calculator is the authority. Rather
       // than approximate it, report that it needs the official calculator.
       return {
         ...base, payable: null, saving: null, calculable: false,
-        note: 'A concessional rate applies between $800,000 and $1,000,000. Confirm the exact amount with the Revenue NSW FHBAS calculator.',
+        note: `A concessional rate applies between $800,000 and $1,000,000. Confirm the exact amount with the Revenue NSW FHBAS calculator.`,
       }
     }
-    return { ...base, payable: standard, saving: 0, note: 'No first home duty benefit at $1,000,000 or above.' }
+    return { ...base, payable: standard, saving: 0, note: `No first home duty benefit at $${cap.toLocaleString()} or above.` }
   }
 
   if (state === 'VIC') {
-    if (price <= 600000) {
-      return { ...base, payable: 0, saving: standard, note: 'Full exemption — no land transfer duty payable up to $600,000.' }
+    // Both established homes and vacant land share the exact same $600k/$750k thresholds in VIC,
+    // but the dutiable value is strictly the land price for vacant land.
+    if (dutiableValue <= 600000) {
+      return { ...base, payable: 0, saving: standard, note: `Full exemption — no land transfer duty payable up to $600,000.` }
     }
-    if (price <= 750000) {
+    if (dutiableValue <= 750000) {
       // The concession tapers linearly: duty is the full amount scaled by how
       // far the price sits through the $600,000–$750,000 band, reaching full
       // duty at $750,000.
-      const payable = round(standard * ((price - 600000) / 150000))
+      const payable = round(standard * ((dutiableValue - 600000) / 150000))
       return { ...base, payable, saving: round(standard - payable), note: 'Tapered concession — duty phases in between $600,001 and $750,000.' }
     }
     return { ...base, payable: standard, saving: 0, note: 'No first home duty benefit above $750,000.' }
@@ -459,26 +485,30 @@ export function firstHomeDuty(state: DutyState, price: number): DutyOutcome {
   }
 
   if (state === 'WA') {
-    if (price <= WA_FHOR_EXEMPT_TO) {
+    const exemptTo = isVacantLand ? 450000 : WA_FHOR_EXEMPT_TO
+    const cap = isVacantLand ? 550000 : WA_FHOR_CAP
+    const taperRate = isVacantLand ? 20.14 : WA_FHOR_RATE_PER_100
+
+    if (dutiableValue <= exemptTo) {
       return {
         ...base, payable: 0, saving: standard,
-        note: 'Full first home owner rate — no transfer duty payable up to $600,000 for transactions entered into on or after 7 May 2026.',
+        note: `Full first home owner rate — no transfer duty payable up to $${exemptTo.toLocaleString()} for transactions entered into on or after 7 May 2026.`,
       }
     }
-    if (price <= WA_FHOR_CAP) {
-      // "$16.15 for every $100, OR PART OF $100, by which it exceeds $600,000" —
-      // so the excess rounds up to the next whole $100 before the rate applies.
-      const hundreds = Math.ceil((price - WA_FHOR_EXEMPT_TO) / 100)
+    if (dutiableValue <= cap) {
+      // "$20.14 for every $100, OR PART OF $100, by which it exceeds $450,000" for land,
+      // "$16.15 for every $100, OR PART OF $100, by which it exceeds $600,000" for home.
+      const hundreds = Math.ceil((dutiableValue - exemptTo) / 100)
       // Never charge more than the general rate: a concession cannot cost more
       // than not having it. The published rate does not breach this, but the
       // guard makes that impossible rather than merely true today.
-      const payable = Math.min(cents(WA_FHOR_RATE_PER_100 * hundreds), standard)
+      const payable = Math.min(cents(taperRate * hundreds), standard)
       return {
         ...base, payable, saving: cents(standard - payable),
-        note: `Concessional first home owner rate — $${WA_FHOR_RATE_PER_100.toFixed(2)} for every $100, or part of $100, above $600,000, leaving $${formatDuty(payable)} of duty payable. The concession tapers to nil at the $800,000 cap.`,
+        note: `Concessional first home owner rate — $${taperRate.toFixed(2)} for every $100, or part of $100, above $${exemptTo.toLocaleString()}, leaving $${formatDuty(payable)} of duty payable. The concession tapers to nil at the $${cap.toLocaleString()} cap.`,
       }
     }
-    return { ...base, payable: standard, saving: 0, note: 'No first home owner rate of duty at $800,000 or above.' }
+    return { ...base, payable: standard, saving: 0, note: `No first home owner rate of duty at $${cap.toLocaleString()} or above.` }
   }
 
   if (state === 'NT') {
@@ -495,11 +525,21 @@ export function firstHomeDuty(state: DutyState, price: number): DutyOutcome {
   }
 
   // QLD — home concession, then the first home concession rebate on top.
-  const homeConcessionDuty = cents(dutyPerHundredOrPart(price, QLD_HOME))
-  const rebate = price < QLD_FIRST_HOME_REBATE_CEILING
-    ? QLD_FIRST_HOME_REBATE.find((b) => price >= b.from)
+  // For vacant land, if contract is after May 2025, there is a full exemption with no cap.
+  if (isVacantLand) {
+    return {
+      ...base,
+      payable: 0,
+      saving: standard,
+      note: 'Full first home vacant land concession — no transfer duty payable on eligible vacant land with no value cap (for contracts entered into on or after 1 May 2025).',
+    }
+  }
+
+  const homeConcessionDuty = cents(dutyPerHundredOrPart(dutiableValue, QLD_HOME))
+  const rebate = dutiableValue < QLD_FIRST_HOME_REBATE_CEILING
+    ? QLD_FIRST_HOME_REBATE.find((b) => dutiableValue >= b.from)
     : undefined
-  if (price < 700000) {
+  if (dutiableValue < 700000) {
     return { ...base, payable: 0, saving: standard, note: 'Full first home concession — no transfer duty payable below $700,000.' }
   }
   if (rebate) {

@@ -73,7 +73,18 @@
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{const m=JSON.parse\\(d\\)[0].messages;console.log\\('baseline findings:',m.length\\);m.forEach\\(x=>console.log\\(' ',x.line+':'+x.column,x.severity===2?'ERROR':'warn',x.ruleId\\)\\)}\\)\")",
       "Bash(NODE_OPTIONS=--max-old-space-size=4096 npx tsx scripts/regression-baseline.ts)",
       "Bash(node warn.mjs)",
-      "Bash(echo \"typecheck-exit:$?\")"
+      "Bash(echo \"typecheck-exit:$?\")",
+      "Bash(cp \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\f--firstnest-v3\\\\58bb0721-c516-4d93-8b50-6d6211bcc940\\\\scratchpad\\\\feedback-smoke.mjs\" ./feedback-smoke.tmp.mjs)",
+      "Bash(node feedback-smoke.tmp.mjs)",
+      "Bash(curl -s -X POST http://localhost:3000/api/uploads/presigned-url -H 'Content-Type: application/json' -d '{\"fileName\":\"tiny.png\",\"contentType\":\"image/png\",\"fileSize\":66}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/uploads/presigned-url -H 'Content-Type: application/json' -d '{\"fileName\":\"tiny2.png\",\"contentType\":\"image/png\",\"fileSize\":66}')",
+      "Bash(xargs grep -l \"hoistableHeaders\\\\|unhoistable\")",
+      "Bash(rm -f feedback-smoke.tmp.mjs tiny-test.png tiny-test.png:Zone.Identifier)",
+      "Bash(rm -f /tmp/tinyhead)",
+      "Bash(cp \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\f--firstnest-v3\\\\58bb0721-c516-4d93-8b50-6d6211bcc940\\\\scratchpad\\\\apply-cors.mjs\" ./apply-cors.tmp.mjs)",
+      "Bash(node apply-cors.tmp.mjs)",
+      "Bash(rm -f apply-cors.tmp.mjs)",
+      "Bash(node feedback-smoke2.tmp.mjs)"
     ],
     "additionalDirectories": [
       "f:\\firstnest-v3"

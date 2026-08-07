@@ -1,0 +1,57 @@
+/* Small decorative branding accent beside the logo — see AustralianFlag.tsx.
+   Kept in its own module (mirrors ../logo/logo.module.css) rather than the
+   Navbar's inline <style> block, since it needs its own keyframes + media
+   queries. */
+
+.flagWrap {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  animation: fnFlagFloat 5s ease-in-out infinite;
+}
+
+.flagWrap svg {
+  display: block;
+  width: 30px;
+  height: 15px;
+  border-radius: 1.5px;
+}
+
+/* Gentle flutter: a hair of vertical float + a one-degree tilt — not a wave
+   or a bounce, just enough to read as "alive" beside the static logo. */
+@keyframes fnFlagFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-1.5px) rotate(-1deg);
+  }
+}
+
+/* Matches the existing narrow-phone breakpoint in logo.module.css, where the
+   Beta badge is already hidden for the same reason: below ~400px the navbar
+   row (16px pad + logo cluster + 84px action cluster + 16px pad) has no
+   spare width left — see the detailed note in logo.module.css. Slightly
+   larger phones (400px+) keep the flag, just smaller. */
+@media (max-width: 640px) {
+  .flagWrap svg {
+    width: 24px;
+    height: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .flagWrap {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flagWrap {
+    animation: none;
+  }
+}

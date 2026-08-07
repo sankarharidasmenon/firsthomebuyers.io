@@ -141,7 +141,7 @@ describe('standardDuty — "per $100 or part thereof" rounding', () => {
 
 describe('firstHomeDuty — NSW FHBAS', () => {
   it('is a full exemption up to $800,000', () => {
-    const outcome = firstHomeDuty('NSW', 800_000)
+    const outcome = firstHomeDuty({ state: 'NSW' as DutyState, propertyPrice: 800_000 })
     expect(outcome.calculable).toBe(true)
     expect(outcome.payable).toBe(0)
     expect(outcome.saving).toBe(30_187)
@@ -149,7 +149,7 @@ describe('firstHomeDuty — NSW FHBAS', () => {
   })
 
   it('refuses to guess in the $800,001–$999,999 concessional band', () => {
-    const outcome = firstHomeDuty('NSW', 900_000)
+    const outcome = firstHomeDuty({ state: 'NSW' as DutyState, propertyPrice: 900_000 })
     expect(outcome.calculable).toBe(false)
     expect(outcome.payable).toBeNull()
     expect(outcome.saving).toBeNull()
@@ -159,7 +159,7 @@ describe('firstHomeDuty — NSW FHBAS', () => {
   })
 
   it('gives no benefit at $1,000,000 and above', () => {
-    const outcome = firstHomeDuty('NSW', 1_000_000)
+    const outcome = firstHomeDuty({ state: 'NSW' as DutyState, propertyPrice: 1_000_000 })
     expect(outcome.payable).toBe(outcome.standard)
     expect(outcome.saving).toBe(0)
   })
@@ -167,26 +167,26 @@ describe('firstHomeDuty — NSW FHBAS', () => {
 
 describe('firstHomeDuty — VIC', () => {
   it('is a full exemption up to $600,000', () => {
-    const outcome = firstHomeDuty('VIC', 600_000)
+    const outcome = firstHomeDuty({ state: 'VIC' as DutyState, propertyPrice: 600_000 })
     expect(outcome.payable).toBe(0)
     expect(outcome.saving).toBe(outcome.standard)
   })
 
   it('tapers linearly through $600,001–$750,000', () => {
-    const outcome = firstHomeDuty('VIC', 675_000)
+    const outcome = firstHomeDuty({ state: 'VIC' as DutyState, propertyPrice: 675_000 })
     // Halfway through the band => half the duty payable.
     expect(outcome.payable).toBe(Math.round(outcome.standard * 0.5))
     expect(outcome.saving).toBe(outcome.standard - (outcome.payable as number))
   })
 
   it('reaches full duty at the top of the taper', () => {
-    const outcome = firstHomeDuty('VIC', 750_000)
+    const outcome = firstHomeDuty({ state: 'VIC' as DutyState, propertyPrice: 750_000 })
     expect(outcome.payable).toBe(outcome.standard)
     expect(outcome.saving).toBe(0)
   })
 
   it('gives no benefit above $750,000', () => {
-    const outcome = firstHomeDuty('VIC', 800_000)
+    const outcome = firstHomeDuty({ state: 'VIC' as DutyState, propertyPrice: 800_000 })
     expect(outcome.payable).toBe(outcome.standard)
     expect(outcome.saving).toBe(0)
   })
@@ -194,7 +194,7 @@ describe('firstHomeDuty — VIC', () => {
 
 describe('firstHomeDuty — QLD concession then rebate', () => {
   it('is a full concession below $700,000', () => {
-    const outcome = firstHomeDuty('QLD', 699_999)
+    const outcome = firstHomeDuty({ state: 'QLD' as DutyState, propertyPrice: 699_999 })
     expect(outcome.payable).toBe(0)
     expect(outcome.saving).toBe(outcome.standard)
     expect(outcome.note).toMatch(/full first home concession/i)
@@ -202,19 +202,19 @@ describe('firstHomeDuty — QLD concession then rebate', () => {
 
   it('applies the $17,350 rebate on top of the home concession at $705,000', () => {
     // Home concession duty at $705,000 is $17,575; the rebate is $17,350.
-    const outcome = firstHomeDuty('QLD', 705_000)
+    const outcome = firstHomeDuty({ state: 'QLD' as DutyState, propertyPrice: 705_000 })
     expect(outcome.payable).toBe(225)
     expect(outcome.note).toMatch(/sliding-scale/i)
   })
 
   it('steps the rebate down in $10,000 bands', () => {
-    const lower = firstHomeDuty('QLD', 705_000).payable as number
-    const higher = firstHomeDuty('QLD', 795_000).payable as number
+    const lower = firstHomeDuty({ state: 'QLD' as DutyState, propertyPrice: 705_000 }).payable as number
+    const higher = firstHomeDuty({ state: 'QLD' as DutyState, propertyPrice: 795_000 }).payable as number
     expect(higher).toBeGreaterThan(lower)
   })
 
   it('drops to home concession only from $800,000', () => {
-    const outcome = firstHomeDuty('QLD', 800_000)
+    const outcome = firstHomeDuty({ state: 'QLD' as DutyState, propertyPrice: 800_000 })
     expect(outcome.note).toMatch(/home concession only/i)
     expect(outcome.payable).toBeGreaterThan(0)
     // Still cheaper than the general rate — the home concession survives.
@@ -229,7 +229,7 @@ describe('firstHomeDuty — jurisdictions with uncapped full relief', () => {
     ['NT' as DutyState, /30 June 2027/],
   ])('%s waives duty entirely at any price', (state, notePattern) => {
     for (const price of [400_000, 900_000, 2_500_000]) {
-      const outcome = firstHomeDuty(state, price)
+      const outcome = firstHomeDuty({ state: state as DutyState, propertyPrice: price })
       expect(outcome.calculable).toBe(true)
       expect(outcome.payable).toBe(0)
       expect(outcome.saving).toBe(outcome.standard)
@@ -240,7 +240,7 @@ describe('firstHomeDuty — jurisdictions with uncapped full relief', () => {
 
 describe('firstHomeDuty — WA first home owner rate', () => {
   it('is a full exemption up to $600,000', () => {
-    const outcome = firstHomeDuty('WA', 600_000)
+    const outcome = firstHomeDuty({ state: 'WA' as DutyState, propertyPrice: 600_000 })
     expect(outcome.payable).toBe(0)
     expect(outcome.saving).toBe(outcome.standard)
   })
@@ -253,7 +253,7 @@ describe('firstHomeDuty — WA first home owner rate', () => {
    * "concession" costing $7,964 MORE than paying full duty.
    */
   it('uses $16.15 per $100, which meets the general rate at the $800,000 cap', () => {
-    const outcome = firstHomeDuty('WA', 800_000)
+    const outcome = firstHomeDuty({ state: 'WA' as DutyState, propertyPrice: 800_000 })
     expect(outcome.payable).toBe(32_300)
     expect(outcome.standard).toBe(32_315.5)
     expect(outcome.saving).toBeCloseTo(15.5, 2)
@@ -261,13 +261,13 @@ describe('firstHomeDuty — WA first home owner rate', () => {
 
   it('never charges more than the general rate', () => {
     for (let price = 600_000; price <= 800_000; price += 10_000) {
-      const outcome = firstHomeDuty('WA', price)
+      const outcome = firstHomeDuty({ state: 'WA' as DutyState, propertyPrice: price })
       expect(outcome.payable as number, `at $${price}`).toBeLessThanOrEqual(outcome.standard)
     }
   })
 
   it('gives no benefit at $800,000 and above', () => {
-    const outcome = firstHomeDuty('WA', 850_000)
+    const outcome = firstHomeDuty({ state: 'WA' as DutyState, propertyPrice: 850_000 })
     expect(outcome.payable).toBe(outcome.standard)
     expect(outcome.saving).toBe(0)
   })
@@ -281,7 +281,7 @@ describe('firstHomeDuty — cross-jurisdiction invariants', () => {
   it('never makes a first home buyer worse off, in any state at any price', () => {
     for (const state of ALL_STATES) {
       for (let price = 100_000; price <= 1_600_000; price += 25_000) {
-        const outcome = firstHomeDuty(state, price)
+        const outcome = firstHomeDuty({ state: state as DutyState, propertyPrice: price })
         if (!outcome.calculable) continue
         expect(outcome.payable as number, `${state} at $${price}`).toBeLessThanOrEqual(
           outcome.standard,
@@ -294,7 +294,7 @@ describe('firstHomeDuty — cross-jurisdiction invariants', () => {
   it('keeps saving === standard − payable wherever it is calculable', () => {
     for (const state of ALL_STATES) {
       for (let price = 150_000; price <= 1_200_000; price += 75_000) {
-        const outcome = firstHomeDuty(state, price)
+        const outcome = firstHomeDuty({ state: state as DutyState, propertyPrice: price })
         if (!outcome.calculable) continue
         expect(outcome.saving as number, `${state} at $${price}`).toBeCloseTo(
           outcome.standard - (outcome.payable as number),
@@ -305,14 +305,14 @@ describe('firstHomeDuty — cross-jurisdiction invariants', () => {
   })
 
   it('echoes back the state and price it was asked about', () => {
-    const outcome = firstHomeDuty('VIC', 640_000)
+    const outcome = firstHomeDuty({ state: 'VIC' as DutyState, propertyPrice: 640_000 })
     expect(outcome.state).toBe('VIC')
     expect(outcome.price).toBe(640_000)
   })
 
   it('always explains itself', () => {
     for (const state of ALL_STATES) {
-      expect(firstHomeDuty(state, 650_000).note.length).toBeGreaterThan(10)
+      expect(firstHomeDuty({ state: state as DutyState, propertyPrice: 650_000 }).note.length).toBeGreaterThan(10)
     }
   })
 })
@@ -343,5 +343,59 @@ describe('formatDuty', () => {
 
   it('formats zero without decimals', () => {
     expect(formatDuty(0)).toBe('0')
+  })
+})
+
+describe('firstHomeDuty — Land + Build Vacant Land Boundary Tests', () => {
+  it('NSW: Full exemption at exactly $350k, taper at $400k, full duty at exactly $450k', () => {
+    let outcome = firstHomeDuty({ state: 'NSW', propertyPrice: 800_000, propertyCategory: 'land', landPrice: 350_000 })
+    expect(outcome.payable).toBe(0)
+    
+    outcome = firstHomeDuty({ state: 'NSW', propertyPrice: 800_000, propertyCategory: 'land', landPrice: 450_000 })
+    expect(outcome.payable).toBe(standardDuty('NSW', 450_000))
+
+    outcome = firstHomeDuty({ state: 'NSW', propertyPrice: 800_000, propertyCategory: 'land', landPrice: 400_000 })
+    expect(outcome.calculable).toBe(false)
+    expect(outcome.note).toMatch(/FHBAS calculator/i)
+  })
+
+  it('VIC: Full exemption at exactly $600k, full duty at exactly $750k', () => {
+    let outcome = firstHomeDuty({ state: 'VIC', propertyPrice: 800_000, propertyCategory: 'land', landPrice: 600_000 })
+    expect(outcome.payable).toBe(0)
+    
+    outcome = firstHomeDuty({ state: 'VIC', propertyPrice: 900_000, propertyCategory: 'land', landPrice: 750_000 })
+    expect(outcome.payable).toBe(standardDuty('VIC', 750_000))
+    
+    outcome = firstHomeDuty({ state: 'VIC', propertyPrice: 900_000, propertyCategory: 'land', landPrice: 675_000 })
+    expect(outcome.payable).toBe(Math.round(standardDuty('VIC', 675_000) * 0.5))
+  })
+
+  it('WA: Full exemption at exactly $450k, full duty at exactly $550k', () => {
+    let outcome = firstHomeDuty({ state: 'WA', propertyPrice: 800_000, propertyCategory: 'land', landPrice: 450_000 })
+    expect(outcome.payable).toBe(0)
+    
+    outcome = firstHomeDuty({ state: 'WA', propertyPrice: 800_000, propertyCategory: 'land', landPrice: 550_000 })
+    expect(outcome.payable).toBe(standardDuty('WA', 550_000))
+    
+    outcome = firstHomeDuty({ state: 'WA', propertyPrice: 800_000, propertyCategory: 'land', landPrice: 500_000 })
+    const hundreds = Math.ceil((500_000 - 450_000) / 100)
+    expect(outcome.payable).toBe(Math.min(Math.round(20.14 * hundreds), standardDuty('WA', 500_000)))
+  })
+
+  it('QLD: No value cap for vacant land (full exemption for any land price)', () => {
+    let outcome = firstHomeDuty({ state: 'QLD', propertyPrice: 600_000, propertyCategory: 'land', landPrice: 400_000 })
+    expect(outcome.payable).toBe(0)
+    
+    outcome = firstHomeDuty({ state: 'QLD', propertyPrice: 2_000_000, propertyCategory: 'land', landPrice: 1_000_000 })
+    expect(outcome.payable).toBe(0)
+  })
+
+  it('SA, ACT, NT: standard duty is correctly calculated on landPrice, not propertyPrice', () => {
+    for (const state of ['SA', 'ACT', 'NT'] as DutyState[]) {
+      const outcome = firstHomeDuty({ state, propertyPrice: 800_000, propertyCategory: 'land', landPrice: 400_000 })
+      expect(outcome.payable).toBe(0)
+      expect(outcome.saving).toBe(standardDuty(state, 400_000))
+      expect(outcome.standard).toBe(standardDuty(state, 400_000))
+    }
   })
 })

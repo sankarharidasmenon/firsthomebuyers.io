@@ -18,6 +18,7 @@ import {
   EMAIL_MAX_LENGTH,
   MESSAGE_MAX_LENGTH,
   isFeedbackType,
+  sanitizeFeedbackAttachments,
   sanitizeMetadata,
   sanitizeText,
   validateFeedback,
@@ -132,6 +133,7 @@ export async function POST(request: NextRequest) {
     }
 
     const email = sanitizeText(body.email, EMAIL_MAX_LENGTH);
+    const attachments = sanitizeFeedbackAttachments(body.attachments);
 
     const row: FeedbackInsert = {
       feedback_type: body.feedbackType,
@@ -145,6 +147,7 @@ export async function POST(request: NextRequest) {
       user_id: user?.id ?? null,
       user_name: userName,
       user_email: user?.email ?? null,
+      attachments: attachments.length > 0 ? attachments : null,
     };
 
     const { error } = await supabase.from('feedback').insert(row);

@@ -6,12 +6,13 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X, Cpu } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Logo } from '@/components/ui/logo/Logo'
+import { AustralianFlag } from '@/components/ui/flag/AustralianFlag'
 
 // Icon-only links shown on the right side of the desktop navbar
 const ICON_LINKS = [
-  { href: '/map',      label: 'Grants Map',        Icon: Map },
-  { href: '/articles', label: 'Articles',          Icon: Newspaper },
-  { href: '/forums',   label: 'Forums',            Icon: MessageSquare },
+  { href: '/map', label: 'Grants Map', Icon: Map },
+  // { href: '/articles', label: 'Articles',          Icon: Newspaper },
+  // { href: '/forums',   label: 'Forums',            Icon: MessageSquare },
 ]
 
 // Full flat list used by the mobile menu
@@ -47,8 +48,8 @@ function AdsIcon() {
           position: 'absolute',
           top: -2,
           right: -6,
-          background: 'var(--primary)',
-          color: 'var(--primary-foreground)',
+          background: '#F5E642',
+          color: '#111111',
           fontSize: '8px',
           fontWeight: 800,
           padding: '1.5px 3.5px',
@@ -90,7 +91,7 @@ function AiIcon({ size = 20, strokeWidth = 2 }: { size?: number, strokeWidth?: n
         y="12.5"
         textAnchor="middle"
         dominantBaseline="central"
-        fill="var(--background)"
+        fill="#F0F0F0"
         stroke="none"
         style={{
           fontFamily: 'Inter, sans-serif',
@@ -182,12 +183,16 @@ export function Navbar() {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 h-14 lg:h-[72px]"
+        className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: 'color-mix(in srgb, var(--background) 90%, transparent)',
+          backgroundColor: 'color-mix(in srgb, #F0F0F0 90%, transparent)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderBottom: '1px solid var(--border)',
+          borderBottom: '1px solid #EEEEEE',
+          // Extends the bar's background up under the status bar / notch /
+          // Dynamic Island on iOS; resolves to 0 outside a native safe-area
+          // context (all browsers, desktop), so desktop height is unchanged.
+          paddingTop: 'env(safe-area-inset-top)',
         }}
       >
         <style>{`
@@ -197,12 +202,16 @@ export function Navbar() {
           .fn-nav-login { background: #111111; color: #F5E642 !important; transition: background 0.25s, transform 0.2s; }
           .fn-nav-login:hover { background: #222222 !important; transform: translateY(-1px); }
         `}</style>
-        <div className="fn-nav max-w-[1150px] mx-auto h-full flex items-center justify-between px-4 lg:px-4">
+        <div className="fn-nav max-w-[1150px] mx-auto h-14 lg:h-[72px] flex items-center justify-between px-4 lg:px-4">
 
-          {/* Logo */}
-          <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: 'var(--foreground)' }}>
-            <Logo size="md" animated showBadge />
-          </Link>
+          {/* Flag + Logo — flag is a purely decorative accent to the left of
+              the (unmodified) logo; see AustralianFlag.tsx */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* <AustralianFlag /> */}
+            <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: '#111111' }}>
+              <Logo size="md" animated showBadge />
+            </Link>
+          </div>
 
 
           {/* Right side - Mobile */}
@@ -214,7 +223,7 @@ export function Navbar() {
               onClick={() => setMenuOpen(o => !o)}
               aria-label="Toggle mobile menu"
               className="fn-icon-btn flex items-center justify-center rounded-lg transition-colors duration-150 ml-1"
-              style={{ width: 40, height: 40, color: 'var(--foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
+              style={{ width: 40, height: 40, color: '#111111', background: 'none', border: 'none', cursor: 'pointer' }}
             >
               {menuOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
             </button>
@@ -234,8 +243,8 @@ export function Navbar() {
                   style={{
                     width: 36,
                     height: 36,
-                    color: pathname === href ? 'var(--foreground)' : 'var(--secondary-foreground)',
-                    background: pathname === href ? 'var(--secondary)' : 'none',
+                    color: pathname === href ? '#111111' : '#555555',
+                    background: pathname === href ? '#E8E8E8' : 'none',
                     textDecoration: 'none',
                   }}
                 >
@@ -252,10 +261,10 @@ export function Navbar() {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: pathname === '/ads' && activeHash !== '#ai-guidance' ? 700 : 500,
                   fontSize: '0.9375rem',
-                  color: pathname === '/ads' && activeHash !== '#ai-guidance' ? '#111111' : 'var(--secondary-foreground)',
+                  color: pathname === '/ads' && activeHash !== '#ai-guidance' ? '#111111' : '#555555',
                   textDecoration: 'none',
                   paddingBottom: 2,
-                  borderBottom: pathname === '/ads' && activeHash !== '#ai-guidance' ? '2px solid var(--primary-hover)' : '2px solid transparent',
+                  borderBottom: pathname === '/ads' && activeHash !== '#ai-guidance' ? '2px solid #D4C400' : '2px solid transparent',
                   transition: 'color 150ms, border-color 150ms, opacity 150ms',
                   transform: 'translateX(8px)',
                 }}
@@ -270,8 +279,8 @@ export function Navbar() {
                 style={{
                   width: 36,
                   height: 36,
-                  color: pathname === '/ask-ai' ? 'var(--foreground)' : 'var(--secondary-foreground)',
-                  background: pathname === '/ask-ai' ? 'var(--secondary)' : 'none',
+                  color: pathname === '/ask-ai' ? '#111111' : '#555555',
+                  background: pathname === '/ask-ai' ? '#E8E8E8' : 'none',
                   textDecoration: 'none',
                   transform: 'translateX(8px)',
                 }}
@@ -289,9 +298,9 @@ export function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 lg:hidden flex flex-col"
-          style={{ top: '56px', background: 'var(--background)', borderTop: '1px solid var(--border)' }}
+          style={{ top: 'calc(56px + env(safe-area-inset-top))', background: '#F0F0F0', borderTop: '1px solid #EEEEEE' }}
         >
           <div className="flex flex-col p-4 gap-2">
             {NAV_LINKS.map(({ href, label, Icon }) => (
@@ -301,8 +310,8 @@ export function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 p-3 rounded-lg transition-colors"
                 style={{
-                  background: pathname === href ? 'var(--secondary)' : 'transparent',
-                  color: pathname === href ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                  background: pathname === href ? '#E8E8E8' : 'transparent',
+                  color: pathname === href ? '#111111' : '#555555',
                   textDecoration: 'none'
                 }}
               >
@@ -315,8 +324,8 @@ export function Navbar() {
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-3 p-3 rounded-lg transition-colors"
               style={{
-                background: pathname === '/ads' ? 'var(--secondary)' : 'transparent',
-                color: pathname === '/ads' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                background: pathname === '/ads' ? '#E8E8E8' : 'transparent',
+                color: pathname === '/ads' ? '#111111' : '#555555',
                 textDecoration: 'none'
               }}
             >
@@ -328,8 +337,8 @@ export function Navbar() {
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-3 p-3 rounded-lg transition-colors"
               style={{
-                background: pathname === '/ask-ai' ? 'var(--secondary)' : 'transparent',
-                color: pathname === '/ask-ai' ? 'var(--foreground)' : 'var(--secondary-foreground)',
+                background: pathname === '/ask-ai' ? '#E8E8E8' : 'transparent',
+                color: pathname === '/ask-ai' ? '#111111' : '#555555',
                 textDecoration: 'none'
               }}
             >

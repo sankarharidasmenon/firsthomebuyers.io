@@ -70,7 +70,12 @@ export function validateProperty(a: Answers): Errors {
   // No Q01 validation — the QLD new-home question was removed, so a Queensland
   // applicant choosing "New" must be able to complete this step with no hidden
   // required field.
-  if (a.price == null || a.price <= 0) e.price = 'Enter the purchase price.'
+  if (a.propertyType === 'Land + Build') {
+    if (a.landPrice == null || a.landPrice <= 0) e.landPrice = 'Enter the land purchase price.'
+    if (a.buildPrice == null || a.buildPrice <= 0) e.buildPrice = 'Enter the building contract amount.'
+  } else {
+    if (a.price == null || a.price <= 0) e.price = 'Enter the purchase price.'
+  }
   if (!a.postcode || !a.state) e.postcode = 'Search and select a suburb.'
   if (!a.ppr) e.ppr = 'Let us know if this will be your home.'
   if (showMoveIn(a) && !a.moveIn) e.moveIn = 'Confirm your move-in timeframe.'
@@ -208,12 +213,16 @@ const hasAnyPartner = (a: Answers) => isJoint(a) || a.hasPartner === 'Yes'
 
 /** Map the full questionnaire down to the existing eligibility API query. */
 export function toEligibilityAnswers(a: Answers): EligibilityAnswers {
+  const isLandAndBuild = a.propertyType === 'Land + Build'
+  const combinedPrice = isLandAndBuild ? (a.landPrice || 0) + (a.buildPrice || 0) : (a.price ?? 0)
+
   return {
     state: a.state || 'VIC',
     firstHomeBuyer: isFirstHomeBuyer(a),
     income: combinedIncome(a),
     hasPartner: hasAnyPartner(a),
-    propertyPrice: a.price ?? 0,
+    propertyPrice: combinedPrice,
+    landPrice: isLandAndBuild && typeof a.landPrice === 'number' ? a.landPrice : null,
     deposit: typeof a.deposit === 'number' ? a.deposit : null,
     propertyType: a.propertyType ? PROPERTY_TYPE_MAP[a.propertyType] : 'house',
     propertyCategory: a.propertyType ? PROPERTY_CATEGORY_MAP[a.propertyType] : undefined,
@@ -232,7 +241,7 @@ export function toLegacySteps(a: Answers) {
     step2: { annualIncome: a.income ?? 0, partnerIncome: isJoint(a) ? a.coIncome ?? 0 : 0, monthlyExpenses: 0 },
     step3: {
       depositAmount: 0,
-      targetPropertyPrice: a.price ?? 0,
+      targetPropertyPrice: a.propertyType === 'Land + Build' ? (a.landPrice || 0) + (a.buildPrice || 0) : (a.price ?? 0),
       propertyType: (a.propertyType ? PROPERTY_TYPE_MAP[a.propertyType] : 'house') as 'house' | 'townhouse' | 'apartment' | 'offplan',
       firstHomeBuyer: isFirstHomeBuyer(a),
     },

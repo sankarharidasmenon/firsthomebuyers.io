@@ -161,9 +161,20 @@ export function QuestionnaireFlow() {
                     <Q label="What type of property are you planning to buy?" help="Certain grants, such as the First Home Owner Grant, are strictly limited to new builds or substantial renovations." error={errors.propertyType}>
                       <Chips options={PROP_CHIPS} value={a.propertyType} onChange={(v) => set('propertyType', v)} />
                     </Q>
-                    <Q label="What is the target purchase price of the property?" help="Every scheme has strict property price caps. If your purchase price exceeds these limits, you will not be eligible for that specific scheme." error={errors.price}>
-                      <Currency value={a.price} onChange={(v) => set('price', v)} placeholder="650,000" invalid={!!errors.price} />
-                    </Q>
+                    {a.propertyType === 'Land + Build' ? (
+                      <>
+                        <Q label="What is the purchase price of the vacant land?" help="Stamp duty is calculated on the land value when building a new home." error={errors.landPrice}>
+                          <Currency value={a.landPrice} onChange={(v) => set('landPrice', v)} placeholder="300,000" invalid={!!errors.landPrice} />
+                        </Q>
+                        <Q label="What is your build price?" help="Enter the fixed-price building contract amount only. Do not include the land purchase price." error={errors.buildPrice}>
+                          <Currency value={a.buildPrice} onChange={(v) => set('buildPrice', v)} placeholder="400,000" invalid={!!errors.buildPrice} />
+                        </Q>
+                      </>
+                    ) : (
+                      <Q label="What is the target purchase price of the property?" help="Every scheme has strict property price caps. If your purchase price exceeds these limits, you will not be eligible for that specific scheme." error={errors.price}>
+                        <Currency value={a.price} onChange={(v) => set('price', v)} placeholder="650,000" invalid={!!errors.price} />
+                      </Q>
+                    )}
                     <Q label="Where is the property located?" help="Some grants are only available for properties in specific postcodes or regional areas." error={errors.postcode}>
                       <LocationCombobox suburb={a.suburb} postcode={a.postcode} stateFilter={a.state}
                         onSelect={(v) => { set('suburb', v.suburb); set('postcode', v.postcode); set('state', v.state) }} invalid={!!errors.postcode} />
@@ -219,7 +230,7 @@ export function QuestionnaireFlow() {
                         answers. It never gates Next, is not part of `errors`, and no
                         rule reads it — PPR (asked on the previous step) and
                         citizenship are still scored exactly as before. */}
-                    <Cond open={ a.citizenship === 'Other'}>
+                    <Cond open={a.citizenship === 'Other'}>
                       <div className="fhbq-notice" role="status" aria-live="polite">
                         <AlertTriangle size={15} className="ic" aria-hidden="true" />
                         <p>

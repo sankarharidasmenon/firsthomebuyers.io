@@ -8,6 +8,7 @@ import { Navbar } from '@/components/home/Navbar'
 import { FloatingSocialWidget } from '@/components/common/FloatingSocialWidget'
 import { FeedbackWidget } from '@/components/feedback/FeedbackWidget'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import { CapacitorBridge } from '@/components/mobile/CapacitorBridge'
 import { Toaster } from 'sonner'
 
 const inter = Inter({
@@ -33,6 +34,11 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: '#F5E642',
+  // Lets the page draw under the status bar/notch/Dynamic Island/home
+  // indicator so env(safe-area-inset-*) resolves to real values instead of 0
+  // inside the native iOS WebView. No effect on desktop/regular mobile
+  // browsers, which already ignore viewport-fit or report 0 insets.
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -48,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="text-foreground antialiased flex flex-col min-h-screen" style={{ background: 'var(--color-brand-dark-surface)' }}>
         <ThemeProvider>
+          <CapacitorBridge />
           <div className="flex-1 flex flex-col bg-background">
             <Navbar />
             <GlobalBackButton />
