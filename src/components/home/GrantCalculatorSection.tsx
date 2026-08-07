@@ -99,7 +99,7 @@ export function GrantCalculatorSection() {
                   Grant Calculator
                 </div> */}
 
-                <h2 className="text-3xl mb-4 max-w-[320px] lg:max-w-none" style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 500, color: '#111111', letterSpacing: '-0.5px' }}>
+                <h2 className="text-3xl mb-4 max-w-[320px] lg:max-w-none text-foreground" style={{ fontFamily: "var(--font-body, 'Inter'), sans-serif", fontWeight: 500, letterSpacing: '-0.5px' }}>
                   Grant Calculator
                   {/* <br className="hidden lg:inline" /> could <span className="pr-1">unlock,</span> <br className="hidden lg:inline" /> right now */}
                 </h2>
@@ -128,8 +128,8 @@ export function GrantCalculatorSection() {
               </ul>
 
               {/* Desktop Disclaimer */}
-              <div className="hidden lg:flex p-3 rounded-xl gap-3 text-[0.8125rem] text-secondary-foreground max-w-[380px] mt-6" style={{ background: 'rgba(245,230,66,0.20)', border: '1px solid rgba(212,196,0,0.35)' }}>
-                <div className="mt-0.5" style={{ color: '#C4A000' }}><Sparkles size={16} fill="currentColor" /></div>
+              <div className="hidden lg:flex p-3 rounded-xl gap-3 text-[0.8125rem] text-secondary-foreground max-w-[380px] mt-6 bg-[#F5E642]/20 border border-[#D4C400]/35 dark:bg-primary/10 dark:border-primary/20">
+                <div className="mt-0.5 text-[#C4A000] dark:text-primary"><Sparkles size={16} fill="currentColor" /></div>
                 <p><strong>Results are estimates only.</strong> Final eligibility is subject to government rules.</p>
               </div>
             </div>
@@ -233,7 +233,7 @@ export function GrantCalculatorSection() {
               </div>
 
               {/* Inner Grants Card */}
-              <div className="dark:bg-card/50 dark:border-border/50 rounded-2xl p-4 sm:p-5 mb-4 mt-4" style={{ background: '#FEFCE8', border: '1px solid rgba(212,196,0,0.35)' }}>
+              <div className="bg-[#FEFCE8] dark:bg-card/50 border border-[#D4C400]/35 dark:border-border/50 rounded-2xl p-4 sm:p-5 mb-4 mt-4">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="flex items-center justify-center w-8 h-8 rounded-full" style={{ background: 'rgba(245,230,66,0.5)', color: '#111111' }}>
                     <Wallet size={16} strokeWidth={2.5} />
@@ -258,7 +258,7 @@ export function GrantCalculatorSection() {
                 </div>
 
                 {/* Footer Total */}
-                <div className="mt-4 pt-4 dark:border-border/40 flex justify-between items-center gap-2" style={{ borderTop: '1px solid rgba(212,196,0,0.35)' }}>
+                <div className="mt-4 pt-4 border-t border-[#D4C400]/35 dark:border-border/40 flex justify-between items-center gap-2">
                   <span className="font-bold text-[0.875rem] sm:text-[0.9375rem] text-foreground leading-tight" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Total Estimated Value
                   </span>

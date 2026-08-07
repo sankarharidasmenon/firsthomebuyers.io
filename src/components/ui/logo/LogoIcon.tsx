@@ -9,7 +9,7 @@ interface LogoIconProps {
 export function LogoIcon({ height, theme = 'light' }: LogoIconProps) {
   const isDark = theme === 'dark'
   
-  const houseColor = isDark ? '#FFFFFF' : '#00205B'
+  const houseColor = isDark ? '#FFFFFF' : '#012169'
   const windowColor = isDark ? '#FFC72C' : '#E4002B'
   const leafColor = isDark ? '#C8102E' : '#E4002B'
   const stemColor = isDark ? '#FFFFFF' : '#E4002B'

@@ -23,11 +23,11 @@ export function ThemeToggle() {
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       className="flex items-center justify-center rounded-md p-2 focus:outline-none"
       style={{ 
-        color: 'var(--foreground)',
+        color: '#111111',
         transition: 'background-color 200ms ease, color 200ms ease, transform 200ms ease',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'var(--secondary)'
+        e.currentTarget.style.backgroundColor = '#E8E8E8'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = 'transparent'

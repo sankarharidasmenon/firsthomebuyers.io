@@ -18,7 +18,7 @@ export function HeroSection() {
     if (!v) return
     const next = !v.muted
     v.muted = next
-    if (!next) v.play().catch(() => {})
+    if (!next) v.play().catch(() => { })
     setMuted(next)
   }
 
@@ -39,7 +39,7 @@ export function HeroSection() {
           setCurrentStep(null)
         }
       }
-    } catch {}
+    } catch { }
     setIsLoaded(true)
   }, [])
 
@@ -138,6 +138,7 @@ export function HeroSection() {
           grid-template-columns: 1fr;
           gap: 14px;
           margin-bottom: 24px;
+          max-width: 540px;
         }
         @media (min-width: 560px) {
           .fn-hero-paths { grid-template-columns: 1fr 1fr; }
@@ -150,7 +151,7 @@ export function HeroSection() {
           flex-direction: row;
           align-items: center;
           justify-content: space-between;
-          gap: 12px;
+          gap: 16px;
           width: 100%;
           text-align: left;
           padding: 14px 18px;
@@ -342,16 +343,16 @@ export function HeroSection() {
                   {/* <div className="fn-hero-eyebrow">For Australian first home buyers</div> */}
                   <h1 className="fn-hero-title max-w-2xl " style={{ fontSize: 'clamp(24px, 3.2vw, 40px)' }}>
                     {/* Australia <br/> */}
-                     {/* Smarter<br /> */}
-               Australian First Home Buyers 
+                    {/* Smarter<br /> */}
+                    Australian First Home Buyers
                   </h1>
                   <p className="fn-hero-sub -mt-3">
                     {/* Your first home, made easier — in about 3 minutes. */}
-                   FirstHomeBuyers identifies every Australian government grant and scheme you qualify for, federal and state, then builds your personalised roadmap to homeownership.
+                    FirstHomeBuyers identifies every Australian government grant and scheme you qualify for, federal and state, then builds your personalised roadmap to homeownership.
                   </p>
                   {/* Primary: grants (black card), Secondary: borrowing (outline card) */}
                   <div className="fn-hero-paths">
-                    <button type="button" className="fn-path fn-path-primary"
+                    {/* <button type="button" className="fn-path fn-path-primary"
                       onClick={() => router.push('/onboarding?flow=grants')}>
                       <span className="fn-path-body">
                         <span className="fn-path-kicker">Eligibility</span>
@@ -360,13 +361,23 @@ export function HeroSection() {
                       <svg className="fn-path-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                       </svg>
-                    </button>
+                    </button> */}
 
                     <button type="button" className="fn-path fn-path-primary"
                       onClick={() => router.push('/grant-calculator')}>
                       <span className="fn-path-body">
                         <span className="fn-path-kicker">Government support</span>
-                        <span className="fn-path-title">Check my grant calculator</span>
+                        <span className="fn-path-title">Grant Calculator</span>
+                      </span>
+                      <svg className="fn-path-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </button>
+                    <button type="button" className="fn-path fn-path-primary"
+                      onClick={() => router.push('/onboarding?flow=grants')}>
+                      <span className="fn-path-body">
+                        <span className="fn-path-kicker">Eligibility</span>
+                        <span className="fn-path-title"> Grants &amp; Schemes</span>
                       </span>
                       <svg className="fn-path-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />

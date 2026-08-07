@@ -18,7 +18,7 @@ function GooglePlayIcon() {
 
 function AppleIcon() {
   return (
-    <svg viewBox="0 0 384 512" width="12" height="12" fill="#FFFFFF" aria-hidden="true">
+    <svg viewBox="0 0 384 512" width="12" height="12" fill="#111111" aria-hidden="true">
       <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
     </svg>
   )
@@ -67,10 +67,10 @@ const OFFICIAL = [
 ]
 
 const LEGAL = [
-  { label: 'Terms & Conditions', href: '#' },
-  { label: 'Privacy Policy', href: '#' },
-  { label: 'Disclaimer', href: '#' },
-  { label: 'Cookie Policy', href: '#' },
+  { label: 'Terms & Conditions', href: '/terms' },
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Disclaimer', href: '/disclaimer' },
+  { label: 'Cookie Policy', href: '/cookies' },
 ]
 
 const CAT: React.CSSProperties = {
@@ -79,7 +79,7 @@ const CAT: React.CSSProperties = {
   fontSize: '0.6875rem',
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
-  color: 'rgba(255,255,255,0.45)',
+  color: '#555555',
   marginBottom: 18,
   display: 'block',
 }
@@ -89,15 +89,15 @@ export function Footer() {
   const [selectedLegal, setSelectedLegal] = useState<string | null>(null)
 
   return (
-    <footer style={{ background: '#111111' }} className="pb-20 lg:pb-0">
+    <footer style={{ background: '#F0F0F0' }} className="pb-20 lg:pb-0">
       <style>{`
-        .fn-ftr-a { color: rgba(255,255,255,0.82); text-decoration: none; transition: color 120ms; }
-        .fn-ftr-a:hover { color: #ffffff; }
+        .fn-ftr-a { color: #555555; text-decoration: none; transition: color 120ms; }
+        .fn-ftr-a:hover { color: #111111; }
 
         .fn-social-btn {
           display: flex; align-items: center; justify-content: center;
           width: 38px; height: 38px; border-radius: 9999px;
-          background: var(--brand);
+          background: #F5E642;
           border: 1px solid rgba(255,255,255,0.14);
           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
           color: #ffffff;
@@ -108,8 +108,8 @@ export function Footer() {
           filter: brightness(1.1);
           box-shadow: 0 6px 18px rgba(0,0,0,0.45);
         }
-        .fn-ftr-legal { color: rgba(255,255,255,0.45); text-decoration: none; transition: color 120ms; }
-        .fn-ftr-legal:hover { color: #ffffff; }
+        .fn-ftr-legal { color: #555555; text-decoration: none; transition: color 120ms; }
+        .fn-ftr-legal:hover { color: #111111; }
 
         @keyframes marquee {
           0% { transform: translateX(0%); }
@@ -127,12 +127,12 @@ export function Footer() {
 
         {/* Brand */}
         <div className="flex flex-col items-start gap-4">
-          <Link href="/" className="no-underline" aria-label="FirstNest home" style={{ color: '#FFFFFF' }}>
-            <Logo size="md" showBadge theme="dark" />
+          <Link href="/" className="no-underline" aria-label="FirstNest home">
+            <Logo size="md" showBadge />
           </Link>
           <p style={{
             fontFamily: 'Inter, sans-serif', fontWeight: 400,
-            fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)',
+            fontSize: '0.875rem', color: '#555555',
             lineHeight: 1.65, maxWidth: '100%', whiteSpace: 'normal',
           }}>
             Australia&apos;s free first home buyer tool - Know your Eligibility &amp; Government Support
@@ -140,7 +140,7 @@ export function Footer() {
         </div>
 
         {/* Official Sources — pill chips */}
-        <div>
+        {/* <div>
           <span style={CAT}>Official Sources</span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {OFFICIAL.map(({ label, href }) => (
@@ -153,20 +153,20 @@ export function Footer() {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 5,
                   fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', fontWeight: 500,
-                  background: 'rgba(255,255,255,0.07)',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: '#FFFFFF',
+                  border: '1px solid #EEEEEE',
                   borderRadius: 9999,
                   padding: '5px 12px',
                   whiteSpace: 'normal', textAlign: 'center',
                   transition: 'background 150ms, border-color 150ms',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.13)'
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'
+                  e.currentTarget.style.background = '#F9F9F9'
+                  e.currentTarget.style.borderColor = '#EEEEEE'
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+                  e.currentTarget.style.background = '#FFFFFF'
+                  e.currentTarget.style.borderColor = '#EEEEEE'
                 }}
               >
                 {label}
@@ -174,13 +174,13 @@ export function Footer() {
               </a>
             ))}
           </div>
-        </div>
+        </div> */}
 
       </div>
 
       {/* ── Bottom bar ── */}
-      <div className="-mb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8 w-full py-5">
+      <div className="-mb-4" style={{ borderTop: '1px solid #EEEEEE' }}>
+        <div className="max-w-[1150px] mx-auto px-4 sm:px-6 lg:px-8 w-full ">
 
           {/* Collapsible legal panel */}
           <div
@@ -192,8 +192,8 @@ export function Footer() {
             }}
           >
             <div style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.09)',
+              background: '#FFFFFF',
+              border: '1px solid #EEEEEE',
               borderRadius: 10,
               padding: '14px 16px',
               display: 'flex',
@@ -203,35 +203,37 @@ export function Footer() {
             }}>
               {/* Legal tab buttons */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {LEGAL.map(({ label }) => {
+                {LEGAL.map(({ label, href }) => {
                   const active = selectedLegal === label
                   return (
-                    <button
+                    <Link
                       key={label}
-                      type="button"
+                      href={href}
                       onClick={() => setSelectedLegal(active ? null : label)}
                       style={{
+                        display: 'inline-block',
                         fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', fontWeight: 500,
-                        background: active ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)',
-                        border: `1px solid ${active ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)'}`,
+                        background: active ? '#F9F9F9' : '#FFFFFF',
+                        border: '1px solid #EEEEEE',
                         borderRadius: 9999,
                         padding: '6px 14px',
-                        color: active ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                        color: active ? '#111111' : '#555555',
                         whiteSpace: 'nowrap',
                         cursor: 'pointer',
+                        textDecoration: 'none',
                         transition: 'background 150ms, border-color 150ms, color 150ms',
                       }}
                     >
                       {label}
-                    </button>
+                    </Link>
                   )
                 })}
               </div>
 
               {/* Content — only shown for Disclaimer */}
-              {selectedLegal === 'Disclaimer' && (
+              {/* {selectedLegal === 'Disclaimer' && (
                 <>
-                  <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
+                  <div style={{ height: 1, background: '#FFFFFF' }} />
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.65, margin: 0 }}>
                     FirstHomeBuyers provides general information only and does not constitute financial, legal or taxation advice.
                     All borrowing estimates and grant eligibility results are indicative only and may not reflect your actual
@@ -240,7 +242,7 @@ export function Footer() {
                     property or borrowing decisions.
                   </p>
                 </>
-              )}
+              )} */}
             </div>
           </div>
 
@@ -258,7 +260,7 @@ export function Footer() {
                 <circle cx="12" cy="8" r="2" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
               </svg>
             </div>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#555555', lineHeight: 1.6, margin: 0 }}>
               FirstNest acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
               throughout Australia and their continuing connection to land, waters and community.
             </p>
@@ -266,19 +268,20 @@ export function Footer() {
 
           {/* Bottom row: copyright + store badges + legal toggle */}
           <div className="flex flex-col md:flex-row items-center md:justify-between gap-6">
-            
+
             {/* Left/Center Group: Copyright + Stores + Socials */}
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-10">
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#555555', textAlign: 'center' }}>
                 © 2026 FirstHomeBuyers. All rights reserved.
               </span>
-              
+
               <div className="flex flex-wrap items-center justify-center gap-6">
                 {/* Store Buttons */}
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   {[
+                    // { label: 'Google Play', sublabel: 'Get it on', href: '#', icon: <GooglePlayIcon /> },
+                    { label: 'App Store', sublabel: 'Download on the', href: '#', icon: <AppleIcon /> },
                     { label: 'Google Play', sublabel: 'Get it on', href: '#', icon: <GooglePlayIcon /> },
-                    { label: 'App Store',   sublabel: 'Download on the', href: '#', icon: <AppleIcon /> },
                   ].map(({ label, sublabel, href, icon }) => (
                     <a
                       key={label}
@@ -289,27 +292,27 @@ export function Footer() {
                       style={{
                         display: 'inline-flex', alignItems: 'center', gap: 6,
                         padding: '4px 10px 4px 7px',
-                        background: 'rgba(255,255,255,0.08)',
-                        border: '1px solid rgba(255,255,255,0.14)',
+                        background: '#FFFFFF',
+                        border: '1px solid #EEEEEE',
                         borderRadius: 7,
                         textDecoration: 'none',
                         transition: 'background 150ms, border-color 150ms',
                       }}
                       onMouseEnter={e => {
-                        e.currentTarget.style.background = 'rgba(255,255,255,0.15)'
-                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.28)'
+                        e.currentTarget.style.background = '#F9F9F9'
+                        e.currentTarget.style.borderColor = '#EEEEEE'
                       }}
                       onMouseLeave={e => {
-                        e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
-                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'
+                        e.currentTarget.style.background = '#FFFFFF'
+                        e.currentTarget.style.borderColor = '#EEEEEE'
                       }}
                     >
                       <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>
                       <span style={{ lineHeight: 1 }}>
-                        <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.5rem', color: 'rgba(255,255,255,0.5)', fontWeight: 400, marginBottom: 1 }}>
+                        <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.5rem', color: '#555555', fontWeight: 400, marginBottom: 1 }}>
                           {sublabel}
                         </span>
-                        <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
+                        <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: '#111111', fontWeight: 600 }}>
                           {label}
                         </span>
                       </span>
@@ -320,10 +323,10 @@ export function Footer() {
                 {/* Social icons */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {[
-                    { label: 'Facebook',    href: '#', color: '#1877F2', svg: FACEBOOK_PATH },
-                    { label: 'YouTube',     href: '#', color: '#FF0000', svg: YOUTUBE_PATH },
+                    { label: 'Facebook', href: '#', color: '#1877F2', svg: FACEBOOK_PATH },
+                    { label: 'YouTube', href: '#', color: '#FF0000', svg: YOUTUBE_PATH },
                     { label: 'X (Twitter)', href: '#', color: '#000000', svg: X_PATH },
-                    { label: 'LinkedIn',    href: '#', color: '#0A66C2', svg: LINKEDIN_PATH },
+                    { label: 'LinkedIn', href: '#', color: '#0A66C2', svg: LINKEDIN_PATH },
                   ].map(({ label, href, color, svg }) => (
                     <a
                       key={label}
@@ -378,8 +381,8 @@ export function Footer() {
                     }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <rect width="20" height="16" x="2" y="4" rx="2"/>
-                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                      <rect width="20" height="16" x="2" y="4" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                     </svg>
                   </a>
                 </div>
@@ -394,12 +397,12 @@ export function Footer() {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 5,
                   fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', fontWeight: 500,
-                  color: 'rgba(255,255,255,0.45)',
+                  color: '#555555',
                   background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                   transition: 'color 150ms',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.75)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+                onMouseEnter={e => (e.currentTarget.style.color = '#111111')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#555555')}
               >
                 Legal
                 <ChevronDown
@@ -411,29 +414,32 @@ export function Footer() {
                 />
               </button>
             </div>
-            
+
           </div>
-     <div className="mt-4 -mb-8" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 20 }}>
+          <div className="mt-4 -mb-8" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 20 }}>
             <div style={{ display: 'flex', gap: 6, flexShrink: 0, paddingTop: 2 }}>
               <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
-                <rect width="24" height="8" fill="#111111"/>
-                <rect y="8" width="24" height="8" fill="#CC0000"/>
-                <circle cx="12" cy="8" r="3.5" fill="#FFCC00"/>
+                <rect width="24" height="8" fill="#111111" />
+                <rect y="8" width="24" height="8" fill="#CC0000" />
+                <circle cx="12" cy="8" r="3.5" fill="#FFCC00" />
               </svg>
               <svg width="22" height="14" viewBox="0 0 24 16" style={{ borderRadius: 3, overflow: 'hidden', opacity: 0.85 }}>
-                <rect width="24" height="16" fill="#006341"/>
-                <rect y="4" width="24" height="1.5" fill="#FFFFFF"/>
-                <rect y="10.5" width="24" height="1.5" fill="#FFFFFF"/>
-                <circle cx="12" cy="8" r="2" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
+                <rect width="24" height="4" fill="#006341" />
+                <rect y="4" width="24" height="1" fill="#000000" />
+                <rect y="5" width="24" height="6" fill="#002366" />
+                <rect y="11" width="24" height="1" fill="#000000" />
+                <rect y="12" width="24" height="4" fill="#006341" />
+                <path d="M 12 5.8 L 10.5 4.8 C 4.5 4.8, 3.5 8.5, 4.5 11.2 L 8.5 10 L 8.5 8.5 C 8.5 7.1, 10 6.3, 12 6.3 C 14 6.3, 15.5 7.1, 15.5 8.5 L 15.5 10 L 19.5 11.2 C 20.5 8.5, 19.5 4.8, 13.5 4.8 Z" fill="#FFFFFF" />
+                <path d="M 12 7.0 L 12.4 8.0 L 13.4 8.0 L 12.7 8.6 L 12.9 9.6 L 12 9.0 L 11.1 9.6 L 11.3 8.6 L 10.6 8.0 L 11.6 8.0 Z" fill="#FFFFFF" />
               </svg>
             </div>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#555555', lineHeight: 1.6, margin: 0 }}>
               FirstHomeBuyers acknowledges Aboriginal and Torres Strait Islanders as the traditional custodians of country
               throughout Australia and their continuing connection to land, waters and community.
             </p>
           </div>
 
-      
+
           {/* <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
               <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
@@ -469,7 +475,7 @@ export function Footer() {
                 >
                   <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>
                   <span style={{ lineHeight: 1 }}>
-                    <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.5rem', color: 'rgba(255,255,255,0.5)', fontWeight: 400, marginBottom: 1 }}>
+                    <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.5rem', color: '#555555', fontWeight: 400, marginBottom: 1 }}>
                       {sublabel}
                     </span>
                     <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
@@ -553,7 +559,7 @@ export function Footer() {
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
                 fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', fontWeight: 500,
-                color: 'rgba(255,255,255,0.45)',
+                color: '#555555',
                 background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                 transition: 'color 150ms',
               }}
