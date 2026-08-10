@@ -11,13 +11,16 @@ import {
   type Answers,
 } from '@/lib/questionnaire/types'
 import {
-  validateStart, validateProperty, validateAbout, validateHistory, validateIncome,
+  validateFast, validateProperty, validateAbout, validateHistory, validateIncome,
   hardStop, type Errors, type HardStop,
   isJoint, showMoveIn, showCoCitizenship, showCoDob, showPartnerOwned, showNsw, showVicLivedIn, showVic, showCoIncome,
 } from '@/lib/questionnaire/logic'
 import { loadAnswers, saveAnswers, saveStepProgress } from '@/lib/questionnaire/storage'
 import { Q, Chips, Segmented, Rows, Duo, Currency, Cond, LocationCombobox } from './controls'
 import { Results } from './Results'
+import { LiveEligibilityPanel, ProvisionalBoard } from './LiveEligibilityPanel'
+import { ConversationalFill } from './ConversationalFill'
+import type { ExtractedFields } from '@/lib/ai/extractSanitize'
 
 const YES_NO = [{ value: 'Yes' as const, label: 'Yes' }, { value: 'No' as const, label: 'No' }]
 const ALL_STATES = ['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'ACT', 'NT']
@@ -27,17 +30,20 @@ const PROP_CHIPS = PROPERTY_TYPE_OPTIONS.map((v) => ({ value: v, label: v }))
 const ENTITY_CHIPS = PURCHASE_ENTITY_OPTIONS.map((v) => ({ value: v, label: v }))
 const FV_CHIPS = FAMILY_VIOLENCE_OPTIONS.map((v) => ({ value: v, label: v }))
 const BUYING = [
-  { value: 'Individually' as const, emoji: '🧍', label: 'Just me', desc: 'Buying on my own' },
-  { value: 'Jointly' as const, emoji: '👥', label: 'With a partner', desc: 'A partner or co-buyer' },
+  { value: 'Individually' as const, emoji: '', label: 'Just me', desc: 'Buying on my own' },
+  { value: 'Jointly' as const, emoji: '', label: 'With a partner', desc: 'A partner or co-buyer' },
 ]
 
-const VALIDATORS = { start: validateStart, property: validateProperty, about: validateAbout, history: validateHistory, income: validateIncome } as const
+const VALIDATORS = { fast: validateFast, property: validateProperty, about: validateAbout, history: validateHistory, income: validateIncome } as const
 
 export function QuestionnaireFlow() {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [idx, setIdx] = useState(0)
   const [showResults, setShowResults] = useState(false)
+  // Fast-path teaser: shown once after the first step's three answers, with
+  // the provisional board and the choice to refine or jump straight out.
+  const [teaser, setTeaser] = useState(false)
   const [a, setA] = useState<Answers>(EMPTY_ANSWERS)
   const [errors, setErrors] = useState<Errors>({})
   const [stop, setStop] = useState<HardStop | null>(null)
@@ -63,13 +69,34 @@ export function QuestionnaireFlow() {
     if (Object.keys(errs).length) { setErrors(errs); return }
     if (stepId === 'about') { const hs = hardStop(a); if (hs) { setStop(hs); return } }
     setErrors({})
+    // Fast path complete → provisional board first, refinement is opt-in.
+    if (stepId === 'fast') { setTeaser(true); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     if (idx === total - 1) { router.push('/results/grants'); return }
     setIdx((i) => i + 1)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const refine = () => { setTeaser(false); setIdx(1); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+
+  // Merge AI-extracted fields into the answers. Already-sanitized upstream;
+  // the one extra rule mirrors the state chip handler: a state change without
+  // a resolved suburb clears the old suburb rather than leaving a mismatch.
+  const applyExtracted = (fields: ExtractedFields) => {
+    setA((prev) => {
+      const next: Answers = { ...prev, ...fields }
+      if (fields.state && fields.state !== prev.state && !fields.suburb && !fields.postcode) {
+        next.suburb = ''
+        next.postcode = ''
+      }
+      saveAnswers(next)
+      return next
+    })
+    setErrors({})
+  }
+
   const goBack = () => {
     if (showResults) { setShowResults(false); return }
+    if (teaser) { setTeaser(false); return }
     setErrors({})
     if (idx === 0) { router.push('/'); return }
     setIdx((i) => i - 1)
@@ -100,7 +127,7 @@ export function QuestionnaireFlow() {
         <div className="fhbq-main">
           {/* MOBILE HEADER (hidden on desktop) */}
           <div className="fhbq-mobile-header">
-            {!showResults && !stop && (
+            {!showResults && !stop && !teaser && (
               <div>
                 <div className="fhbq-plabels">
                   <span>Step {idx + 1} of {total}</span>
@@ -115,10 +142,31 @@ export function QuestionnaireFlow() {
             <div className="fhbq-card">
               <StopScreen stop={stop} onSole={stop.allowSole ? continueAsSole : undefined} onBack={() => setStop(null)} onHome={() => router.push('/')} />
             </div>
+          ) : teaser ? (
+            <motion.div className="fhbq-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: 'easeOut' }}>
+              <div className="fhbq-eyebrow">Instant estimate</div>
+              <h1 className="fhbq-title">Here&rsquo;s where you stand</h1>
+              <p className="fhbq-sub">
+                Based on just three answers — {a.state}, a ${(a.price ?? 0).toLocaleString('en-AU')} property,
+                and your ownership history. Refining takes about two more minutes.
+              </p>
+              <ProvisionalBoard a={a} />
+              <div className="fhbq-nav" style={{ marginTop: 18 }}>
+                <button className="fhbq-btn ghost" onClick={() => router.push('/results/grants')}>
+                  Skip — see full results
+                </button>
+                <button className="fhbq-btn primary" onClick={refine}>
+                  Refine my results <ArrowRight size={15} />
+                </button>
+              </div>
+              <button className="fhbq-teaser-back" onClick={goBack}>
+                <ArrowLeft size={13} /> Change my three answers
+              </button>
+            </motion.div>
           ) : showResults ? (
             <div className="fhbq-card">
               <div className="fhbq-eyebrow">All done</div>
-              <h1 className="fhbq-title">Nice work, {a.name || 'there'} 🎉</h1>
+              <h1 className="fhbq-title">Nice work, {a.name || 'there'}</h1>
               <p className="fhbq-sub">Here’s what you may be eligible for, based on your answers.</p>
               <Results a={a} />
               <div className="fhbq-nav">
@@ -133,11 +181,9 @@ export function QuestionnaireFlow() {
                 <h1 className="fhbq-title">{meta.title}</h1>
                 <p className="fhbq-sub">{meta.sub}</p>
 
-                {stepId === 'start' && (
+                {stepId === 'fast' && (
                   <>
-                    <Q label="What’s your name?" help="Your name is used to personalise your results and is not shared with any government agency." error={errors.name}>
-                      <input className={`fhbq-input${errors.name ? ' invalid' : ''}`} placeholder="e.g. Sarah" value={a.name} onChange={(e) => set('name', e.target.value)} />
-                    </Q>
+                    <ConversationalFill onApply={applyExtracted} />
                     <Q label="Which state or territory are you buying in?" help="Grants, concessions, and property price caps vary significantly depending on the state or territory where you intend to buy." error={errors.state}>
                       <Chips options={STATE_CHIPS} value={a.state} onChange={(v) => {
                         const nextState = v as Answers['state'];
@@ -153,6 +199,12 @@ export function QuestionnaireFlow() {
                         }
                       }} disabled={(v) => !SUPPORTED_STATE_CHIPS.includes(v)} />
                     </Q>
+                    <Q label="What’s your target purchase price?" help="An estimate is fine — every scheme has price caps, so this decides more of your eligibility than any other answer. You can adjust it any time." error={errors.price}>
+                      <Currency value={a.price} onChange={(v) => set('price', v)} placeholder="650,000" invalid={!!errors.price} />
+                    </Q>
+                    <Q label="Have you ever owned residential property in Australia?" help="First-home buyer schemes generally require that you haven’t owned before, though some exceptions exist." error={errors.everOwned}>
+                      <Segmented options={YES_NO} value={a.everOwned} onChange={(v) => set('everOwned', v)} />
+                    </Q>
                   </>
                 )}
 
@@ -161,7 +213,9 @@ export function QuestionnaireFlow() {
                     <Q label="What type of property are you planning to buy?" help="Certain grants, such as the First Home Owner Grant, are strictly limited to new builds or substantial renovations." error={errors.propertyType}>
                       <Chips options={PROP_CHIPS} value={a.propertyType} onChange={(v) => set('propertyType', v)} />
                     </Q>
-                    {a.propertyType === 'Land + Build' ? (
+                    {/* The single target price was asked on the fast-path step;
+                        only the Land + Build split is collected here. */}
+                    {a.propertyType === 'Land + Build' && (
                       <>
                         <Q label="What is the purchase price of the vacant land?" help="Stamp duty is calculated on the land value when building a new home." error={errors.landPrice}>
                           <Currency value={a.landPrice} onChange={(v) => set('landPrice', v)} placeholder="300,000" invalid={!!errors.landPrice} />
@@ -170,10 +224,6 @@ export function QuestionnaireFlow() {
                           <Currency value={a.buildPrice} onChange={(v) => set('buildPrice', v)} placeholder="400,000" invalid={!!errors.buildPrice} />
                         </Q>
                       </>
-                    ) : (
-                      <Q label="What is the target purchase price of the property?" help="Every scheme has strict property price caps. If your purchase price exceeds these limits, you will not be eligible for that specific scheme." error={errors.price}>
-                        <Currency value={a.price} onChange={(v) => set('price', v)} placeholder="650,000" invalid={!!errors.price} />
-                      </Q>
                     )}
                     <Q label="Where is the property located?" help="Some grants are only available for properties in specific postcodes or regional areas." error={errors.postcode}>
                       <LocationCombobox suburb={a.suburb} postcode={a.postcode} stateFilter={a.state}
@@ -203,7 +253,7 @@ export function QuestionnaireFlow() {
                     </Cond>
                     <Cond open={showNsw(a)}>
                       <div className="fhbq-block state">
-                        <span className="fhbq-tag state">🏠 NSW-specific</span>
+                        <span className="fhbq-tag state">NSW-specific</span>
                         <Q label="Is this a new home that has never been previously occupied or sold as a place of residence?" help="The NSW First Home Owner Grant is only available for new homes meeting this condition." error={errors.nswNeverOccupied}>
                           <Segmented options={YES_NO} value={a.nswNeverOccupied} onChange={(v) => set('nswNeverOccupied', v)} />
                         </Q>
@@ -214,6 +264,9 @@ export function QuestionnaireFlow() {
 
                 {stepId === 'about' && (
                   <>
+                    <Q label="What’s your name?" help="Your name is used to personalise your results and is not shared with any government agency." error={errors.name}>
+                      <input className={`fhbq-input${errors.name ? ' invalid' : ''}`} placeholder="e.g. Sarah" value={a.name} onChange={(e) => set('name', e.target.value)} />
+                    </Q>
                     <Q label="Are you 18 years of age or older?" help="Confirms you meet the minimum legal age to purchase property or apply for a grant." error={errors.is18}>
                       <Segmented options={YES_NO} value={a.is18} onChange={(v) => set('is18', v)} />
                     </Q>
@@ -243,7 +296,7 @@ export function QuestionnaireFlow() {
                     </Cond>
                     <Cond open={isJoint(a)}>
                       <div className="fhbq-block co">
-                        <span className="fhbq-tag co">👥 Co-buyer details</span>
+                        <span className="fhbq-tag co">Co-buyer details</span>
                         {showCoCitizenship(a) && (
                           <Q label="Your co-buyer’s citizenship or residency status" help="Both applicants must generally satisfy the residency requirements for most government schemes." error={errors.coCitizenship}>
                             <Rows options={CITIZENSHIP_OPTIONS} value={a.coCitizenship} onChange={(v) => set('coCitizenship', v)} />
@@ -264,17 +317,16 @@ export function QuestionnaireFlow() {
 
                 {stepId === 'history' && (
                   <>
-                    <Q label="Have you ever owned residential property in Australia?" help="You must not have previously owned a residential property in Australia, though some exceptions exist if you have experienced family violence." error={errors.everOwned}>
-                      <Segmented options={YES_NO} value={a.everOwned} onChange={(v) => set('everOwned', v)} />
-                      <Cond open={showVicLivedIn(a)}>
-                        <div className="fhbq-block state">
-                          <span className="fhbq-tag state">🏠 VIC-specific</span>
-                          <Q label="Did you ever live in that property as your Principal Place of Residence?" help="VIC eligibility considers prior occupancy history, not ownership alone." error={errors.vicLivedInPrior}>
-                            <Segmented options={YES_NO} value={a.vicLivedInPrior} onChange={(v) => set('vicLivedInPrior', v)} />
-                          </Q>
-                        </div>
-                      </Cond>
-                    </Q>
+                    {/* Prior ownership itself was asked on the fast-path step;
+                        only VIC's occupancy follow-up remains here. */}
+                    <Cond open={showVicLivedIn(a)}>
+                      <div className="fhbq-block state">
+                        <span className="fhbq-tag state">VIC-specific</span>
+                        <Q label="You said you’ve owned property before — did you ever live in it as your Principal Place of Residence?" help="VIC eligibility considers prior occupancy history, not ownership alone." error={errors.vicLivedInPrior}>
+                          <Segmented options={YES_NO} value={a.vicLivedInPrior} onChange={(v) => set('vicLivedInPrior', v)} />
+                        </Q>
+                      </div>
+                    </Cond>
                     <Q label="Do you currently have a spouse or domestic partner?" help="Your partner's ownership history can affect your eligibility for grants or duty concessions." error={errors.hasPartner}>
                       <Segmented options={YES_NO} value={a.hasPartner} onChange={(v) => set('hasPartner', v)} />
                     </Q>
@@ -288,7 +340,7 @@ export function QuestionnaireFlow() {
                     </Q>
                     {showVic(a) && (
                       <div className="fhbq-block state" style={{ marginTop: 4 }}>
-                        <span className="fhbq-tag state">🏠 VIC-specific</span>
+                        <span className="fhbq-tag state">VIC-specific</span>
                         <Q label="Are you currently serving in the Australian Defence Force (ADF)?" help="ADF members may qualify for exemptions from certain VIC residency requirements." error={errors.vicAdf}>
                           <Segmented options={YES_NO} value={a.vicAdf} onChange={(v) => set('vicAdf', v)} />
                         </Q>
@@ -307,7 +359,7 @@ export function QuestionnaireFlow() {
                     </Q>
                     <Cond open={showCoIncome(a)}>
                       <div className="fhbq-block co">
-                        <span className="fhbq-tag co">👥 Co-buyer income</span>
+                        <span className="fhbq-tag co">Co-buyer income</span>
                         <Q label="What is your co-buyer's annual taxable income (before tax)?" help="For joint applications, your combined taxable income is assessed against couple thresholds for most government schemes." error={errors.coIncome}>
                           <Currency value={a.coIncome} onChange={(v) => set('coIncome', v)} placeholder="75,000" invalid={!!errors.coIncome} />
                         </Q>
@@ -331,8 +383,12 @@ export function QuestionnaireFlow() {
           )}
         </div>
 
-        {/* CONTEXTUAL SIDE PANEL (desktop only) */}
-        {!stop && <ContextualSidePanel stepId={stepId} showResults={showResults} a={a} />}
+        {/* SIDE PANEL (desktop only) — live eligibility once a state is chosen,
+            static contextual copy before that and on the results screen. Hidden
+            on the teaser screen, whose inline board would duplicate it. */}
+        {!stop && !teaser && (!showResults && a.state
+          ? <LiveEligibilityPanel a={a} />
+          : <ContextualSidePanel stepId={stepId} showResults={showResults} a={a} />)}
       </div>
     </div>
   )
@@ -381,7 +437,7 @@ function ContextualSidePanel({ stepId, showResults, a }: { stepId: string, showR
     )
   }
 
-  if (stepId === 'start') {
+  if (stepId === 'fast') {
     return (
       <div className="fhbq-side">
         <div className="fhbq-side-card">

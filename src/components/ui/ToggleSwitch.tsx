@@ -22,8 +22,10 @@ export function ToggleSwitch({ checked, onCheckedChange, label, id }: ToggleSwit
         onCheckedChange={onCheckedChange}
         className={[
           'relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent',
-          'transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-hover focus-visible:ring-offset-2',
-          checked ? 'bg-primary' : 'bg-input',
+          'transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12141C] dark:focus-visible:ring-[#C9A876] focus-visible:ring-offset-2',
+          // "On" fill matches the primary button's ink/brass flip — a toggle's
+          // checked state is a selection, same family as chip/segment selection.
+          checked ? 'bg-[#12141C] dark:bg-[#C9A876]' : 'bg-input',
         ].join(' ')}
       >
         <Switch.Thumb

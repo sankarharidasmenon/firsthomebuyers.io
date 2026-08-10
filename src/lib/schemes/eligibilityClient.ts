@@ -42,12 +42,28 @@ export type DisplayCategory = 'cash' | 'schemes' | 'tax'
 
 export type RuleResult = { met: boolean; text: string; missing?: boolean; isCheck?: boolean }
 
+/**
+ * A near miss: the applicant fails this scheme today, but ONE realistic change
+ * — a lower purchase price, a different property category, a bigger deposit —
+ * would flip the verdict. Verified by counterfactual re-evaluation, never by
+ * pattern-matching reason text.
+ */
+export interface NearMiss {
+  kind: 'price' | 'category' | 'deposit'
+  /** Full sentence for result cards ("You're $150,000 over the… cap"). */
+  message: string
+  /** Compact tag for tight UI ("$150k over cap"). */
+  shortLabel: string
+}
+
 export interface EligibilityItem {
   eg: EvaluatedGrant
   category: DisplayCategory
   variant: 'grant' | 'scheme'
   bucket: 'yes' | 'check' | 'no'
   ruleResults: RuleResult[]
+  /** Present only when bucket is 'no' and a single change would rescue it. */
+  nearMiss?: NearMiss
 }
 
 export interface EligibilityResult {
@@ -107,13 +123,34 @@ function deriveCategory(type: string): DisplayCategory {
 }
 
 /**
+ * The price cap that applies to this applicant, resolved exactly as rule 4
+ * resolves it — one code path, shared by the rule and the near-miss
+ * counterfactual so the two can never disagree.
+ */
+function resolveApplicantPriceCaps(s: ApiScheme, a: EligibilityAnswers) {
+  const ra = a.rawAnswers || {}
+  const purchaseCap = resolvePurchaseCap(s.price_cap_variations, ra.propertyType)
+  const regionCap = purchaseCap ? null : resolveRegionCap(s.price_cap_variations, a.state, a.propertyRegion)
+  const stateCaps = purchaseCap || regionCap ? [] : resolveStateCaps(s.price_cap_variations, a.state)
+  const priceCap = purchaseCap ? purchaseCap.amount
+    : regionCap ? regionCap.amount
+    : stateCaps.length > 0 ? stateCaps[0].amount
+    : parseMoney(s.property_price_cap)
+  const lowestCap = stateCaps.length > 0 ? stateCaps[stateCaps.length - 1].amount : priceCap
+  return { purchaseCap, stateCaps, priceCap, lowestCap, exclusive: capIsExclusive(s) }
+}
+
+/**
  * The 16 eligibility rules, applied to one scheme row.
  *
  * Bucket semantics: every scheme starts at `yes`; a `fail` is sticky and can
  * never be undone, a `check` only downgrades `yes`. Rule 1 is the sole short
  * circuit — the rest keep running so the UI can render every reason.
+ *
+ * `opts.counterfactual` marks a hypothetical re-run (near-miss probing) so
+ * debug instrumentation only records the applicant's real evaluation.
  */
-export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: 'yes' | 'check' | 'no', ruleResults: RuleResult[] } {
+export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers, opts?: { counterfactual?: boolean }): { bucket: 'yes' | 'check' | 'no', ruleResults: RuleResult[] } {
   const rules: RuleResult[] = []
   let bucket: 'yes' | 'check' | 'no' = 'yes'
   const ra = a.rawAnswers || {}
@@ -219,35 +256,27 @@ export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: '
   // higher figure for the capital city and listed regional centres), then the
   // single national column. Between a state's two caps the answer depends on the
   // suburb, which the questionnaire doesn't pin down, so that band is a "check".
-  const purchaseCap = resolvePurchaseCap(s.price_cap_variations, ra.propertyType)
   // When the suburb's region is known the applicable cap is no longer ambiguous,
   // so the two-cap "confirm your suburb" band collapses to a single figure.
   // Unclassified suburbs return null here and behave exactly as before.
-  const regionCap = purchaseCap ? null : resolveRegionCap(s.price_cap_variations, a.state, a.propertyRegion)
-  const stateCaps = purchaseCap || regionCap ? [] : resolveStateCaps(s.price_cap_variations, a.state)
-  const priceCap = purchaseCap ? purchaseCap.amount
-    : regionCap ? regionCap.amount
-    : stateCaps.length > 0 ? stateCaps[0].amount
-    : parseMoney(s.property_price_cap)
-  const lowestCap = stateCaps.length > 0 ? stateCaps[stateCaps.length - 1].amount : priceCap
   // Most caps are inclusive ("must not exceed", "up to"). The Queensland FHOG is
   // exclusive ("less than $750,000"), so exactly the cap does not qualify.
-  const exclusive = capIsExclusive(s)
+  const { purchaseCap, stateCaps, priceCap, lowestCap, exclusive } = resolveApplicantPriceCaps(s, a)
   const within = (value: number, cap: number) => (exclusive ? value < cap : value <= cap)
   if (priceCap !== null && a.propertyPrice > 0) {
-    const price = `$${a.propertyPrice.toLocaleString()}`
+    const price = `$${a.propertyPrice.toLocaleString('en-AU')}`
     if (lowestCap !== null && within(a.propertyPrice, lowestCap)) {
       pass(`Purchase price (${price}) is within the ${a.state} price cap.`)
     } else if (within(a.propertyPrice, priceCap)) {
       const region = stateCaps[0].label || `${a.state} capital city and regional centres`
-      check(`Purchase price (${price}) is within the $${priceCap.toLocaleString()} cap for ${region}, but above the $${lowestCap!.toLocaleString()} cap that applies elsewhere in ${a.state} — confirm the cap for your suburb.`)
+      check(`Purchase price (${price}) is within the $${priceCap.toLocaleString('en-AU')} cap for ${region}, but above the $${lowestCap!.toLocaleString('en-AU')} cap that applies elsewhere in ${a.state} — confirm the cap for your suburb.`)
     } else {
       const capFor = purchaseCap?.label ? ` for ${purchaseCap.label}` : ''
-      const limit = exclusive ? `must be less than $${priceCap.toLocaleString()}` : `of $${priceCap.toLocaleString()}`
+      const limit = exclusive ? `must be less than $${priceCap.toLocaleString('en-AU')}` : `of $${priceCap.toLocaleString('en-AU')}`
       fail(`Purchase price (${price}) exceeds the ${a.state} price cap ${limit}${capFor}`)
     }
   } else if (priceCap !== null) {
-    check(`Purchase price not provided, cap is $${priceCap.toLocaleString()}`)
+    check(`Purchase price not provided, cap is $${priceCap.toLocaleString('en-AU')}`)
   } else {
     pass(`No property price cap applied`)
   }
@@ -364,7 +393,7 @@ export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: '
   const incomeCap = parseMoney(a.hasPartner ? s.income_cap_couple : s.income_cap_single)
   if (incomeCap !== null) {
     if (a.income > 0) {
-      if (a.income <= incomeCap) pass(`Combined income ($${a.income.toLocaleString()}) within $${incomeCap.toLocaleString()} threshold`)
+      if (a.income <= incomeCap) pass(`Combined income ($${a.income.toLocaleString('en-AU')}) within $${incomeCap.toLocaleString('en-AU')} threshold`)
       else {
         // Some schemes extend the higher cap to a SINGLE applicant with dependent
         // children — Queensland's Boost to Buy does. The questionnaire never asks
@@ -374,13 +403,13 @@ export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: '
           ? parseMoney(s.income_cap_couple)
           : null
         if (higherCap !== null && a.income <= higherCap) {
-          check(`Income ($${a.income.toLocaleString()}) exceeds the $${incomeCap.toLocaleString()} single threshold but is within the $${higherCap.toLocaleString()} threshold that applies to a single applicant with dependent children — the questionnaire does not ask about dependants, so this needs verification`)
+          check(`Income ($${a.income.toLocaleString('en-AU')}) exceeds the $${incomeCap.toLocaleString('en-AU')} single threshold but is within the $${higherCap.toLocaleString('en-AU')} threshold that applies to a single applicant with dependent children — the questionnaire does not ask about dependants, so this needs verification`)
         } else {
-          fail(`Combined income ($${a.income.toLocaleString()}) exceeds $${incomeCap.toLocaleString()} threshold`)
+          fail(`Combined income ($${a.income.toLocaleString('en-AU')}) exceeds $${incomeCap.toLocaleString('en-AU')} threshold`)
         }
       }
     } else {
-      check(`Income not provided, threshold is $${incomeCap.toLocaleString()}`)
+      check(`Income not provided, threshold is $${incomeCap.toLocaleString('en-AU')}`)
     }
   } else {
     pass(`No income threshold applies`)
@@ -462,7 +491,7 @@ export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: '
     fail(`The home has been previously occupied or sold as a residence, so it is not a new home for ${s.scheme_name}`)
   }
 
-  if (s.scheme_id === 'fed-first-home-guarantee') {
+  if (s.scheme_id === 'fed-first-home-guarantee' && !opts?.counterfactual) {
     const debugState = globalThis as typeof globalThis & { __firstnestDebug?: { fhbg?: FhbgRuntimeDebug } }
     debugState.__firstnestDebug = debugState.__firstnestDebug || {}
     debugState.__firstnestDebug.fhbg = {
@@ -477,6 +506,79 @@ export function evaluateScheme(s: ApiScheme, a: EligibilityAnswers): { bucket: '
   }
 
   return { bucket, ruleResults: rules }
+}
+
+function compactMoney(n: number): string {
+  return n >= 1000 ? `$${Math.round(n / 1000)}k` : `$${n}`
+}
+
+/**
+ * Near-miss detection by counterfactual re-evaluation.
+ *
+ * For an ineligible scheme, re-run the SAME engine with exactly one answer
+ * changed. Only if that single change alone lifts the scheme out of 'no' is a
+ * suggestion made — so "you'd qualify if…" is always literally true, and a
+ * scheme sunk by a second, immovable failure (prior ownership, citizenship,
+ * wrong state) never produces one. Deliberately limited to the decisions a
+ * buyer can still realistically revisit at this stage: price, new-vs-
+ * established, and deposit size.
+ */
+function computeNearMiss(s: ApiScheme, a: EligibilityAnswers): NearMiss | null {
+  const ra = a.rawAnswers || {}
+  const rescues = (cf: EligibilityAnswers) => evaluateScheme(s, cf, { counterfactual: true }).bucket !== 'no'
+  const grantValue = parseMoney(s.benefit_value)
+  const worth = grantValue ? ` (worth $${grantValue.toLocaleString('en-AU')})` : ''
+
+  // 1. Price: would buying at the cap, alone, rescue it?
+  const { priceCap, exclusive } = resolveApplicantPriceCaps(s, a)
+  if (priceCap !== null && a.propertyPrice > 0) {
+    const within = exclusive ? a.propertyPrice < priceCap : a.propertyPrice <= priceCap
+    const over = a.propertyPrice - priceCap
+    if (!within && over > 0 && rescues({ ...a, propertyPrice: exclusive ? priceCap - 1 : priceCap })) {
+      return {
+        kind: 'price',
+        message: `You're $${over.toLocaleString('en-AU')} over the $${priceCap.toLocaleString('en-AU')} price cap — at or below the cap you would qualify${worth}.`,
+        shortLabel: `${compactMoney(over)} over cap`,
+      }
+    }
+  }
+
+  // 2. Property category: new ↔ established swap.
+  if (a.propertyCategory === 'established' || a.propertyCategory === 'new') {
+    const target = a.propertyCategory === 'established' ? 'new' : 'established'
+    const cf: EligibilityAnswers = {
+      ...a,
+      propertyCategory: target,
+      rawAnswers: { ...ra, propertyType: target === 'new' ? 'New' : 'Established (Existing)' },
+    }
+    if (rescues(cf)) {
+      return {
+        kind: 'category',
+        message: target === 'new'
+          ? `This is for new homes — if you bought or built new instead of an established home, you would qualify${worth}.`
+          : `This is for established homes — it would apply if you bought established instead of new${worth}.`,
+        shortLabel: target === 'new' ? 'if buying new' : 'if established',
+      }
+    }
+  }
+
+  // 3. Deposit: would topping up to the scheme's minimum rescue it?
+  if (s.minimum_deposit && a.deposit !== null && a.propertyPrice > 0) {
+    const requiredPct = parseFloat(String(s.minimum_deposit).replace('%', ''))
+    if (Number.isFinite(requiredPct) && requiredPct > 0) {
+      const needed = Math.ceil((a.propertyPrice * requiredPct) / 100)
+      const shortfall = needed - a.deposit
+      if (shortfall > 0 && rescues({ ...a, deposit: needed })) {
+        return {
+          kind: 'deposit',
+          message: `You're $${shortfall.toLocaleString('en-AU')} short of the ${s.minimum_deposit} minimum deposit ($${needed.toLocaleString('en-AU')} on this price) — saving that extra would qualify you${worth}.`,
+          shortLabel: `${compactMoney(shortfall)} more deposit`,
+        }
+      }
+    }
+  }
+
+  return null
 }
 
 /** Build the display item for one scheme. Status comes straight from the rules. */
@@ -500,6 +602,7 @@ function toItem(s: ApiScheme, a: EligibilityAnswers): EligibilityItem {
 
   const { bucket, ruleResults } = evaluateScheme(s, a)
   const status: EligibilityStatus = bucket === 'yes' ? 'eligible' : bucket === 'check' ? 'check' : 'ineligible'
+  const nearMiss = bucket === 'no' ? computeNearMiss(s, a) : null
 
   const eg: EvaluatedGrant = {
     grant,
@@ -507,8 +610,10 @@ function toItem(s: ApiScheme, a: EligibilityAnswers): EligibilityItem {
     value,
     criteria: ruleResults,
     reason: bucket === 'no' ? 'Does not meet mandatory criteria' : undefined,
+    // GrantCard already renders `alternative` as the lemon 💡 block.
+    alternative: nearMiss ? `Near miss: ${nearMiss.message}` : undefined,
   }
-  return { eg, category, variant, bucket, ruleResults }
+  return { eg, category, variant, bucket, ruleResults, nearMiss: nearMiss ?? undefined }
 }
 
 /**

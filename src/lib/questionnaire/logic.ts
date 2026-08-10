@@ -49,9 +49,11 @@ export type Errors = Partial<Record<keyof Answers, string>>
 const SUPPORTED_STATES = new Set(['NSW', 'VIC', 'QLD', 'SA', 'ACT', 'WA', 'TAS', 'NT'])
 
 // Step 1 — Getting started (name + state)
-export function validateStart(a: Answers): Errors {
+// Step 1 — the fast path. State, price and prior ownership decide most of an
+// applicant's eligibility, so they are asked first and everything else becomes
+// refinement. Name is deliberately NOT here — it adds nothing to the estimate.
+export function validateFast(a: Answers): Errors {
   const e: Errors = {}
-  if (!a.name.trim()) e.name = 'Enter your name to continue.'
   // The message lists the set rather than hard-coding two states, so it stops
   // going stale each time a state is added (it still said "NSW or VIC" after
   // QLD went live).
@@ -59,6 +61,8 @@ export function validateStart(a: Answers): Errors {
     const list = [...SUPPORTED_STATES]
     e.state = `Choose ${list.slice(0, -1).join(', ')} or ${list[list.length - 1]} to continue.`
   }
+  if (a.price == null || a.price <= 0) e.price = 'Enter your target price — an estimate is fine.'
+  if (!a.everOwned) e.everOwned = 'This is required to continue.'
   return e
 }
 
@@ -82,9 +86,10 @@ export function validateProperty(a: Answers): Errors {
   return e
 }
 
-// Step 3 — About you (age, buying structure, citizenship + co-buyer, entity)
+// Step 3 — About you (name, age, buying structure, citizenship + co-buyer, entity)
 export function validateAbout(a: Answers): Errors {
   const e: Errors = {}
+  if (!a.name.trim()) e.name = 'Enter your name to continue.'
   if (!a.is18) e.is18 = 'This is required to continue.'
   if (!a.buyingWith) e.buyingWith = 'Are you buying alone or with someone?'
   if (!a.citizenship) e.citizenship = 'Select your citizenship or residency status.'
@@ -240,7 +245,7 @@ export function toLegacySteps(a: Answers) {
     step1: { firstName: a.name.trim(), state: (a.state || 'VIC') as StateCode, buyingWith: partner ? ('partner' as const) : ('solo' as const) },
     step2: { annualIncome: a.income ?? 0, partnerIncome: isJoint(a) ? a.coIncome ?? 0 : 0, monthlyExpenses: 0 },
     step3: {
-      depositAmount: 0,
+      depositAmount: a.deposit ?? 0,
       targetPropertyPrice: a.propertyType === 'Land + Build' ? (a.landPrice || 0) + (a.buildPrice || 0) : (a.price ?? 0),
       propertyType: (a.propertyType ? PROPERTY_TYPE_MAP[a.propertyType] : 'house') as 'house' | 'townhouse' | 'apartment' | 'offplan',
       firstHomeBuyer: isFirstHomeBuyer(a),

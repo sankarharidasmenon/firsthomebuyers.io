@@ -10,7 +10,8 @@ import { DUMMY_USER } from '@/lib/dummyData'
 import {
   Phone, MessageSquare, CalendarDays, Home,
   Bookmark, Share2, FileDown, ArrowRight,
-  CheckCircle2, Check, Loader2, Mail
+  CheckCircle2, Check, Loader2, Mail,
+  Wallet, AlertTriangle, Construction,
 } from 'lucide-react'
 
 type ContactMode = null | 'callback' | 'message' | 'book'
@@ -156,9 +157,9 @@ export default function NextStepsPage() {
   const HeroHeading = () => (
     <div>
       {/* Compact badge */}
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 9999, padding: '4px 10px', marginBottom: 10 }}>
-        <CheckCircle2 size={11} color="var(--success-foreground)" />
-        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.625rem', letterSpacing: '0.04em', color: 'var(--success-foreground)' }}>
+      <div className="text-[#00786B] dark:text-[#3DDBBF]" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(0,194,168,0.1)', border: '1px solid rgba(0,194,168,0.3)', borderRadius: 9999, padding: '4px 10px', marginBottom: 10 }}>
+        <CheckCircle2 size={11} />
+        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.625rem', letterSpacing: '0.04em' }}>
           Your results are ready
         </span>
       </div>
@@ -197,8 +198,8 @@ export default function NextStepsPage() {
     <div className="lg:hidden" style={{ ...card, overflow: 'hidden' }}>
       {/* 1. Homes You Could Afford */}
       <div className="p-5 border-b border-border bg-card">
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
-          🏡 Homes You Could Afford
+        <p className="flex items-center gap-1.5" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
+          <Home size={15} className="text-muted-foreground" /> Homes You Could Afford
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: hasBorrowingPower ? 'clamp(1.5rem, 5vw, 1.875rem)' : '1.25rem', color: 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {hasBorrowingPower ? `$${(minPrice / 1000).toFixed(0)}k – $${(maxPrice / 1000).toFixed(0)}k` : 'Building capacity...'}
@@ -209,10 +210,10 @@ export default function NextStepsPage() {
       </div>
       {/* 2. Government Support */}
       <div className="p-5 border-b border-border" style={{ background: 'var(--surface)' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
-          💰 Government Support
+        <p className="flex items-center gap-1.5" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
+          <Wallet size={15} className="text-muted-foreground" /> Government Support
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: 'var(--success-foreground)', lineHeight: 1.1, marginBottom: 4 }}>
+        <p className="text-[#00786B] dark:text-[#3DDBBF]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', lineHeight: 1.1, marginBottom: 4 }}>
           ${grantsTotal.toLocaleString('en-AU')}
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
@@ -221,8 +222,8 @@ export default function NextStepsPage() {
       </div>
       {/* 3. Deposit Status */}
       <div className="p-5" style={{ background: 'var(--surface)' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
-          {depositGap > 0 ? '⚠️ Deposit Status' : '✅ Deposit Status'}
+        <p className="flex items-center gap-1.5" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 4 }}>
+          {depositGap > 0 ? <AlertTriangle size={15} className="text-[#B45309]" /> : <CheckCircle2 size={15} className="text-[#00786B] dark:text-[#3DDBBF]" />} Deposit Status
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', color: depositGap > 0 ? '#F59E0B' : 'var(--foreground)', lineHeight: 1.1, marginBottom: 4 }}>
           {depositGap > 0 ? `$${(depositGap/1000).toFixed(0)}k short` : "You're covered"}
@@ -239,8 +240,8 @@ export default function NextStepsPage() {
     <div className="hidden lg:grid grid-cols-3 gap-6">
       {/* 1. Homes You Could Afford */}
       <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'var(--card)' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
-          🏡 Homes You Could Afford
+        <p className="flex items-center gap-1.5" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
+          <Home size={15} className="text-muted-foreground" /> Homes You Could Afford
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: hasBorrowingPower ? '1.875rem' : '1.25rem', color: 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {hasBorrowingPower ? `$${(minPrice / 1000).toFixed(0)}k – $${(maxPrice / 1000).toFixed(0)}k` : 'Building capacity...'}
@@ -251,10 +252,10 @@ export default function NextStepsPage() {
       </div>
       {/* 2. Government Support */}
       <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'var(--card)' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
-          💰 Government Support
+        <p className="flex items-center gap-1.5" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
+          <Wallet size={15} className="text-muted-foreground" /> Government Support
         </p>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.875rem', color: 'var(--success-foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
+        <p className="text-[#00786B] dark:text-[#3DDBBF]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.875rem', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           ${grantsTotal.toLocaleString('en-AU')}
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
@@ -263,8 +264,8 @@ export default function NextStepsPage() {
       </div>
       {/* 3. Deposit Status */}
       <div style={{ ...card, padding: 24, display: 'flex', flexDirection: 'column', background: 'var(--card)' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
-          {depositGap > 0 ? '⚠️ Deposit Status' : '✅ Deposit Status'}
+        <p className="flex items-center gap-1.5" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 8 }}>
+          {depositGap > 0 ? <AlertTriangle size={15} className="text-[#B45309]" /> : <CheckCircle2 size={15} className="text-[#00786B] dark:text-[#3DDBBF]" />} Deposit Status
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.875rem', color: depositGap > 0 ? '#F59E0B' : 'var(--foreground)', lineHeight: 1.1, whiteSpace: 'nowrap', marginBottom: 4 }}>
           {depositGap > 0 ? `$${(depositGap/1000).toFixed(0)}k short` : "You're covered"}
@@ -282,8 +283,8 @@ export default function NextStepsPage() {
 
     return (
       <div style={{ ...card, padding: 24, background: 'var(--amber-bg, rgba(245, 158, 11, 0.1))', border: '1px solid var(--amber-border, rgba(245, 158, 11, 0.3))' }}>
-        <h3 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--warning-foreground)', marginBottom: 12, marginTop: 0 }}>
-          🚧 Bridging your deposit gap
+        <h3 className="flex items-center gap-2" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.125rem', color: 'var(--warning-foreground)', marginBottom: 12, marginTop: 0 }}>
+          <Construction size={19} /> Bridging your deposit gap
         </h3>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9375rem', color: 'var(--foreground)', lineHeight: 1.6, marginBottom: 16, marginTop: 0 }}>
           You're currently <strong>${(depositGap / 1000).toFixed(0)}k short</strong> of the ideal 20% deposit. This is completely normal—the vast majority of first home buyers purchase with less than a 20% deposit. 
@@ -312,7 +313,7 @@ export default function NextStepsPage() {
 
       {/* Broker profile */}
       <div className="flex items-center gap-4 mb-6">
-        <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--foreground)' }}>
+        <div className="bg-[#B08D57] dark:bg-[#C9A876]" style={{ width: 48, height: 48, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.9375rem', color: '#12141C' }}>
           SC
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -331,8 +332,8 @@ export default function NextStepsPage() {
             <button
               type="button"
               onClick={() => setContactMode('book')}
-              className="hover:opacity-90 active:scale-[0.98] transition-all duration-150"
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'var(--primary)', color: 'var(--foreground)', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem', border: 'none', borderRadius: 12, padding: '16px 20px', cursor: 'pointer', marginBottom: 11 }}
+              className="bg-[#12141C] dark:bg-[#C9A876] text-white dark:text-[#12141C] hover:opacity-90 active:scale-[0.98] transition-all duration-150"
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1rem', border: 'none', borderRadius: 12, padding: '16px 20px', cursor: 'pointer', marginBottom: 11 }}
             >
               <CalendarDays size={18} style={{ flexShrink: 0 }} />
               <span className="sm:hidden">Talk to Sarah</span>
@@ -369,13 +370,11 @@ export default function NextStepsPage() {
                 ))}
               </div>
               <button type="submit"
+                className="bg-[#12141C] dark:bg-[#C9A876] text-white dark:text-[#12141C] hover:opacity-90 transition-opacity"
                 style={{
-                  background: 'linear-gradient(180deg, #FEF06F 0%, #F5E642 100%)',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                  color: 'var(--foreground)',
+                  boxShadow: '0 2px 8px rgba(18,20,28,0.2)',
                   fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.875rem',
                   border: 'none', borderRadius: 8, padding: 13, cursor: 'pointer', width: '100%',
-                  textShadow: '0 1px 0 rgba(255,255,255,0.3)'
                 }}
               >
                 Confirm booking
@@ -423,13 +422,11 @@ export default function NextStepsPage() {
                 </div>
               )}
               <button type="submit"
+                className="bg-[#12141C] dark:bg-[#C9A876] text-white dark:text-[#12141C] hover:opacity-90 transition-opacity"
                 style={{
-                  background: 'linear-gradient(180deg, #FEF06F 0%, #F5E642 100%)',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                  color: 'var(--foreground)',
+                  boxShadow: '0 2px 8px rgba(18,20,28,0.2)',
                   fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.875rem',
                   border: 'none', borderRadius: 8, padding: 13, cursor: 'pointer', width: '100%',
-                  textShadow: '0 1px 0 rgba(255,255,255,0.3)'
                 }}
               >
                 Submit request
@@ -442,9 +439,9 @@ export default function NextStepsPage() {
           </p>
         </>
       ) : (
-        <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <CheckCircle2 size={17} color="var(--success-foreground)" style={{ flexShrink: 0 }} />
-          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--success-foreground)', margin: 0 }}>
+        <div className="text-[#00786B] dark:text-[#3DDBBF]" style={{ background: 'rgba(0,194,168,0.1)', border: '1px solid rgba(0,194,168,0.3)', borderRadius: 10, padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <CheckCircle2 size={17} style={{ flexShrink: 0 }} />
+          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', margin: 0 }}>
             Request sent! Sarah will be in touch within 1 business day.
           </p>
         </div>
@@ -473,7 +470,7 @@ export default function NextStepsPage() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 20 }}>🏡</span>
+                <Home size={19} color="var(--foreground)" />
               </div>
               <div>
                 <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', margin: 0, lineHeight: 1.2 }}>
@@ -523,15 +520,15 @@ export default function NextStepsPage() {
               { icon: <FileDown size={16} />, label: 'Download PDF',                action: handlePrint,   active: false,                disabled: false, primary: false },
             ].map(({ icon, label, action, active, disabled, primary }) => (
               <button key={label} type="button" onClick={action} disabled={disabled}
-                  className="transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                  className={`transition-all duration-200 hover:opacity-90 active:scale-[0.98] ${primary && active ? 'text-[#00786B] dark:text-[#3DDBBF]' : ''}`}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                     padding: '12px 16px',
                     borderRadius: 10, cursor: disabled ? 'default' : 'pointer',
                     fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem',
-                    background: primary ? (active ? 'rgba(34,197,94,0.1)' : 'var(--foreground)') : 'var(--card)',
-                    color: primary ? (active ? 'var(--success-foreground)' : 'var(--background)') : 'var(--foreground)',
-                    border: primary ? (active ? '1px solid rgba(34,197,94,0.3)' : 'none') : '1px solid var(--border)',
+                    background: primary ? (active ? 'rgba(0,194,168,0.1)' : 'var(--foreground)') : 'var(--card)',
+                    color: primary ? (active ? undefined : 'var(--background)') : 'var(--foreground)',
+                    border: primary ? (active ? '1px solid rgba(0,194,168,0.3)' : 'none') : '1px solid var(--border)',
                     boxShadow: primary && !active ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
                     opacity: disabled ? 0.6 : 1,
                   }}
@@ -562,7 +559,7 @@ export default function NextStepsPage() {
 
     return (
       <div 
-        className="w-full mt-12 rounded-[24px] overflow-hidden border border-border shadow-[0_8px_30px_rgba(0,0,0,0.04)] bg-gradient-to-br from-yellow-50 via-yellow-50/50 to-white dark:from-yellow-900/20 dark:via-card dark:to-card"
+        className="w-full mt-12 rounded-[24px] overflow-hidden border border-border shadow-[0_8px_30px_rgba(0,0,0,0.04)] bg-gradient-to-br from-[#F5EEE0] via-[#F5EEE0]/50 to-white dark:from-[#2E2717]/40 dark:via-card dark:to-card"
       >
         <div className="flex flex-col lg:flex-row p-6 lg:p-8 lg:px-12 gap-8 lg:gap-12 items-center">
           
@@ -591,8 +588,8 @@ export default function NextStepsPage() {
                 'Share with partner'
               ].map(item => (
                 <div key={item} className="flex items-center gap-2">
-                  <div className="w-3.5 h-3.5 rounded-full bg-[#16A34A]/10 flex items-center justify-center shrink-0">
-                    <Check size={8} color="var(--success-foreground)" strokeWidth={3} />
+                  <div className="w-3.5 h-3.5 rounded-full bg-[#00C2A8]/10 dark:bg-[#3DDBBF]/15 flex items-center justify-center shrink-0">
+                    <Check size={8} className="text-[#00786B] dark:text-[#3DDBBF]" strokeWidth={3} />
                   </div>
                   <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--secondary-foreground)', fontWeight: 500 }}>
                     {item}
@@ -646,8 +643,8 @@ export default function NextStepsPage() {
                 <button
                   type="submit"
                   disabled={emailState === 'sending'}
-                  className="w-full flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ background: 'var(--primary)', color: 'var(--foreground)', borderRadius: 12, height: 52, fontWeight: 700, fontSize: '0.9375rem', fontFamily: 'Inter, sans-serif', border: 'none', cursor: emailState === 'sending' ? 'default' : 'pointer', boxShadow: '0 2px 8px rgba(245, 230, 66, 0.25)' }}
+                  className="w-full flex items-center justify-center gap-2 bg-[#12141C] dark:bg-[#C9A876] text-white dark:text-[#12141C] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ borderRadius: 12, height: 52, fontWeight: 700, fontSize: '0.9375rem', fontFamily: 'Inter, sans-serif', border: 'none', cursor: emailState === 'sending' ? 'default' : 'pointer', boxShadow: '0 2px 8px rgba(18,20,28,0.2)' }}
                 >
                   {emailState === 'sending' ? <Loader2 size={18} className="animate-spin" /> : null}
                   {emailState === 'sending' ? 'Sending...' : 'Send My Report'}

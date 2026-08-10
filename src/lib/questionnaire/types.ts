@@ -117,7 +117,7 @@ export const EMPTY_ANSWERS: Answers = {
   vicFamilyViolence: '',
 }
 
-export type StepId = 'start' | 'property' | 'about' | 'history' | 'income' | 'review'
+export type StepId = 'fast' | 'property' | 'about' | 'history' | 'income' | 'review'
 
 export interface StepMeta {
   id: StepId
@@ -129,10 +129,10 @@ export interface StepMeta {
 
 /** The five input steps (results is rendered separately, progress hidden). */
 export const STEP_META: Record<Exclude<StepId, 'review'>, StepMeta> = {
-  start: {
-    id: 'start', eyebrow: 'Let’s get started', mini: 'Getting started',
-    title: 'Let’s find every grant you qualify for 🏛️',
-    sub: 'We’ll start with a couple of basics, then match you against every NSW & VIC first-home buyer scheme.',
+  fast: {
+    id: 'fast', eyebrow: 'Instant estimate', mini: 'Instant estimate',
+    title: 'Your instant estimate',
+    sub: 'Three answers decide most of your eligibility — see where you stand in under a minute.',
   },
   property: {
     id: 'property', eyebrow: 'The property', mini: 'The property',
@@ -156,4 +156,4 @@ export const STEP_META: Record<Exclude<StepId, 'review'>, StepMeta> = {
   },
 }
 
-export const INPUT_STEPS: Exclude<StepId, 'review'>[] = ['start', 'property', 'about', 'history', 'income']
+export const INPUT_STEPS: Exclude<StepId, 'review'>[] = ['fast', 'property', 'about', 'history', 'income']

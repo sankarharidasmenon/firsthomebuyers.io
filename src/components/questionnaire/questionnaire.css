@@ -1,31 +1,44 @@
 /* ============================================================================
    FirstNest — First Home Grant Finder questionnaire
-   Layout baseline: the reference artifact. Purple accent + yellow selection,
-   content flows on the page (NO giant bordered card), tight onboarding rhythm.
+   Theme: "Opal Fintech" — ink-navy base with a brass accent (replaces the
+   old purple+lemon two-accent system), in the neobank/Judo-Bank register.
+   --q-yellow/--q-purple keep their NAMES (dozens of call sites reference
+   them) but now resolve to the same brass family. Money/eligible/"live"
+   semantics move from green to teal (--q-teal*, defined here and consumed
+   by GrantCard/TotalSavingsHero/live panel) — teal is this theme's "good
+   news" colour, the one deliberate departure from "status colour is never
+   the brand accent," because that departure IS the theme. The teal→violet
+   gradient is spent on exactly one element (the results headline) — never
+   a fill, never a second place it appears.
    Everything is scoped under .fhbq. Dark theme via .dark .fhbq.
    ============================================================================ */
 .fhbq {
-  --q-yellow: #F5D717;
-  --q-yellow-dark: #E0C000;
-  --q-purple: #5B3FA3;
-  --q-purple-light: #EFE9FB;
-  --q-purple-border: #C9B8EE;
-  --q-ink: #1A1A1A;
+  --q-yellow: #B08D57;
+  --q-yellow-dark: #8F7040;
+  --q-purple: #B08D57;
+  --q-purple-light: #F5EEE0;
+  --q-purple-border: #DEC89A;
+  --q-ink: #12141C;
+  --q-btn-ink: #12141C;
   --q-grey: #6B6B70;
-  --q-line: #E6E4E0;
-  --q-bg: #ECEAE6;
+  --q-line: #E7E5DD;
+  --q-bg: #E9E6DC;
   --q-surface: #FFFFFF;
-  --q-input: #FCFCFB;
+  --q-input: #FBFAF7;
   --q-state-bg: #FFFBEA;
   --q-state-border: #EAD98A;
   --q-state-tag: #8A6D00;
   --q-state-tag-bg: #FFF6D6;
+  --q-teal: #00786B;
+  --q-teal-bright: #00C2A8;
+  --q-teal-bg: #E6F7F3;
+  --q-teal-border: #B8E8DD;
   --q-radius: 12px;
   --q-radius-lg: 16px;
   --q-pill: 999px;
 
   min-height: 100vh;
-  background: linear-gradient(135deg, #FFFDF6 0%, #F4EFE1 100%);
+  background: linear-gradient(135deg, #F4F2EC 0%, #EAE6DA 100%);
   color: var(--q-ink);
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -35,19 +48,26 @@
 }
 @media (min-width: 1024px) { .fhbq { padding-top: 72px; } }
 .dark .fhbq {
-  --q-purple: #C4B0F5;
-  --q-purple-light: #241B3A;
-  --q-purple-border: #4B3A78;
-  --q-ink: #F4F3F7;
+  --q-purple: #C9A876;
+  --q-purple-light: #2E2717;
+  --q-purple-border: #5C4A2A;
+  --q-yellow: #C9A876;
+  --q-yellow-dark: #B08D57;
+  --q-ink: #EFEDE6;
+  --q-btn-ink: #C9A876;
   --q-grey: #9C9AA8;
-  --q-line: #2A2A30;
-  --q-bg: #0F0F12;
-  --q-surface: #17171B;
-  --q-input: #1C1C21;
+  --q-line: #262A33;
+  --q-bg: #0D0E13;
+  --q-surface: #171923;
+  --q-input: #1C1F29;
   --q-state-bg: #241F0E;
   --q-state-border: #4A4020;
   --q-state-tag: #E7C65A;
   --q-state-tag-bg: #322A12;
+  --q-teal: #3DDBBF;
+  --q-teal-bright: #3DDBBF;
+  --q-teal-bg: rgba(61,219,191,0.1);
+  --q-teal-border: rgba(61,219,191,0.25);
 }
 
 .fhbq-layout { width: 100%; margin: 0 auto; padding: 18px 16px 48px; }
@@ -233,8 +253,11 @@
 .fhbq-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 22px; }
 .fhbq-btn { border: none; border-radius: var(--q-pill); font-size: 13.5px; font-weight: 700; padding: 11px 22px; cursor: pointer; font-family: inherit; transition: transform .1s, box-shadow .15s, background .15s; white-space: nowrap; }
 .fhbq-btn:active { transform: scale(.98); }
-.fhbq-btn.primary { background: linear-gradient(90deg, var(--q-yellow), var(--q-yellow-dark)); color: #1A1A1A; box-shadow: 0 3px 12px rgba(224,192,0,.38); display: inline-flex; align-items: center; gap: 6px; }
-.fhbq-btn.primary:hover { box-shadow: 0 5px 16px rgba(224,192,0,.5); }
+/* Dark ink fill, not lemon — lemon means "money" (live-panel values, $ totals)
+   and isn't spent on every button. --q-ink/--q-surface already flip under
+   .dark .fhbq, so this is a paper/ink swap in both themes with no extra rule. */
+.fhbq-btn.primary { background: var(--q-btn-ink); color: var(--q-surface); box-shadow: 0 2px 10px rgba(0,0,0,.18); display: inline-flex; align-items: center; gap: 6px; }
+.fhbq-btn.primary:hover { box-shadow: 0 4px 16px rgba(0,0,0,.3); }
 .fhbq-btn.primary:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
 .fhbq-btn.ghost { background: transparent; color: var(--q-grey); padding: 11px 14px; display: inline-flex; align-items: center; gap: 5px; }
 .fhbq-btn.ghost:hover { color: var(--q-ink); }
@@ -296,7 +319,7 @@
 .fhbq-side-card .icon-wrap { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
 .fhbq-side-card h3 .icon-wrap { margin-right: 0px; }
 .fhbq-side-card .icon-wrap.bg-yellow { background: var(--q-yellow); color: var(--q-ink); }
-.fhbq-side-card .icon-wrap.bg-green { background: #E6F6EC; color: #16A34A; }
+.fhbq-side-card .icon-wrap.bg-green { background: var(--q-teal-bg); color: var(--q-teal); }
 .fhbq-side-card .icon-wrap.bg-purple { background: var(--q-purple-light); color: var(--q-purple); }
 
 .fhbq-check-list { list-style: none; padding: 0; margin: 8px 0 0; }
@@ -305,7 +328,7 @@
 .fhbq-action-list { list-style: none; padding: 0; margin: 8px 0 0; }
 .fhbq-action-list li { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--q-ink); margin-bottom: 8px; }
 .fhbq-action-list li:last-child { margin-bottom: 0; }
-.fhbq-action-list .color-green { color: #16A34A; }
+.fhbq-action-list .color-green { color: var(--q-teal); }
 .fhbq-bullet-list { margin: 8px 0 0; padding-left: 18px; font-size: 13px; color: var(--q-ink); }
 .fhbq-bullet-list li { margin-bottom: 4px; }
 
@@ -314,3 +337,200 @@
 .fhbq-side-card .mt-2 { margin-top: 6px; }
 .fhbq-side-card .mt-3 { margin-top: 8px; }
 .fhbq-side-card .mb-3 { margin-bottom: 8px; }
+
+/* ── Live eligibility panel (results-as-you-answer) ───────────────────────── */
+.fhbq-live h3 { margin-bottom: 10px; }
+.fhbq-live-dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--q-teal-bright); flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(0, 194, 168, .45);
+  animation: fhbq-live-pulse 2.2s ease-out infinite;
+}
+.fhbq-live-dot.busy { animation-duration: .9s; }
+@keyframes fhbq-live-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 194, 168, .45); }
+  70% { box-shadow: 0 0 0 7px rgba(0, 194, 168, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 194, 168, 0); }
+}
+
+.fhbq-live-muted { font-size: 13px; color: var(--q-grey); line-height: 1.5; margin: 2px 0 0; }
+
+.fhbq-live-summary { display: flex; gap: 8px; margin: 4px 0 12px; }
+.fhbq-live-summary .stat {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: var(--q-input); border: 1px solid var(--q-line); border-radius: 10px; padding: 8px 6px;
+}
+.fhbq-live-summary .stat b { font-size: 16px; font-weight: 800; color: var(--q-ink); line-height: 1.15; }
+.fhbq-live-summary .stat span { font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--q-grey); }
+.fhbq-live-summary .stat.money b { color: #16A34A; }
+
+.fhbq-live-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.fhbq-live-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 8px; border-radius: 8px;
+  border-bottom: 1px solid var(--q-line); transition: background .4s ease;
+}
+.fhbq-live-item:last-child { border-bottom: none; }
+.fhbq-live-item .st { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; transition: background .35s ease; }
+.fhbq-live-item .st.yes { background: #16A34A; }
+.fhbq-live-item .st.check { background: #D97706; }
+.fhbq-live-item .st.no { background: #C9C9CC; }
+.fhbq-live-item .nm { flex: 1; font-size: 12.5px; font-weight: 600; color: var(--q-ink); line-height: 1.3; }
+.fhbq-live-item.no .nm { color: var(--q-grey); font-weight: 500; text-decoration: line-through; text-decoration-color: rgba(107,107,112,.4); }
+.fhbq-live-item .vl { font-size: 12px; font-weight: 700; color: #16A34A; white-space: nowrap; }
+.fhbq-live-item.check .vl { color: #D97706; }
+.fhbq-live-item.flash { animation: fhbq-live-flash .95s ease; }
+@keyframes fhbq-live-flash {
+  0% { background: var(--q-state-tag-bg); }
+  100% { background: transparent; }
+}
+
+.fhbq-live-hint {
+  display: flex; align-items: center; gap: 6px; margin: 10px 0 0;
+  font-size: 12px; color: var(--q-state-tag); background: var(--q-state-tag-bg);
+  border-radius: 8px; padding: 7px 10px; line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fhbq-live-dot { animation: none; }
+  .fhbq-live-item.flash { animation: none; }
+}
+
+/* Near-miss rows: ineligible, but one change away — recoverable, not dead. */
+.fhbq-live-item.no.nearmiss .nm { text-decoration: none; color: var(--q-ink); font-weight: 600; }
+.fhbq-live-item .vl.miss { color: #D97706; font-weight: 700; font-size: 11px; background: var(--q-state-tag-bg); border-radius: 999px; padding: 2px 8px; }
+
+/* ── Fast-path teaser screen ──────────────────────────────────────────────── */
+.fhbq-teaser-board { margin-top: 6px; }
+.fhbq-teaser-board .fhbq-live-summary { margin-bottom: 14px; }
+.fhbq-teaser-back {
+  display: flex; align-items: center; gap: 5px; margin: 14px auto 0;
+  font-size: 12.5px; font-weight: 600; color: var(--q-grey);
+  background: transparent; border: none; cursor: pointer; padding: 4px 8px; font-family: inherit;
+}
+.fhbq-teaser-back:hover { color: var(--q-ink); }
+
+/* ── Conversational fill (AI "describe your situation") ──────────────────── */
+.fhbq-convo {
+  background: linear-gradient(135deg, var(--q-purple-light) 0%, #FFFFFF 85%);
+  border: 1px solid var(--q-purple-border); border-radius: var(--q-radius-lg);
+  padding: 14px 16px; margin-bottom: 22px;
+}
+.fhbq-convo-head {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 9px;
+  font-size: 12.5px; font-weight: 700; color: var(--q-purple);
+}
+.fhbq-convo-row { display: flex; gap: 8px; align-items: stretch; }
+.fhbq-convo-input {
+  flex: 1; resize: none; background: var(--q-surface); border: 1px solid var(--q-line);
+  border-radius: var(--q-radius); padding: 9px 12px; font: inherit; font-size: 13.5px;
+  color: var(--q-ink); line-height: 1.45;
+}
+.fhbq-convo-input:focus { outline: none; border-color: var(--q-purple-border); box-shadow: 0 0 0 3px rgba(176,141,87,.16); }
+.fhbq-convo-input::placeholder { color: var(--q-grey); opacity: .75; }
+.fhbq-convo-go {
+  width: 42px; border-radius: var(--q-radius); border: none; cursor: pointer;
+  background: var(--q-purple); color: #fff; display: flex; align-items: center; justify-content: center;
+  transition: background .15s ease;
+}
+.fhbq-convo-go:hover:not(:disabled) { background: #4A3287; }
+.fhbq-convo-go:disabled { opacity: .45; cursor: default; }
+.fhbq-spin-icon { animation: fhbq-rotate 1s linear infinite; }
+@keyframes fhbq-rotate { to { transform: rotate(360deg); } }
+.fhbq-convo-error { margin: 8px 0 0; font-size: 12.5px; color: #B45309; }
+.fhbq-convo-applied {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px;
+}
+.fhbq-convo-applied .lbl { font-size: 12px; font-weight: 700; color: var(--q-purple); }
+.fhbq-convo-applied .chip {
+  background: var(--q-surface); border: 1px solid var(--q-purple-border); border-radius: 999px;
+  padding: 3px 10px; font-size: 11.5px; color: var(--q-ink);
+}
+.fhbq-convo-applied .chip b { font-weight: 700; }
+.fhbq-convo-applied .note { width: 100%; font-size: 11.5px; color: var(--q-grey); margin-top: 2px; }
+@media (prefers-reduced-motion: reduce) { .fhbq-spin-icon { animation: none; } }
+
+/* ── Density pass: size controls to content, not to the card ─────────────────
+   A Yes/No never needs 340px and a price never needs 600px. Controls take the
+   width their content justifies; the card's width is for the question text.
+   Heights compact only at ≥640px — mobile keeps 44px+ touch targets. */
+.fhbq-seg { width: fit-content; max-width: none; }
+.fhbq-seg button { flex: 0 0 auto; min-width: 96px; padding: 0 18px; }
+.fhbq-currency { max-width: 260px; }
+.fhbq-field > .fhbq-input { max-width: 380px; }          /* bare text/date inputs */
+.fhbq-rows { max-width: 440px; }
+.fhbq-combo { max-width: 440px; }
+.fhbq-duo { max-width: 430px; }
+.fhbq-convo-input { font-size: 13px; }
+
+@media (min-width: 640px) {
+  .fhbq-card { padding: 24px 24px 20px; }
+  .fhbq-sub { margin-bottom: 14px; }
+  .fhbq-field { margin-bottom: 14px; }
+  .fhbq-input { height: 40px; font-size: 14px; }
+  .fhbq-seg button { height: 34px; font-size: 13px; }
+  .fhbq-row { height: 42px; }
+  .fhbq-chip { padding: 7px 13px; font-size: 12.5px; }
+  .fhbq-duo-card { min-height: 54px; padding: 10px 12px; }
+  .fhbq-nav { margin-top: 16px; }
+  .fhbq-btn { padding: 9px 18px; font-size: 13px; }
+  .fhbq-block { padding: 11px 12px 2px; }
+  .fhbq-cond.open { margin-bottom: 16px; }
+}
+
+/* ── Flat variant: borders carry the structure, not shadows ──────────────────
+   Decorative elevation removed everywhere; the only shadows kept are the
+   functional ones — focus rings (accessibility) and the floating combobox
+   panel (real overlay elevation). */
+.fhbq-card { box-shadow: none; }
+.dark .fhbq .fhbq-card { box-shadow: none; }
+.fhbq-side-card { box-shadow: none; }
+.fhbq-convo { background: color-mix(in srgb, var(--q-purple-light) 55%, var(--q-surface)); }
+
+/* ── Option A: lemon reserved as an accent, not a fill ────────────────────────
+   Selection states move from solid-lemon-fill to an outline + tinted-text
+   pattern (ink border/text, faint ink wash) — the same restraint applied to
+   the primary button above. Lemon itself now appears only where it means
+   "money": live-panel dollar values, the results-page $ totals. */
+.fhbq-chip.selected {
+  background: color-mix(in srgb, var(--q-ink) 6%, var(--q-surface));
+  border-color: var(--q-ink);
+  color: var(--q-ink);
+  box-shadow: none;
+}
+.fhbq-seg button.selected {
+  background: var(--q-surface);
+  color: var(--q-ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  border: 1px solid var(--q-line);
+}
+.fhbq-row.selected { border-color: var(--q-ink); background: color-mix(in srgb, var(--q-ink) 6%, var(--q-surface)); }
+.fhbq-row.selected .fhbq-radio { border-color: var(--q-ink); background: var(--q-ink); }
+.fhbq-row.selected .fhbq-radio::after { background: var(--q-surface); }
+.fhbq-duo-card.selected { border-color: var(--q-ink); background: color-mix(in srgb, var(--q-ink) 6%, var(--q-surface)); }
+.fhbq-duo-card .emoji:empty { display: none; }
+
+/* ── Audit fixes: contrast + iOS zoom ────────────────────────────────────────
+   16px base input size stops iOS Safari's focus auto-zoom; the compact 14px
+   applies only at desktop widths. Small-text greens/ambers darkened to clear
+   WCAG AA 4.5:1; the required marker was near-invisible yellow. */
+.fhbq-input { font-size: 16px; }
+.fhbq-convo-input { font-size: 16px; }
+@media (min-width: 640px) {
+  .fhbq-input { font-size: 14px; }
+  .fhbq-convo-input { font-size: 13px; }
+}
+.fhbq-q .req { color: var(--q-state-tag); }
+/* Opal Fintech: "eligible/live/money" moves from green to teal — this
+   theme's one deliberate status-colour departure (see file header). */
+.fhbq-live-item .st.yes { background: var(--q-teal-bright); }
+.fhbq-live-item .vl { color: var(--q-teal); }
+.fhbq-live-item.check .vl { color: #B45309; }
+.fhbq-live-item .vl.miss { color: #B45309; }
+.fhbq-live-summary .stat.money b { color: var(--q-teal); }
+
+/* Collapsed ineligible rows in the live board */
+.fhbq-live-more {
+  display: block; width: 100%; text-align: left; background: transparent; border: none;
+  cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600;
+  color: var(--q-grey); padding: 8px 8px 2px;
+}
+.fhbq-live-more:hover { color: var(--q-ink); }

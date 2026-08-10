@@ -1,26 +1,34 @@
 'use client'
 
 import React, { useState } from 'react'
-import { ChevronDown, Check, X, ExternalLink } from 'lucide-react'
+import { ChevronDown, Check, X, ExternalLink, CircleCheck, CircleAlert, CircleX, Lightbulb } from 'lucide-react'
 import type { EvaluatedGrant } from '@/lib/schemes/types'
 import { formatDuty, type DutyOutcome } from '@/lib/schemes/stampDuty'
 
+// Opal Fintech: eligible/positive moves from green to teal — the theme's one
+// deliberate status-colour departure. Check/ineligible stay amber/grey.
 const STATUS_COLOURS: Record<string, string> = {
-  eligible: '#22C55E',
+  eligible: '#00C2A8',
   check: '#F59E0B',
   ineligible: '#D1D5DB',
 }
 
 const STATUS_BADGE_STYLES: Record<string, React.CSSProperties> = {
-  eligible: { background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0' },
+  eligible: { background: '#E6F7F3', color: '#00786B', border: '1px solid #B8E8DD' },
   check: { background: '#FFFBEB', color: '#B45309', border: '1px solid #FDE68A' },
   ineligible: { background: '#F9FAFB', color: '#6B7280', border: '1px solid #E5E7EB' },
 }
 
+const STATUS_ICON: Record<string, typeof CircleCheck> = {
+  eligible: CircleCheck,
+  check: CircleAlert,
+  ineligible: CircleX,
+}
+
 const STATUS_LABELS: Record<string, string> = {
-  eligible: '✓ Eligible',
-  check: '~ Check required',
-  ineligible: '✗ Not eligible',
+  eligible: 'Eligible',
+  check: 'Check required',
+  ineligible: 'Not eligible',
 }
 
 interface GrantCardProps {
@@ -48,6 +56,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant', d
 
   const isScheme = variant === 'scheme'
   const schemeBenefit = grant.benefitLine
+  const StatusIcon = STATUS_ICON[status]
 
   const valueDisplay =
     typeof value === 'number'
@@ -56,107 +65,106 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant', d
 
   return (
     <div
-      className={`relative bg-white dark:bg-card dark:border dark:border-border transition-all duration-200 ${hidden ? 'hidden' : ''}`}
+      className={`relative bg-white dark:bg-card border border-[rgba(0,0,0,0.08)] dark:border-border transition-colors duration-150 ${hidden ? 'hidden' : ''}`}
       style={{
-        borderLeft: `3px solid ${STATUS_COLOURS[status]}`,
-        borderRadius: 14,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05)',
-        border: `1px solid rgba(0,0,0,0.06)`,
+        borderRadius: 12,
         borderLeftWidth: 3,
         borderLeftColor: STATUS_COLOURS[status],
       }}
     >
-      {/* Status badge */}
-      <span
-        className="absolute -top-3.5 left-5 rounded-full px-3 py-1 text-[0.6875rem] font-semibold whitespace-nowrap z-10"
-        style={{
-          fontFamily: 'Inter, sans-serif',
-          background: STATUS_BADGE_STYLES[status].background,
-          color: STATUS_BADGE_STYLES[status].color,
-          border: STATUS_BADGE_STYLES[status].border,
-        }}
-      >
-        {STATUS_LABELS[status]}
-      </span>
-
       {/* Collapsed row */}
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
-        className="w-full flex items-start justify-between gap-3 px-5 pt-7 pb-4 text-left cursor-pointer bg-none border-none"
+        className="w-full flex flex-col gap-2 px-5 pt-4 pb-4 text-left cursor-pointer bg-none border-none"
       >
-        {/* Sequential position in the visible list. Decorative — the accessible
-            name of the card is the scheme name, so this is hidden from screen
-            readers rather than read out as part of it. */}
-        {index !== undefined && (
-          <span
-            aria-hidden="true"
-            className="shrink-0 tabular-nums select-none text-[#9CA3AF] dark:text-muted-foreground/60"
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 600,
-              fontSize: '0.8125rem',
-              lineHeight: '1.375rem',
-              minWidth: 16,
-            }}
-          >
-            {index}
-          </span>
-        )}
+        {/* Status badge — inline, not floating over the border */}
+        <span
+          className="inline-flex items-center gap-1 self-start rounded-full px-2.5 py-0.5 text-[0.6875rem] font-semibold whitespace-nowrap"
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            background: STATUS_BADGE_STYLES[status].background,
+            color: STATUS_BADGE_STYLES[status].color,
+            border: STATUS_BADGE_STYLES[status].border,
+          }}
+        >
+          <StatusIcon size={11} strokeWidth={2.5} />
+          {STATUS_LABELS[status]}
+        </span>
 
-        {/* Name + optional benefit line for schemes */}
-        <div className="flex-1 pr-4">
-          <span
-            className="block text-[1rem] sm:text-[0.9375rem] font-semibold text-[#111111] dark:text-foreground leading-snug"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-          >
-            {grant.name}
-          </span>
-          {isScheme && schemeBenefit && (
+        <div className="w-full flex items-start justify-between gap-3">
+          {/* Sequential position in the visible list. Decorative — the accessible
+              name of the card is the scheme name, so this is hidden from screen
+              readers rather than read out as part of it. */}
+          {index !== undefined && (
             <span
-              className="block mt-1"
+              aria-hidden="true"
+              className="shrink-0 tabular-nums select-none text-[#9CA3AF] dark:text-muted-foreground/60"
               style={{
                 fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
                 fontSize: '0.8125rem',
-                color: status === 'eligible' ? '#16A34A' : '#888888',
-                lineHeight: 1.4,
+                lineHeight: '1.375rem',
+                minWidth: 16,
               }}
-            // In dark mode: eligible stays green, ineligible gets lighter
             >
-              {status === 'eligible' ? '✓ ' : ''}{schemeBenefit}
+              {index}
             </span>
           )}
-        </div>
 
-        {/* Value (only for cash grants) + chevron */}
-        <div className="flex items-center gap-3 shrink-0 mt-0.5">
-          {!isScheme && (
+          {/* Name + optional benefit line for schemes */}
+          <div className="flex-1">
             <span
-              style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 700,
-                fontSize: '0.9375rem',
-                color: status === 'eligible' ? '#16A34A' : '#9CA3AF',
-              }}
+              className="block text-[1rem] sm:text-[0.9375rem] font-semibold text-[#111111] dark:text-foreground leading-snug"
+              style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              {valueDisplay}
+              {grant.name}
             </span>
-          )}
-          <ChevronDown
-            size={20}
-            className="shrink-0 text-grey-mid transition-transform duration-200"
-            style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-          />
+            {isScheme && schemeBenefit && (
+              <span
+                className="block mt-1"
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '0.8125rem',
+                  color: status === 'eligible' ? '#00786B' : '#888888',
+                  lineHeight: 1.4,
+                }}
+              >
+                {schemeBenefit}
+              </span>
+            )}
+          </div>
+
+          {/* Value (only for cash grants) + chevron */}
+          <div className="flex items-center gap-3 shrink-0 mt-0.5">
+            {!isScheme && (
+              <span
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 700,
+                  fontSize: '0.9375rem',
+                  color: status === 'eligible' ? '#00786B' : '#9CA3AF',
+                }}
+              >
+                {valueDisplay}
+              </span>
+            )}
+            <ChevronDown
+              size={18}
+              className="shrink-0 text-grey-mid transition-transform duration-200"
+              style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            />
+          </div>
         </div>
       </button>
 
       {/* Expanded content */}
       {open && (
-        <div className="px-5 pb-5 border-t border-grey-light" style={{ borderTopColor: 'rgba(0,0,0,0.05)' }}>
+        <div className="px-5 pb-5 border-t border-[rgba(0,0,0,0.06)] dark:border-border">
           {duty && (
             <div
-              className="bg-[#F9FAFB] dark:bg-muted/20 rounded-xl px-4 py-3"
+              className="bg-[#FAFAFA] dark:bg-muted/20 border border-[rgba(0,0,0,0.05)] dark:border-border rounded-lg px-4 py-3"
               style={{ marginTop: 12, fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}
             >
               {duty.calculable && duty.payable !== null && duty.saving !== null ? (
@@ -178,7 +186,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant', d
                     style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
                   >
                     <span className="text-[#111111] dark:text-foreground" style={{ fontWeight: 600 }}>You save</span>
-                    <span className="text-[#16A34A]" style={{ fontWeight: 700, fontSize: '0.9375rem' }}>
+                    <span className="text-[#00786B]" style={{ fontWeight: 700, fontSize: '0.9375rem' }}>
                       ${formatDuty(duty.saving)}
                     </span>
                   </div>
@@ -203,7 +211,7 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant', d
             {criteria.map((c, i) => (
               <li key={i} className="flex items-start gap-2">
                 {c.met
-                  ? <Check size={14} className="text-[#22C55E] mt-0.5 shrink-0" />
+                  ? <Check size={14} className="text-[#00C2A8] mt-0.5 shrink-0" />
                   : <X size={14} className="text-[#9CA3AF] mt-0.5 shrink-0" />
                 }
                 <span className="text-[#444444] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>
@@ -215,18 +223,19 @@ export function GrantCard({ evaluatedGrant, hidden = false, variant = 'grant', d
 
           {/* Ineligible reason */}
           {reason && (
-            <div className="rounded-sm p-3 mb-3" style={{ background: '#FFFBEB' }}>
+            <div className="rounded-md p-3 mb-3 border border-[#FDE68A] dark:border-[rgba(217,119,6,0.3)]" style={{ background: '#FFFBEB' }}>
               <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#92400E' }}>
                 <strong>Why:</strong> {reason}
               </p>
             </div>
           )}
 
-          {/* Alternative suggestion */}
+          {/* Alternative suggestion (near miss) */}
           {alternative && (
-            <div className="rounded-sm p-3 mb-3" style={{ background: '#FBF6A8' }}>
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#111111' }}>
-                💡 {alternative}
+            <div className="flex items-start gap-2 rounded-md p-3 mb-3 border border-[rgba(0,0,0,0.06)] dark:border-border" style={{ background: '#F9F9F9' }}>
+              <Lightbulb size={14} className="text-[#B45309] mt-0.5 shrink-0" strokeWidth={2} />
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem', color: '#333333' }}>
+                {alternative}
               </p>
             </div>
           )}

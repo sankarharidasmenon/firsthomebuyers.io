@@ -9,6 +9,7 @@ import { ScenarioSliders } from '@/components/results/ScenarioSliders'
 import { ResultsTabSwitcher } from '@/components/results/ResultsTabSwitcher'
 import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/home/Navbar'
+import { Lightbulb } from 'lucide-react'
 import { getStep1, getStep2, getStep3, getStep4 } from '@/lib/localStorage'
 import { calculateBorrowingCapacity, type BorrowingInputs } from '@/lib/calculations'
 import { DUMMY_USER } from '@/lib/dummyData'
@@ -91,7 +92,7 @@ export default function BorrowingResultsPage() {
               className="flex items-start gap-3 rounded-xl px-4 py-3"
               style={{ background: '#FFFBEB', border: '1px solid #FCD34D' }}
             >
-              <span style={{ fontSize: '1rem', lineHeight: 1, marginTop: 1 }}>💡</span>
+              <Lightbulb size={16} strokeWidth={2} className="text-[#B45309]" style={{ marginTop: 1, flexShrink: 0 }} />
               <div>
                 <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.8125rem', color: '#92400E', marginBottom: 2 }}>
                   Showing estimates based on typical figures

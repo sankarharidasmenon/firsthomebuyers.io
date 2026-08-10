@@ -27,7 +27,7 @@ const COLUMNS: Array<[string, keyof SchemeRecord]> = [
   ['Scheme Name (official)', 'schemeName'],
   ['UI/UX Short Description', 'shortDescription'],
   ['UI/UX Long Description', 'detailedDescription'],
-  ['UI/UX Reference Link', 'officialUrl'],
+  ['UI/UX Reference', 'catchyLine'],
   // ['UI/UX Program Type', 'type'],
   ['Scheme ID', 'schemeId'],
   // ['Scheme Name (official)', 'schemeName'],
@@ -85,7 +85,6 @@ const COLUMNS: Array<[string, keyof SchemeRecord]> = [
   ['Notes/Caveats', 'notesCaveats'],
   ['Eligibility Tag/Pill', 'eligibilityTag'],
   ['Priority/Ranking', 'priorityRanking'],
-  ['Catchy Line/Hook', 'catchyLine'],
 ];
 
 const OUTPUT_PATH = path.resolve(__dirname, '../../output/government_schemes.xlsx');
@@ -146,8 +145,6 @@ export async function exportToExcel(
         row[label] = rec.shortDescription ?? '';
       } else if (label === 'UI/UX Long Description') {
         row[label] = rec.detailedDescription ?? '';
-      } else if (label === 'UI/UX Reference') {
-        row[label] = rec.catchyLine ?? '';
       } else {
         row[label] = rec[key] ?? '';
       }

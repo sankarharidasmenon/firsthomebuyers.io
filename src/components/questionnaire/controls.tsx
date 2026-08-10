@@ -96,7 +96,7 @@ export function Duo<T extends string>({
       {options.map((o) => (
         <button key={o.value} type="button" role="radio" aria-checked={value === o.value}
           className={`fhbq-duo-card${value === o.value ? ' selected' : ''}`} onClick={() => onChange(o.value)}>
-          <span className="emoji">{o.emoji}</span>
+          {o.emoji && <span className="emoji">{o.emoji}</span>}
           <span className="lab">{o.label}</span>
           <span className="desc">{o.desc}</span>
         </button>

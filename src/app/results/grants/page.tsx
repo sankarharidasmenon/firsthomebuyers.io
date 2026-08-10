@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Wallet, Landmark, Receipt } from 'lucide-react'
 import { TotalSavingsHero } from '@/components/results/TotalSavingsHero'
 import { ResultsTabSwitcher } from '@/components/results/ResultsTabSwitcher'
 import { GrantCard } from '@/components/results/GrantCard'
@@ -17,15 +17,15 @@ import { getStep1, getStep2, getStep3 } from '@/lib/localStorage'
 import { toast } from 'sonner'
 import { DUMMY_USER } from '@/lib/dummyData'
 import { fetchEligibility, type EligibilityResult, type EligibilityItem, type DisplayCategory } from '@/lib/schemes/eligibilityClient'
-import { categoryDisplay, summariseEligibility, taxDisplay, totalBenefitDisplay } from '@/lib/schemes/summary'
+import { summariseEligibility } from '@/lib/schemes/summary'
 import { loadAnswers } from '@/lib/questionnaire/storage'
 import { toEligibilityAnswers } from '@/lib/questionnaire/logic'
 
 // Section header — airy, not heavy
-function SectionHeader({ icon, title, description }: { icon: string; title: string; description: string }) {
+function SectionHeader({ icon: Icon, title, description }: { icon: typeof Wallet; title: string; description: string }) {
   return (
-    <div className="flex items-center gap-2.5 px-1">
-      <span style={{ fontSize: '0.9375rem', opacity: 0.75 }}>{icon}</span>
+    <div className="flex items-center gap-2 px-1">
+      <Icon size={14} className="text-[#999999] dark:text-muted-foreground/60" strokeWidth={2} />
       <div>
         <span className="text-[#444444] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.875rem' }}>
           {title}
@@ -54,9 +54,9 @@ const STATUS_PRI: Record<string, number> = { eligible: 1, check: 2, ineligible: 
 const CATEGORY_PRI: Record<DisplayCategory, number> = { cash: 1, schemes: 2, tax: 3 }
 
 const CATEGORY_META = {
-  cash: { icon: '💰', title: 'Cash Grants', description: 'One-time payments that do not need to be repaid' },
-  schemes: { icon: '🏠', title: 'Government Schemes', description: 'Programs that help you buy without providing direct cash' },
-  tax: { icon: '🧾', title: 'Tax & Duty Savings', description: 'Reductions in government taxes on your purchase' },
+  cash: { icon: Wallet, title: 'Cash Grants', description: 'One-time payments that do not need to be repaid' },
+  schemes: { icon: Landmark, title: 'Government Schemes', description: 'Programs that help you buy without providing direct cash' },
+  tax: { icon: Receipt, title: 'Tax & Duty Savings', description: 'Reductions in government taxes on your purchase' },
 } as const
 
 /**
@@ -97,8 +97,9 @@ export default function GrantsResultsPage() {
     try {
       const answers = loadAnswers()
       
-      // If there's no name, we likely don't have real answers (empty state)
-      if (!answers.name) {
+      // No state means no real answers (empty state). Name is NOT the gate —
+      // the fast path lets users reach results before they've given a name.
+      if (!answers.state) {
         setLoadState('empty')
         return
       }
@@ -147,16 +148,13 @@ export default function GrantsResultsPage() {
   }
 
   // Summary figures, derived from the SAME items that render the cards below, so
-  // the header and sidebar can never disagree with the list. No re-evaluation.
+  // the hero can never disagree with the list. No re-evaluation.
   const summary = summariseEligibility(result?.items ?? [], {
     state: display.state,
     price: display.targetPropertyPrice,
     propertyCategory: display.propertyCategory,
     landPrice: display.landPrice,
   })
-  const sidebarCash = categoryDisplay(summary.cash, { costed: '', uncosted: '', none: '' })
-  const sidebarTax = taxDisplay(summary)
-  const sidebarTotal = totalBenefitDisplay(summary)
 
   const CardList = () => {
     if (!result) return null
@@ -166,15 +164,17 @@ export default function GrantsResultsPage() {
     // order the engine returned them in — no scheme is reprioritised, only
     // repositioned. `.sort()` mutates, so it runs on the array `.map()` just
     // produced, never on `result.items` itself.
-    // Toggle OFF: Not Eligible items are dropped entirely. Toggle ON: Not
-    // Eligible items are kept only when they're relevant to this applicant
-    // (own state/territory + federal, own relationship profile) — see
-    // isRelevantNonEligible. Filtering happens on the flat list, before
-    // grouping, so a scheme excluded here never contributes a stray section
-    // header either. Eligible and Check items are never touched.
+    // Toggle OFF: Not Eligible items are dropped entirely — EXCEPT near
+    // misses, which the engine has verified are one realistic change away
+    // from qualifying. A close miss is an opportunity, not noise, so it is
+    // always shown. Toggle ON: Not Eligible items are kept only when they're
+    // relevant to this applicant (own state/territory + own relationship
+    // profile) — see isRelevantNonEligible. Filtering happens on the flat
+    // list, before grouping, so a scheme excluded here never contributes a
+    // stray section header either. Eligible and Check items are never touched.
     const flatItems: Item[] = result.items
       .map((i) => ({ ...i, status: i.eg.status }))
-      .filter((item) => (showIneligible ? isRelevantNonEligible(item) : item.status !== 'ineligible'))
+      .filter((item) => (showIneligible ? isRelevantNonEligible(item) : item.status !== 'ineligible' || !!item.nearMiss))
       .sort((a, b) =>
         (STATUS_PRI[a.status] ?? 3) - (STATUS_PRI[b.status] ?? 3) ||
         (CATEGORY_PRI[a.category] ?? 9) - (CATEGORY_PRI[b.category] ?? 9))
@@ -210,7 +210,7 @@ export default function GrantsResultsPage() {
                 <GrantCard
                   key={item.eg.grant.id}
                   evaluatedGrant={item.eg}
-                  hidden={!showIneligible && item.eg.status === 'ineligible'}
+                  hidden={!showIneligible && item.eg.status === 'ineligible' && !item.nearMiss}
                   variant={item.variant}
                   // Same calculator as the summary card — only for the duty
                   // scheme the applicant actually qualifies for.
@@ -264,14 +264,6 @@ export default function GrantsResultsPage() {
 
   const ActionButtons = () => (
     <div className="px-5 pb-7 pt-1 flex flex-col lg:px-6 lg:pb-6" style={{ gap: 10 }}>
-      {/* <Button onClick={() => router.push('/next-steps')} variant="primary" fullWidth>NEXT STEPS →</Button>
-      <button
-        type="button"
-        onClick={handleSave}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.875rem', color: saved ? '#16A34A' : '#AAAAAA', textAlign: 'center', padding: '6px 0', transition: 'color 150ms' }}
-      >
-        {saved ? '✓ Saved to My Results' : '💾 Save to My Results'}
-      </button> */}
       <Link
         href="/"
         style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem', color: '#BBBBBB', textAlign: 'center', padding: '4px 0', textDecoration: 'none', display: 'block', transition: 'color 150ms' }}
@@ -287,105 +279,28 @@ export default function GrantsResultsPage() {
     <div className="min-h-screen flex flex-col bg-[#FAFAFA] dark:bg-background">
       <Navbar />
 
+      {/* One layout for every width — nothing left to split once the
+          duplicate desktop sidebar (same figures the hero already shows) is
+          gone. Only the max-width and card chrome change at lg. */}
       <main className="w-full pt-14 lg:pt-14.5 pb-16">
-        {/* ── Mobile layout ── */}
-        <div className="lg:hidden">
-          <div className="bg-white dark:bg-card">
-            {loadState === 'ready' && result ? (
-              <>
-                <TotalSavingsHero
-                  summary={summary}
-                  state={display.state || 'your state'}
-                />
-                <ResultsTabSwitcher />
-                <HideIneligibleToggle showIneligible={showIneligible} onChange={setShowIneligible} />
-                <div className="px-5 pt-5 pb-1">
-                  <AIChatCard onClick={() => setIsChatOpen(true)} />
-                </div>
-                <CardList />
-                <ActionButtons />
-              </>
-            ) : (
-              <StatusPanel />
-            )}
-          </div>
-        </div>
-
-        {/* ── Desktop layout ── */}
-        <div className="hidden lg:block max-w-275 mx-auto px-12">
+        <div className="max-w-[680px] mx-auto lg:px-6">
           {loadState === 'ready' && result ? (
-            <div className="grid gap-8" style={{ gridTemplateColumns: '1fr 320px', alignItems: 'start' }}>
-              {/* Left column */}
-              <div className="bg-white dark:bg-card rounded-2xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)' }}>
-                <TotalSavingsHero
-                  summary={summary}
-                  state={display.state || 'your state'}
-                />
-                <ResultsTabSwitcher />
-                <HideIneligibleToggle showIneligible={showIneligible} onChange={setShowIneligible} />
-                <div className="px-5 pt-5 pb-1">
-                  <AIChatCard onClick={() => setIsChatOpen(true)} />
-                </div>
-                <CardList />
+            <div className="bg-white dark:bg-card lg:rounded-2xl lg:overflow-hidden lg:border lg:border-[rgba(0,0,0,0.06)] dark:lg:border-border">
+              <TotalSavingsHero
+                summary={summary}
+                state={display.state || 'your state'}
+                targetPrice={display.targetPropertyPrice}
+              />
+              <ResultsTabSwitcher />
+              <HideIneligibleToggle showIneligible={showIneligible} onChange={setShowIneligible} />
+              <div className="px-5 pt-5 pb-1">
+                <AIChatCard onClick={() => setIsChatOpen(true)} />
               </div>
-
-              {/* Right column — ONE unified card */}
-              <div style={{ position: 'sticky', top: 80 }}>
-                <div className="bg-white dark:bg-card rounded-2xl" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-                  <div className="px-6 pt-6 pb-5">
-                    <p className="text-[#BBBBBB] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.6875rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 20 }}>
-                      Your summary
-                    </p>
-                    <div className="flex flex-col" style={{ gap: 18 }}>
-                       <div className="flex justify-between items-baseline">
-                        <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>🏠 Eligible Schemes</span>
-                        <span className={summary.schemes.eligibleCount > 0 ? 'text-[#16A34A]' : 'text-[#CCCCCC] dark:text-muted-foreground/30'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
-                          {summary.schemes.eligibleCount > 0 ? summary.schemes.eligibleCount : '—'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>💰 Grants</span>
-                        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem', color: sidebarCash.muted ? '#CCCCCC' : '#16A34A' }}>
-                          {sidebarCash.value}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>🧾 Tax & Duty Savings</span>
-                        <span className={sidebarTax.muted ? 'text-[#CCCCCC] dark:text-muted-foreground/30' : 'text-[#111111] dark:text-foreground'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
-                          {sidebarTax.value}
-                        </span>
-                      </div>
-                      {/* <div className="flex justify-between items-baseline">
-                        <span className="text-[#666666] dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>🏠 Eligible Schemes</span>
-                        <span className={summary.schemes.eligibleCount > 0 ? 'text-[#16A34A]' : 'text-[#CCCCCC] dark:text-muted-foreground/30'} style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.0625rem' }}>
-                          {summary.schemes.eligibleCount > 0 ? summary.schemes.eligibleCount : '—'}
-                        </span>
-                      </div> */}
-                      <div className="flex justify-between items-baseline pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-                        <span className="text-[#111111] dark:text-foreground" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem' }}>Total Benefit</span>
-                        <span className="text-[#16A34A]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '1.25rem' }}>
-                          {sidebarTotal.value}
-                        </span>
-                      </div>
-                      {sidebarTotal.note && (
-                        <p className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', marginTop: -10, textAlign: 'right' }}>
-                          {sidebarTotal.note}
-                        </p>
-                      )}
-                      <div className="flex justify-between items-center pt-3">
-                        <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8125rem' }}>Property target</span>
-                        <span className="text-[#BBBBBB] dark:text-muted-foreground/50" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8125rem' }}>
-                          ${display.targetPropertyPrice.toLocaleString('en-AU')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <ActionButtons />
-                </div>
-              </div>
+              <CardList />
+              <ActionButtons />
             </div>
           ) : (
-            <div className="bg-white dark:bg-card rounded-2xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)' }}>
+            <div className="bg-white dark:bg-card lg:rounded-2xl lg:overflow-hidden lg:border lg:border-[rgba(0,0,0,0.06)] dark:lg:border-border">
               <StatusPanel />
             </div>
           )}

@@ -79,7 +79,7 @@ export function BorrowingRangeDisplay({
         textAlign: 'center',
         marginBottom: 8,
       }}>
-        Here&apos;s what you could borrow, {name} 🏡
+        Here&apos;s what you could borrow, {name}
       </p>
 
       {/* Hero range */}
@@ -108,7 +108,7 @@ export function BorrowingRangeDisplay({
 
       {/* Recommended property range — subtle accent treatment */}
       <div
-        className="rounded-[10px] px-4 py-3 mb-4 bg-[#FEFCE8] dark:bg-surface border border-[#F0E030] dark:border-[rgba(245,230,66,0.25)]"
+        className="rounded-[10px] px-4 py-3 mb-4 bg-[#F5EEE0] dark:bg-surface border border-[#DEC89A] dark:border-[rgba(201,168,118,0.3)]"
         style={{ borderLeftWidth: 3 }}
       >
         <p className="text-[#999999] dark:text-muted-foreground/60" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>

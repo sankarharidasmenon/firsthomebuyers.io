@@ -7,6 +7,7 @@ import { InputField } from '@/components/ui/InputField'
 import { Button } from '@/components/ui/button'
 import { calculateBorrowingCapacity, type BorrowingInputs } from '@/lib/calculations'
 import { toast } from 'sonner'
+import { Check, Save } from 'lucide-react'
 
 interface ScenarioSlidersProps {
   baseInputs: BorrowingInputs
@@ -142,7 +143,10 @@ export function ScenarioSliders({ baseInputs, baseResult, onResultChange }: Scen
       {/* Actions */}
       <div className="flex flex-col gap-2 mt-5 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
         <Button onClick={handleSave} variant="primary" fullWidth size="sm">
-          {saved ? '✓ Saved!' : '💾 Save this scenario'}
+          <span className="inline-flex items-center gap-1.5">
+            {saved ? <Check size={15} /> : <Save size={15} />}
+            {saved ? 'Saved!' : 'Save this scenario'}
+          </span>
         </Button>
         <button
           type="button"

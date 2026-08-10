@@ -67,10 +67,12 @@ export function SliderField({
         className="relative flex items-center w-full h-6 touch-none select-none"
       >
         <Slider.Track className="relative h-[6px] grow rounded-full bg-border">
-          <Slider.Range className="absolute h-full rounded-full bg-primary" />
+          {/* Teal, not lemon: this fill tracks toward a $ figure (borrowing
+              capacity), so it uses the "money" colour, not the brand accent. */}
+          <Slider.Range className="absolute h-full rounded-full bg-[#00C2A8] dark:bg-[#3DDBBF]" />
         </Slider.Track>
         <Slider.Thumb
-          className="block w-6 h-6 rounded-full bg-foreground shadow-[0_2px_8px_rgba(0,0,0,0.2)] cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-hover focus-visible:ring-offset-2"
+          className="block w-6 h-6 rounded-full bg-foreground shadow-[0_2px_8px_rgba(0,0,0,0.2)] cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] focus-visible:ring-offset-2"
           aria-label={label}
           aria-valuetext={formatValue(value)}
         />
@@ -88,7 +90,7 @@ export function SliderField({
             }}
             className={[
               'px-3 py-0.5 rounded-full text-[0.75rem] font-medium',
-              deltaPositive ? 'bg-primary text-primary-foreground' : 'bg-surface text-secondary-foreground',
+              deltaPositive ? 'bg-[#00C2A8] dark:bg-[#3DDBBF] text-white dark:text-[#12141C]' : 'bg-surface text-secondary-foreground',
             ].join(' ')}
           >
             {deltaPositive ? '+' : ''}

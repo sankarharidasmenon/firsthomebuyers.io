@@ -17,25 +17,25 @@ const SIZES = {
 }
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  /* gradient is in VARIANT_STYLES below — keep just structural Tailwind here */
-  primary: 'text-primary-foreground active:scale-[0.97] btn-shine',
+  // "Opal Fintech": ink-navy base, one brass accent. In dark mode the
+  // button flips to brass (the general accent), not teal — teal is reserved
+  // for money/eligible specifically, not spent on chrome. 'final' stays
+  // visually identical to 'primary' — one accent, not two.
+  primary: 'bg-[#12141C] text-white dark:bg-[#C9A876] dark:text-[#12141C] active:scale-[0.97] btn-shine',
   secondary: 'bg-transparent border-2 border-foreground text-foreground hover:bg-accent active:scale-[0.97]',
   ghost: 'bg-transparent text-secondary-foreground hover:bg-accent active:scale-[0.97]',
-  final: 'bg-foreground text-primary dark:bg-primary dark:text-fn-navy active:scale-[0.97]',
+  final: 'bg-[#12141C] text-white dark:bg-[#C9A876] dark:text-[#12141C] active:scale-[0.97]',
 }
 
-/* Inline styles for gradient variants — CSS classes can't express dynamic gradients reliably */
 const VARIANT_STYLES: Record<Variant, React.CSSProperties> = {
   primary: {
-    background: 'linear-gradient(135deg, var(--brand-gradient-start) 0%, var(--brand-gradient-end) 100%)',
-    color: 'var(--brand-dark-surface)',
-    boxShadow: '0 4px 16px rgba(245,230,66,0.50)',
+    boxShadow: '0 2px 10px rgba(18,20,28,0.25)',
     transition: 'transform 80ms, box-shadow 120ms, filter 120ms',
   },
   secondary: {},
   ghost: {},
   final: {
-    boxShadow: '0 4px 16px rgba(17,17,17,0.25)',
+    boxShadow: '0 4px 16px rgba(18,20,28,0.3)',
   },
 }
 
@@ -64,8 +64,8 @@ export function Button({
         SIZES[size],
         fullWidth ? 'w-full' : '',
         disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '',
-        /* hover: lift + deepen shadow for primary */
-        variant === 'primary' ? 'hover:-translate-y-[1px] hover:shadow-[0_6px_20px_rgba(245,230,66,0.65)]' : '',
+        /* hover: lift + deepen shadow for primary — opal ink / brass glow */
+        variant === 'primary' ? 'hover:-translate-y-[1px] hover:shadow-[0_6px_20px_rgba(18,20,28,0.4)] dark:hover:shadow-[0_6px_20px_rgba(201,168,118,0.35)]' : '',
         className,
       ]
         .filter(Boolean)

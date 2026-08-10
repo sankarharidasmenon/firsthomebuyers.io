@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { CheckCircle2, Lightbulb } from 'lucide-react'
 
 interface DepositGapIndicatorProps {
   depositAmount: number
@@ -18,12 +19,12 @@ export function DepositGapIndicator({ depositAmount, targetPropertyPrice }: Depo
   if (!needsLMI) {
     return (
       <div
-        className="mx-5 mt-3 rounded-[8px] p-4 bg-[#F0FDF4] dark:bg-[rgba(34,197,94,0.06)] border-l-4 border-[#22C55E] dark:border-[rgba(34,197,94,0.4)]"
+        className="mx-5 mt-3 rounded-[8px] p-4 bg-[#E6F7F3] dark:bg-[rgba(61,219,191,0.08)] border-l-4 border-[#00C2A8] dark:border-[rgba(61,219,191,0.4)]"
       >
-        <p className="text-[#16A34A]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', marginBottom: 4 }}>
-          ✓ No LMI required
+        <p className="text-[#00786B] dark:text-[#3DDBBF] flex items-center gap-1.5" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', marginBottom: 4 }}>
+          <CheckCircle2 size={16} strokeWidth={2.5} /> No LMI required
         </p>
-        <p className="text-[#166534] dark:text-[#86EFAC]" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>
+        <p className="text-[#00695C] dark:text-[#8AEEDB]" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}>
           Your deposit covers {depositPct}% of the property price — above the 20% threshold.
         </p>
       </div>
@@ -34,8 +35,8 @@ export function DepositGapIndicator({ depositAmount, targetPropertyPrice }: Depo
     <div
       className="mx-5 mt-3 rounded-[8px] p-4 bg-[#FFFBEB] dark:bg-[rgba(245,158,11,0.06)] border-l-4 border-[#F59E0B] dark:border-[rgba(245,158,11,0.4)]"
     >
-      <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 6 }}>
-        💡 Deposit Gap
+      <p className="flex items-center gap-1.5" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9375rem', color: 'var(--foreground)', marginBottom: 6 }}>
+        <Lightbulb size={16} strokeWidth={2} className="text-[#B45309]" /> Deposit Gap
       </p>
       <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--secondary-foreground)', marginBottom: 8 }}>
         To avoid Lenders Mortgage Insurance (LMI), you&apos;d need an extra:
