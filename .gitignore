@@ -60,3 +60,12 @@ next-env.d.ts
 /scratch-others.ts
 /tmp-trace.ts
 /tmp-verify-live.ts
+
+# capacitor / xcode
+ios/App/App/public
+ios/App/App/capacitor.config.json
+ios/App/Pods
+ios/App/*.xcworkspace/xcuserdata
+ios/App/*.xcodeproj/xcuserdata
+ios/App/DerivedData
+ios/.build

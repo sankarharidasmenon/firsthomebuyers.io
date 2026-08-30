@@ -1,5 +1,12 @@
 import { defineConfig } from 'vitest/config'
 import { fileURLToPath } from 'node:url'
+import { config } from 'dotenv'
+
+// Loads .env into process.env so SUPABASE_TEST_URL / SUPABASE_TEST_ANON_KEY
+// (see tests/integration/helpers/testDb.ts) are picked up without exporting
+// them into the shell by hand. CI supplies these as real environment
+// variables already, so this is a no-op there (.env doesn't exist in CI).
+config()
 
 /**
  * Integration test configuration — deliberately separate from

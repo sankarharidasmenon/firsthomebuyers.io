@@ -363,7 +363,7 @@ export function HeroSection() {
                       </svg>
                     </button> */}
 
-                    <button type="button" className="fn-path fn-path-primary"
+                    {/* <button type="button" className="fn-path fn-path-primary"
                       onClick={() => router.push('/grant-calculator')}>
                       <span className="fn-path-body">
                         <span className="fn-path-kicker">Government support</span>
@@ -372,7 +372,7 @@ export function HeroSection() {
                       <svg className="fn-path-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                       </svg>
-                    </button>
+                    </button> */}
                     <button type="button" className="fn-path fn-path-primary"
                       onClick={() => router.push('/onboarding?flow=grants')}>
                       <span className="fn-path-body">

@@ -1,5 +1,7 @@
 .logoContainer {
-  --color-logo-gold: #D8BC4A;
+  /* #D8BC4A only hit 1.87:1 against a white background (WCAG AA large-text
+     minimum is 3:1). Same hue/saturation, darkened until it clears 3:1. */
+  --color-logo-gold: #A88D24;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -9,7 +11,7 @@
 }
 
 .logoContainer:hover {
-  --color-logo-gold: #CFAF35;
+  --color-logo-gold: #8A7420;
 }
 
 .logoAnimated {
