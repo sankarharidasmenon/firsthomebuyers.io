@@ -28,10 +28,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -76,7 +76,7 @@ jobs:
       # fetch-depth: 0 so the scan covers full history, not just the tip commit.
       # A secret committed and later deleted is still a leaked secret.
       - name: Checkout (full history)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -129,7 +129,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Installed via pipx (preinstalled on GitHub runners) rather than the
       # semgrep container image — project policy: no container images.
@@ -165,10 +165,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -187,7 +187,7 @@ jobs:
           output-file: firstnest-sbom.cyclonedx.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom
           path: firstnest-sbom.cyclonedx.json
