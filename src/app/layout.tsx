@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Cormorant_Garamond } from 'next/font/google'
+import { Inter, Cormorant_Garamond, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { BottomNav } from '@/components/navigation/BottomNav'
 import { Footer } from '@/components/layout/Footer'
@@ -25,6 +25,13 @@ const cormorant = Cormorant_Garamond({
   display: 'swap',
 })
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-grotesk',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
   title: 'FirstHomeBuyers — Know Your Budget. Know Your Grants.',
   description: "Australia's smartest first home buyer tool — free, fast, no login needed.",
@@ -45,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${cormorant.variable}`}
+      className={`${inter.variable} ${cormorant.variable} ${spaceGrotesk.variable}`}
       suppressHydrationWarning
     >
       <head>

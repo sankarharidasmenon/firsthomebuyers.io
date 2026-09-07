@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X, Cpu, Sparkles, Library } from 'lucide-react'
+import { Home, Mail, Newspaper, MessageSquare, Map, Menu, X, Cpu, Sparkles, Library, Calculator } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Logo } from '@/components/ui/logo/Logo'
 import { AustralianFlag } from '@/components/ui/flag/AustralianFlag'
@@ -13,6 +13,7 @@ const ICON_LINKS = [
   { href: '/map', label: 'Grants Map', Icon: Map },
   { href: '/schemes/cards', label: 'Scheme Cards', Icon: Sparkles },
   { href: '/schemes/library', label: 'Schemes Library', Icon: Library },
+  { href: '/schemes/calculator', label: 'All-States Calculator', Icon: Calculator },
   // { href: '/articles', label: 'Articles',          Icon: Newspaper },
   // { href: '/forums',   label: 'Forums',            Icon: MessageSquare },
 ]
